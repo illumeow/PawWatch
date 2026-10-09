@@ -22,7 +22,8 @@ uv run python scripts/check_clip.py data/videos/test_food.mp4
 # Tests
 uv run pytest
 
-# Dashboard
+# Dashboard (seed simulated history first if there are no real events yet)
+uv run python scripts/seed_fake.py --with-today
 uv run streamlit run dashboard/app.py
 ```
 

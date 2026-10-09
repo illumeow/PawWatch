@@ -59,6 +59,13 @@ def insert_event(conn, camera, zone, start_ts, end_ts, simulated=False):
     return cur.lastrowid
 
 
+def delete_simulated(conn):
+    """Remove all seeded fake events. Returns how many were deleted."""
+    cur = conn.execute("DELETE FROM events WHERE simulated = 1")
+    conn.commit()
+    return cur.rowcount
+
+
 def events_between(conn, start_ts, end_ts):
     """Visits that started in [start_ts, end_ts), oldest first."""
     rows = conn.execute(

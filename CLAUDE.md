@@ -12,6 +12,7 @@ Current status and each person's next steps: the top section of `docs/TeamPlan.m
 
 - Hackathon prototype with a hard deadline: build the smallest thing the demo shows; effort goes into slides and video.
 - Runs on a laptop now; the ASUS UGen300 (Hailo-10H) accelerator is the deployment target. Keep the detector swappable.
+- Supported platforms: Linux (deployment host) and macOS (development laptops). Windows is not supported.
 - Demo runs on pre-recorded video, not a live camera.
 - Two people work in parallel on separate halves. Respect file ownership and shared contracts described in `docs/`;
   changing a shared contract needs a heads-up to the other person.
