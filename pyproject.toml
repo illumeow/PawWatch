@@ -2,7 +2,7 @@
 name = "pawwatch"
 version = "0.1.0"
 description = "Edge-AI cat health monitor: logs eat / drink / litter visits from fixed cameras, events only."
-requires-python = ">=3.10,<3.11"
+requires-python = ">=3.10,<3.14"
 dependencies = [
     "numpy",
     "opencv-python",

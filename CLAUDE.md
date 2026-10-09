@@ -23,7 +23,7 @@ Product, plan, work split and hardware notes live in `docs/`. Read the relevant 
   Never import `hailo_platform` unless the Hailo backend is selected.
 - Event logic is pure (detections + timestamps in, events out) and testable without a model or video.
   Use video time, not wall clock, so recorded footage replays correctly.
-- Python 3.10 (matches HailoRT). No cloud services.
+- Python 3.10–3.13 supported (HailoRT's range); develop on 3.12. No cloud services.
 - Managed with uv: `uv sync` to set up, `uv run` to execute, `uv add` / `uv remove` for dependencies. No bare `pip`.
 
 ## Conventions

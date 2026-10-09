@@ -7,7 +7,7 @@ Built for the 2026 ASUS UGen AI League. See [docs/](docs/) for the product descr
 
 ## Setup
 
-Requires [uv](https://docs.astral.sh/uv/). It installs Python 3.10 and all dependencies:
+Requires [uv](https://docs.astral.sh/uv/). It installs Python 3.12 and all dependencies:
 
 ```bash
 uv sync

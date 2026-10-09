@@ -9,6 +9,25 @@ Notes for porting PawWatch detection to the ASUS UGen300, taken from the referen
 - It's a card plugged into a host, not a standalone computer. The host decodes video, runs the event logic and serves the dashboard.
 - Only finalists receive hardware, so the MVP runs on a laptop with Ultralytics and UGen300 is a documented target.
 
+## Python version
+
+Our code supports Python 3.10–3.13 and is developed on 3.12. The HailoRT Python package (`hailo_platform`) supports
+the same range (`requires-python = ">=3.10,<3.14"` in HailoRT v5.4.0), but each prebuilt package is compiled for
+**one** Python version, shown as `cpXY` in its filename (`cp312` = Python 3.12). Use the Python the package was built for.
+
+| Host | Where the package comes from | Python |
+| --- | --- | --- |
+| Windows | Bundled in the HailoRT installer: `C:\Program Files\HailoRT\python\hailort-*.whl` | Only what the installer ships. HailoRT 4.20 shipped 3.10 only; ugen300-demos uses 3.10 with 5.3.x. Check the filename. |
+| Linux x86_64 / Raspberry Pi | [Hailo Developer Zone](https://hailo.ai/developer-zone/software-downloads), filter by Python version | Pick the host's system Python: Ubuntu 22.04 = 3.10, 24.04 = 3.12, Pi OS Bookworm = 3.11, Trixie = 3.13. Can also be built from source. |
+
+When the hardware arrives:
+
+```bash
+uv venv -p 3.XY          # XY from the package's cpXY tag
+uv sync
+uv pip install path/to/hailort-*-cpXY-*.whl
+```
+
 ## Files worth copying
 
 | File in ugen300-demos | Use for PawWatch |
