@@ -22,12 +22,12 @@ PawWatch is an in-home cat health monitor: cameras plus an edge AI accelerator (
 1. **Eat / drink / litter log:** draw boxes around the food bowl, water bowl and litter box on screen; when the cat stays inside long enough, one visit is logged, with time and duration.
 2. **Anomaly alerts:** push a notification when today's count differs a lot from the 7-day average, e.g. twice as many litter box visits as usual. It only prompts the owner to watch or see a vet; it does not diagnose.
 3. **Forbidden-zone alarm:** play a sound and notify when the cat jumps onto the counter or dining table, or gets near cables.
-4. **AI daily report:** turn the day's log into a plain-language summary, e.g. "Mochi drank water 6 times today, 2 more than usual."
+4. **AI daily report:** turn the day's log into a plain-language summary, e.g. "Tangerine drank water 6 times today, 2 more than usual."
 5. **Dashboard:** one page with today's counts, a timeline and 7-day trends.
 
 ## Usage scenario
 
-Nothing to do before leaving in the morning. In the afternoon the phone shows: "Mochi has used the litter box 9 times today; usually it's 4." After work the owner opens the dashboard, looks at the trend, decides to see the vet, and brings the daily report for the doctor.
+Nothing to do before leaving in the morning. In the afternoon the phone shows: "Tangerine has used the litter box 9 times today; usually it's 4." After work the owner opens the dashboard, looks at the trend, decides to see the vet, and brings the daily report for the doctor.
 
 ## How it works
 
