@@ -6,6 +6,42 @@ Three people deliver PawWatch by 2026-10-14. Two build the code in parallel, spl
 Half A (vision) writes events from real cat video; half B (output) reads them into the dashboard, anomaly alerts and daily report.
 C owns the slides, research and the architecture diagram.
 
+## Status and next steps (updated 2026-10-09)
+
+We're finishing in **3 days (Fri 10/9 to Sun 10/11)**, with 10/12 to 10/14 as buffer. See Schedule below.
+
+**Half B is done and in review:** [PR #1](https://github.com/illumeow/PawWatch/pull/1), with the simulated 7-day history,
+anomaly alert, daily report, alarm sound and Streamlit dashboard. To see it:
+
+```bash
+uv sync
+uv run python scripts/seed_fake.py --with-today
+uv run streamlit run dashboard/app.py
+```
+
+**@meander (A):**
+- Review PR #1. It touches two shared contracts: `store.delete_simulated()` is new (additive, table unchanged), and
+  `alarm.trigger(camera, zone, ts)` is implemented with a 30 s cooldown per camera, so call it on every frame the cat
+  is in a forbidden zone. Set `PAWWATCH_MUTE=1` for bulk runs.
+- Day 1: cameras up, 1-minute test (`uv run python scripts/check_clip.py <clip>`), record overnight, stage a counter jump.
+- Day 2: zones files, visit logic, `run.py` writing real events by the evening. Use the GPU if there is one
+  (`device="cuda"`; `"mps"` on Macs) and 1 frame per second for the overnight footage.
+- Day 3 morning: screen captures of detection and the airplane-mode shot.
+- Check the alarm sound on Fedora once:
+  `uv run python -c "import time; from pawwatch import alarm; alarm.trigger('cam_counter','forbidden',time.time()); time.sleep(1)"`
+
+**@bbwinner (C):**
+- Day 1: research, slide outline, business model page (35% of the score).
+- Day 2: slide text, architecture diagram, Hailo's published YOLOv8 speed on Hailo-10H (cite the source).
+  B sends dashboard screenshots and the repo link on Day 2 evening.
+- Day 3: finish slides, add the demo video link, submit.
+
+**@illumeow (B):** merge PR #1, README, dashboard on real events, screenshots to C, then the demo video on Day 3.
+
+**Cut for time:** Hailo backend port, Telegram setup, LLM-written daily report, a second day of recording.
+
+**Open:** who does registration? Check its deadline on the competition page.
+
 ## Roles
 
 meander lives with the cat and takes A; illumeow takes B; bbwinner takes C. A needs a tight loop with the cameras
@@ -24,10 +60,10 @@ Handoffs to C:
 
 | What | From | By |
 | --- | --- | --- |
-| Detection screenshots (boxes, zones, alarm) | A | 10/12 |
-| Dashboard and daily report screenshots | B | 10/12 |
-| Public GitHub repo link | B | 10/12 |
-| Architecture diagram, for README and video | C to B | 10/12 |
+| Detection screenshots (boxes, zones, alarm) | A | Sat 10/10 evening |
+| Dashboard and daily report screenshots | B | Sat 10/10 evening |
+| Public GitHub repo link | B | Sat 10/10 evening |
+| Architecture diagram, for README and video | C to B | Sat 10/10 evening |
 
 ## Interface contract
 
@@ -88,7 +124,7 @@ Gitignored: `data/videos/`, `*.pt`, `*.hef`, `*.db`. Footage lives in a shared G
 ## Data strategy
 
 The demo shows real today plus simulated history: anomaly alerts need 7 days of baseline,
-and we will have at most 1 to 2 days of footage by the deadline.
+and we will have about one day of footage.
 
 | Data | Written by | Proves or enables | Shown in demo |
 | --- | --- | --- | --- |
@@ -115,7 +151,6 @@ and argues that the UGen300 port is low-risk. Never present laptop footage as ru
 | Architecture slide: laptop backend today, Hailo backend after; same `(label, score, box)` contract as ASUS's UGen300 demos | C | Port is a swap, not a rewrite |
 | Stock COCO YOLOv8: Hailo publishes precompiled versions for Hailo-10H, so no training or model conversion | C | No model risk |
 | Load fits the chip: 3 cameras × 5 fps = 15 inferences/s vs Hailo's published YOLOv8 speed on Hailo-10H (look up and cite) | C | Hardware is sufficient |
-| Optional, 10/12 if time: port `hailo_detect.py` behind `--backend hailo`, README says "untested on hardware" | A | Code signal, not shown in demo |
 
 Video: the 0:50–2:10 live section adds the airplane-mode shot and the caption; the "fits the chip" numbers go in 2:10–2:45.
 
@@ -153,7 +188,7 @@ Checklist:
 
 - [ ] Record 1 minute per spot with the cat in frame
 - [ ] Run `check_clip.py` on each clip; move the camera if the cat is missed
-- [ ] Long recording, all zones at once, 1 to 2 days
+- [ ] Long recording, all zones at once, overnight (one night is enough)
 - [ ] Staged clips: cat jumping on counter or table (forbidden zone)
 - [ ] Close-up shots of eating and drinking for the demo video
 - [ ] Upload clips to the shared Drive folder as they finish
@@ -167,19 +202,17 @@ Keep it light: one feature branch each, small PRs into `develop`, merged at leas
 3. Each person branches off it: `feat/vision` (A), `feat/dashboard` (B).
 4. Small PRs into `develop`, at least daily; pull `develop` into your branch before each PR.
 5. Don't edit the other half's files; `store.py` changes need a heads-up first.
-6. `develop` merges to `main` on 10/13 for the final recording, and again on 10/14 if fixes land.
+6. `develop` merges to `main` on Sun 10/11 before the final recording, and again if fixes land before 10/14.
 
 `CLAUDE.md` is in the repo, so everyone's Claude sessions follow the same contract.
 
 ## Schedule
 
-Real events reach the dashboard on 10/11; everything after that is polish, recording and submission.
+Three working days; real events reach the dashboard on Day 2 evening, everything on Day 3 is recording and submission.
 
-| Date | A: vision | B: output | C: slides |
+| Day | A: vision (@meander) | B: output (@illumeow) | C: slides (@bbwinner) |
 | --- | --- | --- | --- |
-| Fri 10/9 | Set up cameras, 1-minute test, start long recording | Skeleton commit, `store.py`, `seed_fake.py` | Research: vet sources, market size |
-| Sat 10/10 | Zones files, YOLO on real clips, visit events | Anomaly alert, daily report | Write slide text |
-| Sun 10/11 | SQLite writes, red box and `alarm.trigger` call, first real events merged | Alarm sound, Streamlit dashboard on simulated + first real events | Write slide text, business model page |
-| Mon 10/12 | Tune debounce and dwell time, staged forbidden-zone clips, send screenshots | README, send screenshots and repo link | Architecture diagram, slide layout |
-| Tue 10/13 | Record screen captures of detection | Edit demo video, TTS voice-over, upload unlisted to YouTube | Finish slides, add demo video link |
-| Wed 10/14 | Buffer: final checks together, submit early | Buffer: check every link in slides and README | Buffer: registration, final check of slides |
+| Fri 10/9 | Cameras up, 1-minute test, record overnight, stage a counter jump | Half B done (PR #1); merge it, README | Research, slide outline, business model page |
+| Sat 10/10 | Zones, visit logic, `run.py`; first real events by evening; send screenshots | Dashboard on real events; send screenshots and repo link | Slide text, architecture diagram, Hailo speed number |
+| Sun 10/11 | Morning: screen captures, airplane-mode shot | Edit demo video, TTS voice-over, upload unlisted to YouTube | Finish slides, add video link, submit |
+| 10/12–10/14 | Buffer | Buffer: check every link in slides and README | Buffer |

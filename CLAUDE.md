@@ -6,6 +6,7 @@ flags changes from the cat's normal pattern, alarms on no-go zones and writes a 
 Video never leaves the box: only events are stored.
 
 Product, plan, work split and hardware notes live in `docs/`. Read the relevant doc before starting a task.
+Current status and each person's next steps: the top section of `docs/TeamPlan.md`.
 
 ## Constraints
 
