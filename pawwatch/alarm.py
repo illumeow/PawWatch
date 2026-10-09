@@ -10,6 +10,7 @@ Environment (all optional):
 import json
 import os
 import platform
+import shutil
 import subprocess
 import threading
 import time
@@ -50,8 +51,11 @@ def _play_sound():
     try:
         if system == "Darwin":  # development laptops
             subprocess.Popen(["afplay", custom or "/System/Library/Sounds/Sosumi.aiff"])
-        else:  # Linux host
-            subprocess.Popen(["paplay", custom or "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"])
+        else:  # Linux: PulseAudio's paplay, or PipeWire's pw-play (Fedora)
+            player = shutil.which("paplay") or shutil.which("pw-play")
+            if not player:
+                raise FileNotFoundError("no paplay or pw-play")
+            subprocess.Popen([player, custom or "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"])
     except Exception as e:  # noqa: BLE001 — a missing player must never stop the pipeline
         print(f"[alarm] sound failed ({e}); ringing the terminal bell", flush=True)
         print("\a", end="", flush=True)
