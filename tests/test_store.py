@@ -34,3 +34,14 @@ def test_daily_counts_zero_filled(conn):
     assert list(counts) == [date(2026, 10, d) for d in range(3, 10)]
     assert counts[today] == {"food": 0, "water": 0, "litter": 1, "forbidden": 0}
     assert counts[date(2026, 10, 8)]["litter"] == 1
+
+
+def test_recordings_grow_and_overlap_queries():
+    conn = store.connect(":memory:")
+    rec = store.insert_recording(conn, "cam_food", ["food", "water"], 100.0)
+    store.extend_recording(conn, rec, 160.0)
+    store.extend_recording(conn, rec, 150.0)  # never shrinks
+    assert store.recordings_between(conn, 150, 200) == [store.Recording("cam_food", ("food", "water"), 100.0, 160.0)]
+    assert store.recordings_between(conn, 160, 200) == []
+    with pytest.raises(ValueError):
+        store.insert_recording(conn, "cam_x", ["sofa"], 0.0)

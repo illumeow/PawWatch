@@ -9,6 +9,8 @@ Per sampled frame: detector.infer -> highest-score box center -> zones.zone_at -
 -> store.insert_event for each finished visit, and alarm.trigger on every frame the cat is in a forbidden zone
 (the alarm applies its own cooldown). With --show, each frame is also drawn in the detection window (pawwatch.overlay);
 the per-frame logic is the same either way, so windowed and headless runs store the same rows.
+Each file also gets a recordings row (camera, its zones, start to last processed frame), so the dashboard compares
+only the hours that were actually filmed.
 Frames are only read and displayed, never written anywhere.
 Timestamps are video time: the recording start from the filename (<zone>_YYYY-MM-DDTHHMM.mp4) plus the
 frame offset. Files are processed in time order with one tracker, so a visit spanning two files is one visit.
@@ -89,6 +91,8 @@ def process(paths, zones_path, detector, conn, fps=1.0, start=None,
     tracker = events.VisitTracker(min_dwell, gap_tolerance, forbidden_dwell)
     stored = []
     counts = Counter()  # visits stored so far per zone, for the window
+    watched = [z for z in store.ZONES if any(name == z for name, _ in zone_list)]
+    recordings = {}  # file start -> recordings row id
 
     def save(visits):
         for v in visits:
@@ -101,6 +105,9 @@ def process(paths, zones_path, detector, conn, fps=1.0, start=None,
     try:
         for t0, offset, frame in frames_in_order(files, fps):
             ts = t0 + offset
+            if t0 not in recordings:
+                recordings[t0] = store.insert_recording(conn, camera, watched, t0)
+            store.extend_recording(conn, recordings[t0], ts)
             detections = detector.infer(frame)
             zone = cat_zone(detections, zone_list)
             save(tracker.update(ts, zone))

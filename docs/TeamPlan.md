@@ -38,6 +38,8 @@ uv run python -m pawwatch.run data/videos/TangerineJumpOntoBed.MOV --zones confi
 ```
 
 **@meander (A):**
+- Heads-up: `run.py` now also writes a `recordings` row per file (see Interface contract), added by B in the
+  coverage PR. No change to how you call it. Rerun old clips into a fresh database to get their rows.
 - Tonight: fix the overnight cameras, `check_clip.py` and `draw_zones.py` on a short test clip from each, then record overnight.
   Name files `<zone>_YYYY-MM-DDTHHMM.mp4` with the start time.
 - Day 2: time one hour of footage on the Fedora laptop (CPU only, no NVIDIA GPU), then run all overnight footage at
@@ -100,6 +102,11 @@ CREATE TABLE events (
 ```
 
 `store.py` exposes plain functions: `insert_event(...)`, `events_between(start, end)`, `daily_counts(days)`. B reads only through these.
+
+A second table, `recordings (camera, zones, start_ts, end_ts)`, says which zones were on camera and when. `run.py` writes
+one row per video file (`insert_recording`, `extend_recording` per frame), and the anomaly check compares each zone only
+over its filmed hours, so a 2-minute clip isn't read as "didn't drink all day". Days without recordings (simulated
+history) count as watched all day.
 
 ```python
 # pawwatch/alarm.py (owned by B, called by A)
