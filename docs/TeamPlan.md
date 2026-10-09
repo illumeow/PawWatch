@@ -110,8 +110,10 @@ Each file has one owner; nobody edits the other half's files without asking.
 | `pawwatch/events.py` | A | Detections over time to visits, with debounce (pure logic, tested) |
 | `pawwatch/alarm.py` | Shared interface, B implements | `trigger()`: sound and optional Telegram; A calls it |
 | `pawwatch/run.py` | A | CLI: videos + zones to events in SQLite |
+| `pawwatch/overlay.py` | A | Detection window for `run.py --show`: boxes, zones, visit counts, caption |
 | `config/zones/*.json` | A | One zones file per camera |
 | `scripts/check_clip.py` | A | 1-minute test: cat detection rate on a clip |
+| `scripts/draw_zones.py` | A | Click zone polygons on a clip's frame, write the zones file |
 | `scripts/seed_fake.py` | B | 7 days of simulated events |
 | `pawwatch/anomaly.py` | B | Today vs 7-day mean |
 | `pawwatch/report.py` | B | Daily report text |

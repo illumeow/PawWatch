@@ -57,3 +57,21 @@ def test_load_zones_rejects_degenerate_polygon(tmp_path):
     path = write(tmp_path, {"camera": "cam_food", "zones": [{"name": "food", "polygon": [[0, 0], [1, 1]]}]})
     with pytest.raises(ValueError, match="3 points"):
         zones.load_zones(path)
+
+
+def test_save_zones_round_trips_through_the_loader(tmp_path):
+    path = tmp_path / "cam_food.json"
+    drawn = [("food", [(10.4, 20), (300, 20), (300, 200)]), ("water", [(310, 20), (600, 20), (600, 200), (310, 200)])]
+    zones.save_zones(path, "cam_food", drawn)
+    assert zones.load_zones(path) == ("cam_food", [
+        ("food", [(10.0, 20.0), (300.0, 20.0), (300.0, 200.0)]),  # whole pixels
+        ("water", [(310.0, 20.0), (600.0, 20.0), (600.0, 200.0), (310.0, 200.0)]),
+    ])
+
+
+def test_save_zones_rejects_what_the_loader_would(tmp_path):
+    with pytest.raises(ValueError, match="unknown zone"):
+        zones.save_zones(tmp_path / "a.json", "cam", [("sofa", [(0, 0), (1, 0), (1, 1)])])
+    with pytest.raises(ValueError, match="3 points"):
+        zones.save_zones(tmp_path / "b.json", "cam", [("food", [(0, 0), (1, 0)])])
+    assert not list(tmp_path.iterdir())
