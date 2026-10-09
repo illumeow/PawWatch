@@ -1,15 +1,116 @@
-"""CLI: video files + zones -> events in SQLite. Owner: A.
+"""CLI: one camera's video files + its zones file -> visits in SQLite. Owner: A.
 
-Planned usage:
-    uv run python -m pawwatch.run --video data/videos/food_2026-10-09T1830.mp4 --zones config/zones/cam_food.json
+Usage:
+    uv run python -m pawwatch.run data/videos/food_2026-10-09T1830.mp4 --zones config/zones/cam_food.json
+    uv run python -m pawwatch.run data/videos/food_*.mp4 --zones config/zones/cam_food.json --fps 1 --device cuda
 
-Per frame: detector.infer -> box center -> zones.zone_at -> events -> store.insert_event for finished visits,
-alarm.trigger + red box on forbidden-zone entry. Timestamps come from the file's start time plus frame offset.
+Per sampled frame: detector.infer -> highest-score box center -> zones.zone_at -> events.VisitTracker
+-> store.insert_event for each finished visit. Frames are only read, never written anywhere.
+Timestamps are video time: the recording start from the filename (<zone>_YYYY-MM-DDTHHMM.mp4) plus the
+frame offset. Files are processed in time order with one tracker, so a visit spanning two files is one visit.
 """
+import argparse
+import re
+from datetime import datetime
+from pathlib import Path
+
+import cv2
+
+from pawwatch import events, store, zones
+from pawwatch.detector import make_detector
+
+FILENAME_START = re.compile(r"_(\d{4}-\d{2}-\d{2}T\d{4})$")
 
 
-def main():
-    raise NotImplementedError  # TODO(A)
+def parse_start(path, override=None):
+    """Recording start of a video file as unix seconds (local time), from its name or an ISO override."""
+    if override:
+        return datetime.fromisoformat(override).timestamp()
+    m = FILENAME_START.search(Path(path).stem)
+    if not m:
+        raise ValueError(f"{path}: name doesn't end in _YYYY-MM-DDTHHMM; pass --start to give the recording start")
+    return datetime.strptime(m.group(1), "%Y-%m-%dT%H%M").timestamp()
+
+
+def cat_zone(detections, zone_list):
+    """Zone of the highest-score cat box's center, or None (single-cat MVP)."""
+    cats = [d for d in detections if d[0] == "cat"]
+    if not cats:
+        return None
+    _, _, (x1, y1, x2, y2) = max(cats, key=lambda d: d[1])
+    return zones.zone_at(((x1 + x2) / 2, (y1 + y2) / 2), zone_list)
+
+
+def sampled_frames(path, fps):
+    """Yield (offset_s, frame) at about `fps` frames per second of video.
+
+    Offsets are the container's frame timestamps, so variable-frame-rate phone footage stays in sync.
+    """
+    cap = cv2.VideoCapture(str(path))
+    if not cap.isOpened():
+        raise ValueError(f"cannot open {path}")
+    next_sample = 0.0
+    try:
+        while cap.grab():  # grab without decoding; decode only the sampled frames
+            offset = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000
+            if offset >= next_sample - 1e-3:  # 1 ms slack: summed 1/fps steps drift past exact frame times
+                ok, frame = cap.retrieve()
+                if ok:
+                    yield offset, frame
+                next_sample = max(next_sample + 1 / fps, offset)
+    finally:
+        cap.release()
+
+
+def process(paths, zones_path, detector, conn, fps=1.0, start=None,
+            min_dwell=events.MIN_DWELL_S, gap_tolerance=events.GAP_TOLERANCE_S):
+    """Run one camera's videos through the pipeline and store each visit as it finishes. Returns the visits."""
+    camera, zone_list = zones.load_zones(zones_path)
+    files = sorted((parse_start(p, start), Path(p)) for p in paths)
+    tracker = events.VisitTracker(min_dwell, gap_tolerance)
+    stored = []
+
+    def save(visits):
+        for v in visits:
+            store.insert_event(conn, camera, v.zone, v.start_ts, v.end_ts)
+            print(f"{camera} {v.zone:6} {datetime.fromtimestamp(v.start_ts):%Y-%m-%d %H:%M:%S}"
+                  f" {v.end_ts - v.start_ts:6.1f} s", flush=True)
+        stored.extend(visits)
+
+    for t0, path in files:
+        print(f"{path.name}: start {datetime.fromtimestamp(t0):%Y-%m-%d %H:%M}", flush=True)
+        for offset, frame in sampled_frames(path, fps):
+            save(tracker.update(t0 + offset, cat_zone(detector.infer(frame), zone_list)))
+    save(tracker.close())
+    return stored
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Video files of one camera + its zones file -> visits in SQLite.")
+    ap.add_argument("videos", nargs="+", help="video files of one camera, any order")
+    ap.add_argument("--zones", required=True, help="zones file, e.g. config/zones/cam_food.json")
+    ap.add_argument("--db", default=str(store.DEFAULT_DB), help="events database (default: %(default)s)")
+    ap.add_argument("--fps", type=float, default=1.0, help="frames per second to process: ~5 live, 1 bulk (default: %(default)s)")
+    ap.add_argument("--device", help="detector device: cpu, cuda or mps (default: the detector's choice)")
+    ap.add_argument("--start", help="recording start, e.g. 2026-10-09T18:30, for a single file without a dated name")
+    ap.add_argument("--min-dwell", type=float, default=events.MIN_DWELL_S, help="seconds in a zone to count a visit")
+    ap.add_argument("--gap-tolerance", type=float, default=events.GAP_TOLERANCE_S, help="dropout seconds that don't end a visit")
+    args = ap.parse_args(argv)
+    if args.fps <= 0:
+        ap.error("--fps must be positive")
+    if args.start and len(args.videos) > 1:
+        ap.error("--start applies to a single file; name multiple files <zone>_YYYY-MM-DDTHHMM.mp4 instead")
+
+    try:
+        zones.load_zones(args.zones)  # fail on a bad zones file before loading the model
+        for p in args.videos:
+            parse_start(p, args.start)
+    except ValueError as e:
+        ap.error(str(e))
+    detector = make_detector(device=args.device)
+    stored = process(args.videos, args.zones, detector, store.connect(args.db), args.fps, args.start,
+                     args.min_dwell, args.gap_tolerance)
+    print(f"stored {len(stored)} visits in {args.db}")
 
 
 if __name__ == "__main__":
