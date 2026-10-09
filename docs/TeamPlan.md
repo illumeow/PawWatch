@@ -10,7 +10,7 @@ C owns the slides, research and the architecture diagram.
 
 We're finishing in **3 days (Fri 10/9 to Sun 10/11)**, with 10/12 to 10/14 as buffer. See Schedule below.
 
-**Half B is done and in review:** [PR #1](https://github.com/illumeow/PawWatch/pull/1), with the simulated 7-day history,
+**Half B is done and merged into `develop`** ([PR #1](https://github.com/illumeow/PawWatch/pull/1)): the simulated 7-day history,
 anomaly alert, daily report, alarm sound and Streamlit dashboard. To see it:
 
 ```bash
@@ -20,7 +20,7 @@ uv run streamlit run dashboard/app.py
 ```
 
 **@meander (A):**
-- Review PR #1. It touches two shared contracts: `store.delete_simulated()` is new (additive, table unchanged), and
+- Read PR #1's description: it touched two shared contracts. `store.delete_simulated()` is new (additive, table unchanged), and
   `alarm.trigger(camera, zone, ts)` is implemented with a 30 s cooldown per camera, so call it on every frame the cat
   is in a forbidden zone. Set `PAWWATCH_MUTE=1` for bulk runs.
 - Day 1: cameras up, 1-minute test (`uv run python scripts/check_clip.py <clip>`), record overnight, stage a counter jump.
@@ -36,7 +36,7 @@ uv run streamlit run dashboard/app.py
   B sends dashboard screenshots and the repo link on Day 2 evening.
 - Day 3: finish slides, add the demo video link, submit.
 
-**@illumeow (B):** merge PR #1, README, dashboard on real events, screenshots to C, then the demo video on Day 3.
+**@illumeow (B):** README, dashboard on real events, screenshots to C, then the demo video on Day 3.
 
 **Cut for time:** Hailo backend port, Telegram setup, LLM-written daily report, a second day of recording.
 
@@ -212,7 +212,7 @@ Three working days; real events reach the dashboard on Day 2 evening, everything
 
 | Day | A: vision (@meander) | B: output (@illumeow) | C: slides (@bbwinner) |
 | --- | --- | --- | --- |
-| Fri 10/9 | Cameras up, 1-minute test, record overnight, stage a counter jump | Half B done (PR #1); merge it, README | Research, slide outline, business model page |
+| Fri 10/9 | Cameras up, 1-minute test, record overnight, stage a counter jump | Half B done and merged (PR #1); README | Research, slide outline, business model page |
 | Sat 10/10 | Zones, visit logic, `run.py`; first real events by evening; send screenshots | Dashboard on real events; send screenshots and repo link | Slide text, architecture diagram, Hailo speed number |
 | Sun 10/11 | Morning: screen captures, airplane-mode shot | Edit demo video, TTS voice-over, upload unlisted to YouTube | Finish slides, add video link, submit |
 | 10/12–10/14 | Buffer | Buffer: check every link in slides and README | Buffer |
