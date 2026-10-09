@@ -146,7 +146,7 @@ and we will have about one day of footage.
 
 | Data | Written by | Proves or enables | Shown in demo |
 | --- | --- | --- | --- |
-| Real video | Filmed by A | Model and event logic work | Detection window: boxes, zones, count ticking up, counter alarm |
+| Real video | Filmed by A | Model and event logic work | Detection window: boxes, zones, count ticking up, bed alarm |
 | Real events (`simulated=0`) | `run.py` | Today's numbers are genuine | Today's counts, timeline, daily report |
 | Simulated history (`simulated=1`) | `seed_fake.py` | B can build before A is done; anomaly has a baseline | 7-day trend, "2x more litter visits than usual" alert |
 
@@ -207,7 +207,7 @@ Checklist:
 - [ ] Record 1 minute per spot with the cat in frame
 - [ ] Run `check_clip.py` on each clip; move the camera if the cat is missed
 - [ ] Long recording, all zones at once, overnight (one night is enough)
-- [ ] Staged clips: cat jumping on counter or table (forbidden zone)
+- [x] Staged clip: cat jumping onto the bed (forbidden zone)
 - [ ] Close-up shots of eating and drinking for the demo video
 - [ ] Upload clips to the shared Drive folder as they finish
 
@@ -230,7 +230,7 @@ Three working days; real events reach the dashboard on Day 2 evening, everything
 
 | Day | A: vision (@meander) | B: output (@illumeow) | C: slides (@bbwinner) |
 | --- | --- | --- | --- |
-| Fri 10/9 | Cameras up, 1-minute test, record overnight, stage a counter jump | Half B done and merged (PR #1); README | Research, slide outline, business model page |
+| Fri 10/9 | Cameras up, 1-minute test, record overnight, film the bed jump | Half B done and merged (PR #1); README | Research, slide outline, business model page |
 | Sat 10/10 | Zones, visit logic, `run.py`; first real events by evening; send screenshots | Dashboard on real events; send screenshots and repo link | Slide text, architecture diagram, Hailo speed number |
 | Sun 10/11 | Morning: screen captures, airplane-mode shot | Edit demo video, TTS voice-over, upload unlisted to YouTube | Finish slides, add video link, submit |
 | 10/12–10/14 | Buffer | Buffer: check every link in slides and README | Buffer |
