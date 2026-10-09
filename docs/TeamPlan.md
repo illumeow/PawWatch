@@ -1,0 +1,150 @@
+# PawWatch team plan
+
+2026-10-09
+
+Three people deliver PawWatch by 2026-10-14. Two build the code in parallel, split at one seam: the SQLite events table.
+Half A (vision) writes events from real cat video; half B (output) reads them into the dashboard, anomaly alerts and daily report.
+C owns the slides, research and the architecture diagram.
+
+## Roles
+
+meander lives with the cat and takes A; illumeow takes B; bbwinner takes C. A needs a tight loop with the cameras
+(move, re-shoot, retune in minutes) and knows which bowl is which; B can work from simulated data until real events arrive;
+C needs no code and can start research today.
+
+| Role | Owner | Builds | Works from |
+| --- | --- | --- | --- |
+| A: vision | @meander | Detection, zones, visit events, SQLite writes, red box on forbidden zone, `run.py` CLI | Real video footage |
+| B: output | @illumeow | Seed script, alarm (sound, optional Telegram), anomaly alert, daily report, Streamlit dashboard, README, demo video edit | Simulated events, then A's real events |
+| C: slides | @bbwinner | English slides (~12 pages), market and vet research, architecture diagram, references | Product docs, then screenshots and clips from A and B |
+
+The forbidden-zone alarm is split: A draws the red box in the detection window and calls `alarm.trigger(...)` when the cat enters a forbidden zone; B implements what the trigger does.
+
+Handoffs to C:
+
+| What | From | By |
+| --- | --- | --- |
+| Detection screenshots (boxes, zones, alarm) | A | 10/12 |
+| Dashboard and daily report screenshots | B | 10/12 |
+| Public GitHub repo link | B | 10/12 |
+| Architecture diagram, for README and video | C to B | 10/12 |
+
+## Interface contract
+
+Two things cross the A/B line, so we fix both on day 1. Changing either needs a heads-up to the other person.
+
+1. The events table in `pawwatch/store.py`, for finished visits.
+2. The live alarm hook in `pawwatch/alarm.py`, for the moment the cat enters a forbidden zone. It can't go through SQLite, because a visit is written only after it ends.
+
+```sql
+CREATE TABLE events (
+  id         INTEGER PRIMARY KEY,
+  camera     TEXT NOT NULL,     -- e.g. cam_food
+  zone       TEXT NOT NULL,     -- food | water | litter | forbidden
+  start_ts   REAL NOT NULL,     -- unix seconds, from video time, not wall clock
+  end_ts     REAL NOT NULL,
+  duration_s REAL NOT NULL,
+  simulated  INTEGER NOT NULL DEFAULT 0  -- 1 = seeded fake history
+);
+```
+
+`store.py` exposes plain functions: `insert_event(...)`, `events_between(start, end)`, `daily_counts(days)`. B reads only through these.
+
+```python
+# pawwatch/alarm.py (owned by B, called by A)
+def trigger(camera: str, zone: str, ts: float) -> None:
+    """Cat just entered a forbidden zone. Plays a sound; optionally sends a Telegram message. Must return fast."""
+```
+
+Two contracts stay inside half A but are written down so the UGen300 port is a drop-in:
+
+- Detector output: `infer(frame_bgr) -> list[(label, score, (x1, y1, x2, y2))]` in original-image pixels,
+  the same as `ObjectDetector` in the [ugen300-demos](https://github.com/erp0917-stack/ugen300-demos) repo.
+- Zones file, one per camera: `{"camera": "cam_food", "zones": [{"name": "food", "polygon": [[x, y], ...]}]}`.
+
+## Repo layout
+
+Each file has one owner; nobody edits the other half's files without asking.
+
+| Path | Owner | Purpose |
+| --- | --- | --- |
+| `pawwatch/store.py` | Shared | Events table and query functions |
+| `pawwatch/detector.py` | A | YOLO cat detection, Ultralytics now, Hailo later |
+| `pawwatch/zones.py` | A | Load zones file, point-in-polygon |
+| `pawwatch/events.py` | A | Detections over time to visits, with debounce (pure logic, tested) |
+| `pawwatch/alarm.py` | Shared interface, B implements | `trigger()`: sound and optional Telegram; A calls it |
+| `pawwatch/run.py` | A | CLI: videos + zones to events in SQLite |
+| `config/zones/*.json` | A | One zones file per camera |
+| `scripts/check_clip.py` | A | 1-minute test: cat detection rate on a clip |
+| `scripts/seed_fake.py` | B | 7 days of simulated events |
+| `pawwatch/anomaly.py` | B | Today vs 7-day mean |
+| `pawwatch/report.py` | B | Daily report text |
+| `dashboard/app.py` | B | Streamlit page |
+| `README.md` | B | Features, architecture, run steps, UGen300 notes |
+| `tests/` | Each own | Tests for their own modules |
+
+Gitignored: `data/videos/`, `*.pt`, `*.hef`, `*.db`. Footage lives in a shared Google Drive folder.
+
+## Data strategy
+
+The demo shows real today plus simulated history: anomaly alerts need 7 days of baseline,
+and we will have at most 1 to 2 days of footage by the deadline.
+
+| Data | Written by | Proves or enables | Shown in demo |
+| --- | --- | --- | --- |
+| Real video | Filmed by A | Model and event logic work | Detection window: boxes, zones, count ticking up, counter alarm |
+| Real events (`simulated=0`) | `run.py` | Today's numbers are genuine | Today's counts, timeline, daily report |
+| Simulated history (`simulated=1`) | `seed_fake.py` | B can build before A is done; anomaly has a baseline | 7-day trend, "2x more litter visits than usual" alert |
+
+- Label simulated history as "simulated" in the dashboard (B) and slides (C).
+- To make the alert fire on camera, seed a baseline that today's real count clearly exceeds (e.g. 3 litter visits a day vs 6 today).
+- Days of real recording replace their simulated days, so the trend becomes partly real.
+
+## Recording guide
+
+Start recording today: every later step needs footage, and lost recording days can't be made up.
+
+Setup and settings:
+
+- One device per zone (food, water, litter); with two devices, put the bowls side by side and split them with two zones.
+- Fix the camera with a tripod, clamp or tape; it must not move, because zones are pixel coordinates.
+- About 1 to 2 m away, slightly above, side view; the cat should fill a good part of the frame.
+- Keep a small lamp on at night; dark phone footage loses detections.
+- 720p at 15 to 30 fps, real time (no time-lapse), 1-hour segments if the app allows.
+- Name files with the start time, e.g. `food_2026-10-09T1830.mp4`.
+- Devices plugged in; auto-lock and battery saver off.
+
+Checklist:
+
+- [ ] Record 1 minute per spot with the cat in frame
+- [ ] Run `check_clip.py` on each clip; move the camera if the cat is missed
+- [ ] Long recording, all zones at once, 1 to 2 days
+- [ ] Staged clips: cat jumping on counter or table (forbidden zone)
+- [ ] Close-up shots of eating and drinking for the demo video
+- [ ] Upload clips to the shared Drive folder as they finish
+
+## Git workflow
+
+Keep it light: one feature branch each, small PRs into `develop`, merged at least once a day.
+
+1. `main` = what we submit; `develop` = shared integration branch.
+2. Skeleton commit lands on `develop` first (stubs, `store.py` schema, `.gitignore`, sample zones file).
+3. Each person branches off it: `feat/vision` (A), `feat/dashboard` (B).
+4. Small PRs into `develop`, at least daily; pull `develop` into your branch before each PR.
+5. Don't edit the other half's files; `store.py` changes need a heads-up first.
+6. `develop` merges to `main` on 10/13 for the final recording, and again on 10/14 if fixes land.
+
+`CLAUDE.md` is in the repo, so everyone's Claude sessions follow the same contract.
+
+## Schedule
+
+Real events reach the dashboard on 10/11; everything after that is polish, recording and submission.
+
+| Date | A: vision | B: output | C: slides |
+| --- | --- | --- | --- |
+| Fri 10/9 | Set up cameras, 1-minute test, start long recording | Skeleton commit, `store.py`, `seed_fake.py` | Research: vet sources, market size |
+| Sat 10/10 | Zones files, YOLO on real clips, visit events | Anomaly alert, daily report | Write slide text |
+| Sun 10/11 | SQLite writes, red box and `alarm.trigger` call, first real events merged | Alarm sound, Streamlit dashboard on simulated + first real events | Write slide text, business model page |
+| Mon 10/12 | Tune debounce and dwell time, staged forbidden-zone clips, send screenshots | README, send screenshots and repo link | Architecture diagram, slide layout |
+| Tue 10/13 | Record screen captures of detection | Edit demo video, TTS voice-over, upload unlisted to YouTube | Finish slides, add demo video link |
+| Wed 10/14 | Buffer: final checks together, submit early | Buffer: check every link in slides and README | Buffer: registration, final check of slides |

@@ -1,78 +1,78 @@
-# PawWatch 黑客松工作清單
+# PawWatch hackathon worklist
 
-Oct 9, 2026 · @Kathy Li
+2026-10-09
 
-10/14 前要交四樣東西：報名、英文簡報、英文 Demo 影片、GitHub repo。目標是用最少力氣交出像樣的東西：程式只做最小可展示的版本，力氣花在簡報和影片上。
+Four things are due by 10/14: registration, English slides, English demo video and a GitHub repo. The goal is to submit something solid with the least effort: build only the smallest demoable version of the code and put the effort into the slides and video.
 
-產品用途、功能和設計說明見 產品說明。
+For product purpose, features and design, see [Product description](ProductDescription.md).
 
-## 交件清單（10/14 前）
+## Deliverables (by 10/14)
 
-| 項目 | 規定 | 備註 |
+| Item | Requirement | Notes |
 | --- | --- | --- |
-| 線上報名 | 填隊員資料，選賽道和參賽形式 | 選 Lightning。參賽形式建議選國際線上組，入圍了也不用 12/19 去華碩總部 |
-| 英文簡報 | 正文最多 20 頁 | 做 12 頁左右就夠 |
-| 英文 Demo 影片 | 3 分鐘內，上傳 YouTube 設「不公開」 | 拍自己的貓 |
-| GitHub repo | 公開，附 README | 簡報裡要放連結 |
+| Online registration | Team member details, choose track and participation format | Choose Lightning. For format, the international online group is suggested, so we don't have to go to ASUS HQ on 12/19 if we're finalists |
+| English slides | Max 20 content pages | About 12 pages is enough |
+| English demo video | Under 3 minutes, uploaded to YouTube as "unlisted" | Film our own cat |
+| GitHub repo | Public, with README | Link it in the slides |
 
-## 0. 今天就先開始錄影（最優先）
+## 0. Start recording today (top priority)
 
-- [ ] 用兩三支手機或 webcam 分別固定對著飯碗、水碗、貓砂盆，同時錄一兩天（鏡頭不要動）
-- [ ] 補拍幾段貓跳上桌子或流理台的畫面
+- [ ] Fix two or three phones or webcams on the food bowl, water bowl and litter box, and record simultaneously for one or two days (don't move the cameras)
+- [ ] Also film a few clips of the cat jumping onto the table or counter
 
-程式直接讀錄好的影片檔，不要現場跑 webcam。這樣 demo 比較穩，貓不配合也不怕。
+The program reads the recorded video files directly instead of a live webcam. This makes the demo more stable, even if the cat doesn't cooperate.
 
-## 1. 程式（MVP）
+## 1. Code (MVP)
 
-筆電跑就好，硬體要等入圍後才會寄來。
+A laptop is enough; hardware is only shipped after we're shortlisted.
 
-- [ ] **偵測：** 用 Ultralytics YOLOv8n 現成的 COCO 模型，只留 class 15（cat），不用訓練。
-- [ ] **區域設定：** 寫一個 `zones.json`，每台攝影機一份，存它負責的區域（飯碗、水碗、砂盆或禁區）的多邊形座標。程式要能同時讀多個影片檔或串流，事件紀錄多一欄 camera。偵測框的中心點落在哪個多邊形裡，貓就算在哪一區。
-- [ ] **事件判斷：** 貓在同一區待超過 N 秒，才算一次「吃飯／喝水／上廁所」。要加防抖，避免框閃一下就被重複計算。
-- [ ] **紀錄：** 存進 SQLite，只存事件（時間、區域、持續多久），不存畫面。這就是隱私賣點。
-- [ ] **禁區警報：** 貓進入禁區就播音效，畫面上同時跳紅框。要的話可以再加 Telegram 通知。
-- [ ] **異常提醒：** 拿今天的次數跟過去 7 天平均比，差太多就提醒。過去 7 天的資料可以用假資料，簡報裡標註 simulated 就好。
-- [ ] **日報：** 用模板字串產生就夠了。想加 AI 分數的話，用 Ollama 跑一個小模型（例如 Qwen 1.5B）來寫。
-- [ ] **儀表板：** 用 Streamlit，一頁放今日次數、時間軸、7 天趨勢圖和日報。
-- [ ] **README：** 寫功能、架構圖、執行方式，以及之後怎麼部署到 UGen300（Hailo-10H）。
+- [ ] **Detection:** use Ultralytics YOLOv8n's off-the-shelf COCO model, keep only class 15 (cat), no training.
+- [ ] **Zone config:** write a `zones.json` per camera storing the polygon coordinates of the zone it covers (food bowl, water bowl, litter box or forbidden zone). The program must read several video files or streams at once, and event records get an extra camera column. Whichever polygon the detection box's center falls in is the zone the cat is in.
+- [ ] **Event logic:** the cat must stay in the same zone for more than N seconds to count as one "eat / drink / litter" visit. Add debouncing so a flickering box isn't counted twice.
+- [ ] **Logging:** store in SQLite, events only (time, zone, duration), no frames. This is the privacy selling point.
+- [ ] **Forbidden-zone alarm:** when the cat enters a forbidden zone, play a sound and show a red box on screen. Telegram notifications can be added if wanted.
+- [ ] **Anomaly alert:** compare today's count with the 7-day average and alert when it differs a lot. The past 7 days can be fake data, labeled "simulated" in the slides.
+- [ ] **Daily report:** a template string is enough. For bonus AI points, have a small model via Ollama (e.g. Qwen 1.5B) write it.
+- [ ] **Dashboard:** Streamlit, one page with today's counts, timeline, 7-day trend chart and daily report.
+- [ ] **README:** features, architecture diagram, how to run, and how to deploy to UGen300 (Hailo-10H) later.
 
-## 2. 英文簡報（約 12 頁）
+## 2. English slides (about 12 pages)
 
-★ 是官方規定要涵蓋的項目。
+★ marks items the official rules require.
 
-1. 封面：PawWatch，加上一句 slogan
-2. ★ 問題：貓很會隱藏病痛，吃喝和上廁所的變化往往是最早的徵兆，但主人白天在上班看不到。這頁要找一兩個獸醫或研究來源。
-3. 現有方案的缺點：寵物攝影機要上雲、要月費、有隱私疑慮；智慧貓砂盆只管得到上廁所這一件事。
-4. ★ 解決方案：一個攝影機加一個邊緣 AI 加速器，同時追蹤吃、喝、拉，還有禁區警報。
-5. Demo 截圖：偵測畫面和儀表板
-6. ★ 軟硬體架構圖：攝影機 → UGen300 跑 YOLO → 事件引擎 → SQLite → 儀表板和通知
-7. 為什麼要做在邊緣端：隱私、沒有雲端費用、離線也能跑、低功耗
-8. ★ 預期效益：及早發現異常，減少急診和醫療支出
-9. 商業模式（佔評分 35%，最重要）：授權給寵物攝影機和智慧貓砂盆廠商、跟動物醫院合作遠端照護、硬體一次買斷取代月費
-10. 市場規模：台灣家貓數量和全球寵物科技市場，這頁要查資料
-11. 未來展望：多貓辨識（分出哪隻吃了哪碗）、街貓 TNR 追蹤（剪耳辨識）
-12. 團隊、★ 參考資料、★ GitHub 連結
+1. Cover: PawWatch plus a slogan
+2. ★ Problem: cats hide pain well; changes in eating, drinking and litter use are often the earliest signs, but owners are at work during the day and can't see them. Find one or two vet or research sources for this page.
+3. Shortcomings of existing solutions: pet cameras need the cloud, a monthly fee and raise privacy concerns; smart litter boxes only cover litter use.
+4. ★ Solution: a camera plus an edge AI accelerator tracking eating, drinking and litter use together, plus forbidden-zone alarms.
+5. Demo screenshots: detection view and dashboard
+6. ★ Hardware and software architecture diagram: camera → UGen300 running YOLO → event engine → SQLite → dashboard and notifications
+7. Why on the edge: privacy, no cloud cost, works offline, low power
+8. ★ Expected benefits: catch anomalies early, reduce emergency visits and medical costs
+9. Business model (35% of the score, most important): license to pet camera and smart litter box makers, partner with vet clinics for remote care, one-time hardware purchase instead of a subscription
+10. Market size: number of pet cats in Taiwan and the global pet tech market; research needed for this page
+11. Future work: multi-cat identification (which cat ate from which bowl), street-cat TNR tracking (ear-tip recognition)
+12. Team, ★ references, ★ GitHub link
 
-## 3. Demo 影片腳本（3 分鐘）
+## 3. Demo video script (3 minutes)
 
-| 時間 | 內容 |
+| Time | Content |
 | --- | --- |
-| 0:00–0:20 | 開場：你家的貓 + 一句問題（"Would you notice if your cat drank twice as much water today?"） |
-| 0:20–0:50 | 痛點和現有方案的缺點 |
-| 0:50–2:10 | 實機畫面：貓吃飯時計數跳一下 → 跳上桌時警報響 → 儀表板 → 日報 |
-| 2:10–2:45 | 架構圖和為什麼要做在邊緣端 |
-| 2:45–3:00 | 未來展望和結尾 |
+| 0:00–0:20 | Opening: your cat + one question ("Would you notice if your cat drank twice as much water today?") |
+| 0:20–0:50 | Pain points and shortcomings of existing solutions |
+| 0:50–2:10 | Live footage: count ticks up when the cat eats → alarm sounds when it jumps on the table → dashboard → daily report |
+| 2:10–2:45 | Architecture diagram and why on the edge |
+| 2:45–3:00 | Future work and closing |
 
-英文旁白可以用 TTS 生成，不一定要自己唸。
+The English narration can be generated with TTS; no need to record it ourselves.
 
-## 4. 建議時程
+## 4. Suggested schedule
 
-| 日期 | 程式 | 簡報／影片 |
+| Date | Code | Slides / video |
 | --- | --- | --- |
-| 10/9（五） | 錄貓的素材、建好 repo、跑通 YOLO 偵測 | 查市場和獸醫資料 |
-| 10/10–11 | 區域判斷、事件、SQLite、警報 | 寫簡報文字 |
-| 10/12 | Streamlit 儀表板、日報、README | 架構圖、簡報排版 |
-| 10/13 | 錄螢幕畫面 | 剪片、配旁白、上傳 YouTube |
-| 10/14 | 緩衝，記得提早交 | 檢查所有連結 |
+| 10/9 (Fri) | Record cat footage, set up repo, get YOLO detection working | Research market and vet sources |
+| 10/10–11 | Zone logic, events, SQLite, alarm | Write slide text |
+| 10/12 | Streamlit dashboard, daily report, README | Architecture diagram, slide layout |
+| 10/13 | Record screen captures | Edit video, add narration, upload to YouTube |
+| 10/14 | Buffer, remember to submit early | Check all links |
 
-分工上，兩人寫程式、一人做簡報（兼查資料、畫架構圖）。寫程式的兩人一個做前半（偵測、區域、事件、SQLite、警報），一個做後半（儀表板、日報、README），後者 10/13 再負責剪片和配旁白。最後一天三人一起檢查。
+Split: two people code, one does the slides (plus research and the architecture diagram). Of the two coders, one does the first half (detection, zones, events, SQLite, alarm) and the other the second half (dashboard, daily report, README); the latter also edits the video and adds narration on 10/13. On the last day all three check everything together.

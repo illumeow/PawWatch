@@ -1,68 +1,68 @@
-# 產品說明：PawWatch
+# Product description: PawWatch
 
-PawWatch 是放在家裡的貓咪健康監測裝置：一台攝影機加一個邊緣 AI 加速器（UGen300），自動記錄貓吃飯、喝水、上廁所的次數，貓跳上禁區時發出警報。影像只在裝置上處理，不上雲、不收月費。
+PawWatch is an in-home cat health monitor: cameras plus an edge AI accelerator (UGen300) automatically log how often the cat eats, drinks and uses the litter box, and raise an alarm when the cat jumps onto a forbidden zone. Video is processed only on the device: no cloud, no monthly fee.
 
-## 為什麼需要
+## Why it's needed
 
-- 貓本能會隱藏病痛，飲食、飲水、排泄的變化常是最早的徵兆。
-- 主人白天上班看不到這些變化，等症狀明顯時往往已經拖了一段時間。
-- 現有寵物攝影機要上雲、要月費、有隱私疑慮；智慧貓砂盆只看得到上廁所。
+- Cats instinctively hide pain and illness; changes in eating, drinking and elimination are often the earliest signs.
+- Owners at work during the day can't see these changes, and by the time symptoms are obvious, time has often been lost.
+- Existing pet cameras need the cloud, a monthly fee and raise privacy concerns; smart litter boxes only see litter use.
 
-## 目標使用者
+## Target users
 
-| 對象 | 需求 | PawWatch 提供什麼 |
+| Who | Need | What PawWatch provides |
 | --- | --- | --- |
-| 上班族飼主 | 白天不在家，想知道貓好不好 | 每日紀錄、異常推播 |
-| 老貓或慢性病貓的家庭 | 需要長期觀察 | 7 天趨勢、可帶去給獸醫看的日報 |
-| 動物醫院 | 術後或回診前想知道貓在家的狀況 | 客觀的吃喝拉紀錄 |
-| 寵物攝影機／貓砂盆廠商 | 想加 AI 功能，又不想付雲端成本 | 可授權的邊緣端軟體 |
+| Working owners | Away all day, want to know the cat is fine | Daily log, anomaly notifications |
+| Households with senior or chronically ill cats | Need long-term observation | 7-day trends, a daily report to bring to the vet |
+| Veterinary clinics | Want to know how the cat is doing at home after surgery or before a follow-up | Objective eat / drink / litter records |
+| Pet camera and litter box makers | Want AI features without paying cloud costs | Licensable edge software |
 
-## 主要功能
+## Key features
 
-1. **吃喝拉紀錄：** 在畫面上框出飯碗、水碗、砂盆，貓進去待夠久就記一次，連時間和持續多久一起存。
-2. **異常提醒：** 今天的次數跟過去 7 天平均差太多就推播，例如跑砂盆的次數比平常多一倍。只提醒主人留意或就醫，不做診斷。
-3. **禁區警報：** 貓跳上流理台、餐桌或靠近電線時播音效並通知。
-4. **AI 日報：** 把當天紀錄寫成一段白話，例如「小橘今天喝水 6 次，比平常多 2 次」。
-5. **儀表板：** 一頁看完今日次數、時間軸和 7 天趨勢。
+1. **Eat / drink / litter log:** draw boxes around the food bowl, water bowl and litter box on screen; when the cat stays inside long enough, one visit is logged, with time and duration.
+2. **Anomaly alerts:** push a notification when today's count differs a lot from the 7-day average, e.g. twice as many litter box visits as usual. It only prompts the owner to watch or see a vet; it does not diagnose.
+3. **Forbidden-zone alarm:** play a sound and notify when the cat jumps onto the counter or dining table, or gets near cables.
+4. **AI daily report:** turn the day's log into a plain-language summary, e.g. "Mochi drank water 6 times today, 2 more than usual."
+5. **Dashboard:** one page with today's counts, a timeline and 7-day trends.
 
-## 使用情境
+## Usage scenario
 
-早上出門前什麼都不用做。下午手機跳出通知：「小橘今天已經跑砂盆 9 次，平常是 4 次。」主人下班打開儀表板看趨勢，決定帶去看獸醫，順便把日報給醫生參考。
+Nothing to do before leaving in the morning. In the afternoon the phone shows: "Mochi has used the litter box 9 times today; usually it's 4." After work the owner opens the dashboard, looks at the trend, decides to see the vet, and brings the daily report for the doctor.
 
-## 運作方式
+## How it works
 
-1. 各台固定鏡頭攝影機的畫面經家裡的區網送到主機，主機交給 UGen300 跑 YOLO 偵測貓。
-2. 程式判斷貓在哪個區域、待了多久，產生事件。
-3. 事件存進本機 SQLite，畫面用完就丟。
-4. 儀表板、日報、通知都從事件資料產生。
+1. Each fixed camera streams over the home LAN to the host, which hands frames to the UGen300 to run YOLO cat detection.
+2. The program determines which zone the cat is in and for how long, and produces events.
+3. Events are stored in a local SQLite database; frames are discarded after use.
+4. The dashboard, daily report and notifications are all generated from the event data.
 
-## 硬體架構
+## Hardware architecture
 
-一台主機搭配 UGen300，透過家裡的區網接收多台固定鏡頭攝影機的畫面，所有運算都在這台主機上完成。UGen300 是加速卡（M.2 或 USB 版），不是獨立電腦，必須插在主機上。
+One host with a UGen300 receives streams from several fixed cameras over the home LAN; all computation happens on this host. The UGen300 is an accelerator card (M.2 or USB), not a standalone computer, and must be plugged into the host.
 
-&#91;embedded content: 硬體架構 · 3 台攝影機、1 台主機\]
+(The original doc embedded a hardware architecture diagram here: 3 cameras, 1 host.)
 
-| 元件 | 角色 | 備註 |
+| Component | Role | Notes |
 | --- | --- | --- |
-| 固定鏡頭網路攝影機 ×N | 每台對準一個區域（飯碗、水碗、砂盆或禁區） | 用 RTSP 串流到區網，關掉原廠雲端上傳 |
-| 主機（迷你 PC 或單板電腦） | 收串流、解碼、事件判斷、SQLite、儀表板 | UGen300 插在這台上 |
-| UGen300（Hailo-10H） | 跑 YOLO 偵測貓 | 主機把影格交給它推論 |
-| 手機 | 收通知、看儀表板 | 只收事件，不收影像 |
+| Fixed-lens network cameras ×N | Each points at one zone (food bowl, water bowl, litter box or forbidden zone) | Stream RTSP over the LAN; disable the vendor's cloud upload |
+| Host (mini PC or single-board computer) | Receives streams, decodes, event logic, SQLite, dashboard | The UGen300 plugs into this |
+| UGen300 (Hailo-10H) | Runs YOLO cat detection | The host passes frames to it for inference |
+| Phone | Receives notifications, views the dashboard | Receives events only, never video |
 
-### 為什麼用固定鏡頭
+### Why fixed cameras
 
-- 區域是用畫面座標框的，鏡頭不動，框就一直對得上；裝好時框一次就好。
-- 一台攝影機只管一個區域，畫面裡的目標比較大，偵測也比較準。
-- 每台攝影機有自己的區域設定檔，事件紀錄多一欄「哪台攝影機」。
-- 之後可以擴充：支援雲台攝影機的預設位置（每個角度一組區域），或自動偵測碗和砂盆的位置。
+- Zones are drawn in screen coordinates; with a fixed camera the zones stay aligned, so they're drawn once at install time.
+- One camera per zone makes the target larger in frame, so detection is more accurate.
+- Each camera has its own zone config file, and event records carry an extra "camera" field.
+- Future extensions: preset positions for pan-tilt cameras (one zone set per angle), or automatic detection of bowl and litter box positions.
 
-## 設計原則
+## Design principles
 
-- **隱私優先：** 只存事件，不存也不傳影像。
-- **零月費：** 運算在本地完成，沒有雲端成本。
-- **離線可用：** 網路斷了照樣紀錄。
-- **裝好就能用：** 使用者只需要在畫面上框出幾個區域。
+- **Privacy first:** store events only; never store or transmit video.
+- **No monthly fee:** computation is local, so there's no cloud cost.
+- **Works offline:** keeps logging when the internet is down.
+- **Works out of the box:** the user only draws a few zones on screen.
 
-## 目前限制
+## Current limitations
 
-MVP 分不出多隻貓，多貓家庭的紀錄會合在一起；個體辨識列為未來功能，和街貓 TNR 追蹤共用同一項技術。
+The MVP can't tell multiple cats apart, so multi-cat households get combined records. Individual identification is a future feature and shares its technology with street-cat TNR tracking.
