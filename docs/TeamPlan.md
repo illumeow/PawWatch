@@ -100,6 +100,41 @@ and we will have at most 1 to 2 days of footage by the deadline.
 - To make the alert fire on camera, seed a baseline that today's real count clearly exceeds (e.g. 3 litter visits a day vs 6 today).
 - Days of real recording replace their simulated days, so the trend becomes partly real.
 
+## Demo plan
+
+Everything runs on a laptop: the UGen300 ships only to finalists, so the demo shows the real pipeline on a laptop
+and argues that the UGen300 port is low-risk. Never present laptop footage as running on UGen300.
+
+| What | Owner | Why |
+| --- | --- | --- |
+| Recorded footage through the real pipeline: boxes, zones, counts ticking up, alarm, then dashboard and report | A, B | Proves it works |
+| Caption on the detection window: "Running on laptop · YOLOv8n · target: ASUS UGen300" | A | Honest about hardware |
+| Frame-rate limit per camera (`run.py --fps`, about 5 live, 1 for bulk runs) | A | Edge-sized load; makes bulk processing feasible |
+| Airplane mode on camera while the pipeline keeps running | A records, B edits | Shows "no cloud" |
+| Database rows with no images, empty frames folder | B | Shows "events only" |
+| Architecture slide: laptop backend today, Hailo backend after; same `(label, score, box)` contract as ASUS's UGen300 demos | C | Port is a swap, not a rewrite |
+| Stock COCO YOLOv8: Hailo publishes precompiled versions for Hailo-10H, so no training or model conversion | C | No model risk |
+| Load fits the chip: 3 cameras × 5 fps = 15 inferences/s vs Hailo's published YOLOv8 speed on Hailo-10H (look up and cite) | C | Hardware is sufficient |
+| Optional, 10/12 if time: port `hailo_detect.py` behind `--backend hailo`, README says "untested on hardware" | A | Code signal, not shown in demo |
+
+Video: the 0:50–2:10 live section adds the airplane-mode shot and the caption; the "fits the chip" numbers go in 2:10–2:45.
+
+### Compute
+
+YOLOv8n on a 1280×720 frame, measured on an M3 Pro laptop (2026-10-09):
+
+| Device | Model input size | ms / frame | fps |
+| --- | --- | --- | --- |
+| CPU | 640 | 20.5 | 49 |
+| CPU | 416 | 10.8 | 93 |
+| Apple GPU (`device="mps"`) | 640 | 5.9 | 169 |
+| Apple GPU (`device="mps"`) | 416 | 5.1 | 195 |
+
+- Live demo needs about 15 fps in total: fine even on CPU.
+- Bulk runs are the cost: 2 days × 3 cameras is 144 camera-hours. At 1 fps that's about 3 h on CPU or under 1 h on the Apple GPU; at 5 fps, about 14 h on CPU.
+- Ultralytics picks CUDA automatically but not Apple's GPU; pass `device="mps"` on Macs.
+- Time a clip on the machine that will process the footage first; a laptop without a GPU may be 2–3× slower.
+
 ## Recording guide
 
 Start recording today: every later step needs footage, and lost recording days can't be made up.
@@ -110,7 +145,7 @@ Setup and settings:
 - Fix the camera with a tripod, clamp or tape; it must not move, because zones are pixel coordinates.
 - About 1 to 2 m away, slightly above, side view; the cat should fill a good part of the frame.
 - Keep a small lamp on at night; dark phone footage loses detections.
-- 720p at 15 to 30 fps, real time (no time-lapse), 1-hour segments if the app allows.
+- 720p at 15 fps (less to decode later), real time (no time-lapse), 1-hour segments if the app allows.
 - Name files with the start time, e.g. `food_2026-10-09T1830.mp4`.
 - Devices plugged in; auto-lock and battery saver off.
 
