@@ -48,3 +48,9 @@ def test_backend_that_never_reports_visible_never_closes(monkeypatch):  # macOS 
     win = SimpleNamespace(title="t", seen_visible=False)
     monkeypatch.setattr(overlay.cv2, "getWindowProperty", lambda title, prop: -1.0)
     assert not any(overlay.closed_by_user(win) for _ in range(3))
+
+
+def test_portrait_frames_get_landscape_text_size():
+    assert overlay.scale(np.zeros((720, 1280, 3), np.uint8)) == overlay.scale(np.zeros((1280, 720, 3), np.uint8)) == 1
+    img = overlay.render(np.zeros((1280, 720, 3), np.uint8), [], [], None, {})
+    assert img.shape == (1280, 720, 3)

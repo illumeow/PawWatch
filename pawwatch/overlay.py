@@ -22,7 +22,7 @@ def counts_text(zone_list, counts):
 def render(frame, detections, zone_list, zone, counts):
     """Annotated copy of a frame. zone is the cat's current zone; the top cat box turns red in a forbidden one."""
     img = frame.copy()
-    s = img.shape[1] / 1280  # sizes are tuned for 1280 px wide and scale with the frame
+    s = scale(img)
     thick = max(1, round(2 * s))
     band = round(56 * s)
     draw_zones(img, zone_list, top=band)
@@ -37,13 +37,21 @@ def render(frame, detections, zone_list, zone, counts):
     img[:band] //= 3  # darkened bands keep the text readable on any footage
     img[-band:] //= 3
     _text(img, "Visits  " + counts_text(zone_list, counts), (round(16 * s), round(38 * s)), s, (255, 255, 255))
-    _text(img, CAPTION, (round(16 * s), img.shape[0] - round(18 * s)), 0.8 * s, (220, 220, 220))
+    caption = 0.8 * s
+    width = cv2.getTextSize(CAPTION, FONT, caption, max(1, round(2 * caption)))[0][0]
+    caption *= min(1.0, (img.shape[1] - 32 * s) / width)  # portrait frames: shrink the caption to fit
+    _text(img, CAPTION, (round(16 * s), img.shape[0] - round(18 * s)), caption, (220, 220, 220))
     return img
+
+
+def scale(img):
+    """Sizes are tuned for 1280 px on the long side, so portrait phone clips get the same text size as landscape."""
+    return max(img.shape[:2]) / 1280
 
 
 def draw_zones(img, zone_list, top=0):
     """Zone outlines with their names, in place. Labels stay below `top` px (the counts band)."""
-    s = img.shape[1] / 1280
+    s = scale(img)
     for name, polygon in zone_list:
         color = ZONE_COLORS[name]
         pts = [(round(x), round(y)) for x, y in polygon]
