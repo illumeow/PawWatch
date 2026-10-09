@@ -53,7 +53,10 @@ uv run python -m pawwatch.run data/videos/TangerineJumpOntoBed.MOV --zones confi
   A and B put their screenshots in `slides/images/` on Day 2 evening.
 - Day 3: finish slides, add the demo video link, submit.
 
-**@illumeow (B):** README, dashboard on real events, screenshots to C, then the demo video on Day 3.
+**@illumeow (B):** open PRs: [#2](https://github.com/illumeow/PawWatch/pull/2) compares only filmed hours (touches
+`store.py` and `run.py`), [#3](https://github.com/illumeow/PawWatch/pull/3) README, [#4](https://github.com/illumeow/PawWatch/pull/4)
+readable detection window on portrait clips (touches `overlay.py`). Next: dashboard on the overnight events, screenshots
+to C, then the demo video on Day 3 (shot list, narration and timings in `docs/DemoVideo.md`).
 
 **Cut for time:** Hailo backend port, Telegram setup, LLM-written daily report, a second day of recording.
 
