@@ -9,7 +9,7 @@ Narration is TTS; total speech is about 2 minutes, which leaves room for the ala
 | --- | --- | --- | --- |
 | 0:00–0:18 | Tangerine eating, raw footage | `TangerineEat.mp4` (Drive) | 1 |
 | 0:18–0:35 | Problem and existing products | Slides 2–3 (C) | 2 |
-| 0:35–1:00 | Detection window on the eat clip: box, food zone, count goes 0 → 1 | Screen recording, `run.py --show` (A) | 3a |
+| 0:35–1:00 | Detection window on the eat clip (box, food zone, count goes 0 → 1), then quick cuts of the drinking and litter box clips | Screen recordings, `run.py --show` (A) | 3a |
 | 1:00–1:12 | Detection window on the bed clip, red box, **alarm sound audible** | Screen recording (A) | 3b |
 | 1:12–1:20 | Turning on airplane mode while the pipeline keeps running | Phone or screen recording (A) | 3c |
 | 1:20–1:45 | Dashboard on the simulated alert day: alert, tiles, timeline, past week; open "What PawWatch stores" | Screen recording (B) | 3d |

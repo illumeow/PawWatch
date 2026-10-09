@@ -28,7 +28,7 @@ Two real clips of our cat (Tangerine) are tested end to end; the footage itself 
 | `TangerineEatCut.mp4`, 69 s, starts 2026-10-09 22:00:22 (last 69 s of the 13-min `TangerineEat.mp4`) | `config/zones/cam_food2.json` | 1 food visit, 22:00:41, 31 s |
 | `TangerineJumpOntoBed.MOV`, 69 s, starts 22:22:20 | `config/zones/cam_bed.json` (mattress = forbidden) | Alarm rings; 4 short forbidden visits (petting hides the cat, splitting the stay) |
 
-The bed clip replaces the staged counter jump. The eat clip is from a different camera than the overnight one, hence `cam_food2`.
+The bed clip replaces the staged counter jump.
 
 To run them (the database flag keeps demo rows out of the default database):
 
@@ -40,12 +40,11 @@ uv run python -m pawwatch.run data/videos/TangerineJumpOntoBed.MOV --zones confi
 **@meander (A):**
 - Heads-up: `run.py` now also writes a `recordings` row per file (see Interface contract), added by B in the
   coverage PR. No change to how you call it. Rerun old clips into a fresh database to get their rows.
-- Tonight: fix the overnight cameras, `check_clip.py` and `draw_zones.py` on a short test clip from each, then record overnight.
-  Name files `<zone>_YYYY-MM-DDTHHMM.mp4` with the start time.
-- Day 2: time one hour of footage on the Fedora laptop (CPU only, no NVIDIA GPU), then run all overnight footage at
-  `--fps 1` with `PAWWATCH_MUTE=1`; real events in the database by the evening.
-- Day 2 evening: screen recordings of the detection window on the eat and bed clips to C and B.
-- Day 3 morning: the airplane-mode shot.
+- **No overnight recording.** The 7-day history is simulated anyway, and footage only has to show the pipeline
+  working on camera. Two more short clips are enough (see Footage we need below): drinking and a litter box visit.
+- Day 2: film those two clips, zones file for each, run them with `--show` into `data/demo.db`.
+- Day 2 evening: screen recordings of the detection window on the eat, bed, water and litter clips to B.
+- Day 3 morning: the airplane-mode shot (a screen recording of the pipeline running on a clip while Wi-Fi goes off).
 
 **@bbwinner (C):** slides live in the repo under `slides/`, on branch `feat/slides` off `develop`.
 - Day 1: research, slide outline, business model page (35% of the score).
@@ -53,12 +52,11 @@ uv run python -m pawwatch.run data/videos/TangerineJumpOntoBed.MOV --zones confi
   A and B put their screenshots in `slides/images/` on Day 2 evening.
 - Day 3: finish slides, add the demo video link, submit.
 
-**@illumeow (B):** open PRs: [#2](https://github.com/illumeow/PawWatch/pull/2) compares only filmed hours (touches
-`store.py` and `run.py`), [#3](https://github.com/illumeow/PawWatch/pull/3) README, [#4](https://github.com/illumeow/PawWatch/pull/4)
-readable detection window on portrait clips (touches `overlay.py`). Next: dashboard on the overnight events, screenshots
-to C, then the demo video on Day 3 (shot list, narration and timings in `docs/DemoVideo.md`).
+**@illumeow (B):** merged into `develop`: anomaly check compares only filmed hours (touches `store.py` and `run.py`),
+full README, readable detection window on portrait clips (touches `overlay.py`). Next: dashboard on the real clips'
+events, screenshots to C, then the demo video on Day 3 (shot list, narration and timings in `docs/DemoVideo.md`).
 
-**Cut for time:** Hailo backend port, Telegram setup, LLM-written daily report, a second day of recording.
+**Cut for time:** Hailo backend port, Telegram setup, LLM-written daily report, overnight recording and bulk runs.
 
 **Open:** who does registration? Check its deadline on the competition page.
 
@@ -151,8 +149,8 @@ Gitignored: `data/videos/`, `*.pt`, `*.hef`, `*.db`. Footage lives in a shared G
 
 ## Data strategy
 
-The demo shows real today plus simulated history: anomaly alerts need 7 days of baseline,
-and we will have about one day of footage.
+The demo shows real clips plus simulated history: anomaly alerts need 7 days of baseline, and footage only has to
+prove the pipeline works on camera. Real days are compared only over their filmed hours (the `recordings` table).
 
 | Data | Written by | Proves or enables | Shown in demo |
 | --- | --- | --- | --- |
@@ -163,6 +161,19 @@ and we will have about one day of footage.
 - Label simulated history as "simulated" in the dashboard (B) and slides (C).
 - To make the alert fire on camera, seed a baseline that today's real count clearly exceeds (e.g. 3 litter visits a day vs 6 today).
 - Days of real recording replace their simulated days, so the trend becomes partly real.
+
+### Footage we need
+
+| Clip | Shows | Status |
+| --- | --- | --- |
+| Eating (`TangerineEat.mp4`) | Opening shot; food visit count 0 → 1 | Have |
+| Jump onto the bed (`TangerineJumpOntoBed.MOV`) | Alarm | Have; a person is in frame, so get their OK, crop, or re-film |
+| Drinking | Second health zone working | Need, about 1 min once trimmed |
+| Litter box visit | The zone the video's alert is about | Need, about 1 min once trimmed |
+| Jump with nobody in frame | Cleaner alarm shot | Nice to have |
+
+Fix the phone near the spot and record until Tangerine goes there, then trim, as with the eat clip. Note each
+recording's start time (filename or `--start`) so visits land at the right time of day.
 
 ## Demo plan
 
@@ -194,13 +205,13 @@ YOLOv8n on a 1280×720 frame, measured on an M3 Pro laptop (2026-10-09):
 | Apple GPU (`device="mps"`) | 416 | 5.1 | 195 |
 
 - Live demo needs about 15 fps in total: fine even on CPU.
-- Bulk runs are the cost: 2 days × 3 cameras is 144 camera-hours. At 1 fps that's about 3 h on CPU or under 1 h on the Apple GPU; at 5 fps, about 14 h on CPU.
+- Bulk runs over long recordings were the cost (2 days × 3 cameras = 144 camera-hours, about 3 h on CPU at 1 fps); cut, since we use short clips.
 - Ultralytics picks CUDA automatically but not Apple's GPU; pass `device="mps"` on Macs.
 - Time a clip on the machine that will process the footage first; a laptop without a GPU may be 2–3× slower.
 
 ## Recording guide
 
-Start recording today: every later step needs footage, and lost recording days can't be made up.
+Short clips only (see Footage we need); no overnight recording.
 
 Setup and settings:
 
@@ -216,9 +227,10 @@ Checklist:
 
 - [ ] Record 1 minute per spot with the cat in frame
 - [ ] Run `check_clip.py` on each clip; move the camera if the cat is missed
-- [ ] Long recording, all zones at once, overnight (one night is enough)
 - [x] Staged clip: cat jumping onto the bed (forbidden zone)
-- [ ] Close-up shots of eating and drinking for the demo video
+- [x] Eating clip
+- [ ] Drinking clip
+- [ ] Litter box clip
 - [ ] Upload clips to the shared Drive folder as they finish
 
 ## Git workflow
@@ -236,11 +248,11 @@ Keep it light: one feature branch each, small PRs into `develop`, merged at leas
 
 ## Schedule
 
-Three working days; real events reach the dashboard on Day 2 evening, everything on Day 3 is recording and submission.
+Three working days; real clips reach the dashboard on Day 2 evening, everything on Day 3 is recording and submission.
 
 | Day | A: vision (@meander) | B: output (@illumeow) | C: slides (@bbwinner) |
 | --- | --- | --- | --- |
-| Fri 10/9 | Cameras up, 1-minute test, record overnight, film the bed jump | Half B done and merged (PR #1); README | Research, slide outline, business model page |
-| Sat 10/10 | Zones, visit logic, `run.py`; first real events by evening; send screenshots | Dashboard on real events; send screenshots and repo link | Slide text, architecture diagram, Hailo speed number |
+| Fri 10/9 | Pipeline, eat clip, film the bed jump | Half B done and merged (PR #1); README | Research, slide outline, business model page |
+| Sat 10/10 | Drinking and litter clips, zones, runs with `--show`; screen recordings by evening | Dashboard on real clips' events; send screenshots and repo link | Slide text, architecture diagram, Hailo speed number |
 | Sun 10/11 | Morning: screen captures, airplane-mode shot | Edit demo video, TTS voice-over, upload unlisted to YouTube | Finish slides, add video link, submit |
 | 10/12–10/14 | Buffer | Buffer: check every link in slides and README | Buffer |
