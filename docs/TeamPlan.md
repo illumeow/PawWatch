@@ -30,10 +30,10 @@ uv run streamlit run dashboard/app.py
 - Check the alarm sound on Fedora once:
   `uv run python -c "import time; from pawwatch import alarm; alarm.trigger('cam_counter','forbidden',time.time()); time.sleep(1)"`
 
-**@bbwinner (C):**
+**@bbwinner (C):** slides live in the repo under `slides/`, on branch `feat/slides` off `develop`.
 - Day 1: research, slide outline, business model page (35% of the score).
 - Day 2: slide text, architecture diagram, Hailo's published YOLOv8 speed on Hailo-10H (cite the source).
-  B sends dashboard screenshots and the repo link on Day 2 evening.
+  A and B put their screenshots in `slides/images/` on Day 2 evening.
 - Day 3: finish slides, add the demo video link, submit.
 
 **@illumeow (B):** README, dashboard on real events, screenshots to C, then the demo video on Day 3.
@@ -60,8 +60,8 @@ Handoffs to C:
 
 | What | From | By |
 | --- | --- | --- |
-| Detection screenshots (boxes, zones, alarm) | A | Sat 10/10 evening |
-| Dashboard and daily report screenshots | B | Sat 10/10 evening |
+| Detection screenshots (boxes, zones, alarm), into `slides/images/` | A | Sat 10/10 evening |
+| Dashboard and daily report screenshots, into `slides/images/` | B | Sat 10/10 evening |
 | Public GitHub repo link | B | Sat 10/10 evening |
 | Architecture diagram, for README and video | C to B | Sat 10/10 evening |
 
@@ -117,6 +117,7 @@ Each file has one owner; nobody edits the other half's files without asking.
 | `pawwatch/report.py` | B | Daily report text |
 | `dashboard/app.py` | B | Streamlit page |
 | `README.md` | B | Features, architecture, run steps, UGen300 notes |
+| `slides/` | C | Slide deck; images in `slides/images/` |
 | `tests/` | Each own | Tests for their own modules |
 
 Gitignored: `data/videos/`, `*.pt`, `*.hef`, `*.db`. Footage lives in a shared Google Drive folder.
@@ -199,9 +200,9 @@ Keep it light: one feature branch each, small PRs into `develop`, merged at leas
 
 1. `main` = what we submit; `develop` = shared integration branch.
 2. Skeleton commit lands on `develop` first (stubs, `store.py` schema, `.gitignore`, sample zones file).
-3. Each person branches off it: `feat/vision` (A), `feat/dashboard` (B).
+3. Each person branches off it: `feat/vision` (A), `feat/dashboard` (B), `feat/slides` (C).
 4. Small PRs into `develop`, at least daily; pull `develop` into your branch before each PR.
-5. Don't edit the other half's files; `store.py` changes need a heads-up first.
+5. Don't edit other people's files; `store.py` changes need a heads-up first.
 6. `develop` merges to `main` on Sun 10/11 before the final recording, and again if fixes land before 10/14.
 
 `CLAUDE.md` is in the repo, so everyone's Claude sessions follow the same contract.
