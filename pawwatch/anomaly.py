@@ -25,20 +25,20 @@ class Anomaly:
     partial_day: bool  # True while the day is still in progress
 
 
-def _day_start(day):
+def day_start(day):
     return datetime.combine(day, time()).timestamp()
 
 
-def _cutoff(day, now):
+def seconds_so_far(day, now):
     """Seconds into `day` that count as "so far": the whole day once it's over."""
-    elapsed = (now or datetime.now()).timestamp() - _day_start(day)
+    elapsed = (now or datetime.now()).timestamp() - day_start(day)
     return min(max(elapsed, 0.0), 86400.0)
 
 
 def counts_until(conn, day, seconds):
     """Visits per zone on `day` that started within its first `seconds`."""
     counts = dict.fromkeys(store.ZONES, 0)
-    start = _day_start(day)
+    start = day_start(day)
     for ev in store.events_between(conn, start, start + seconds):
         counts[ev.zone] += 1
     return counts
@@ -49,7 +49,7 @@ def expected_counts(conn, day, now=None, window=WINDOW_DAYS):
 
     Returns ({zone: mean}, days_used); ({}, 0) when there's no history.
     """
-    cutoff = _cutoff(day, now)
+    cutoff = seconds_so_far(day, now)
     totals = dict.fromkeys(store.ZONES, 0)
     used = 0
     for i in range(1, window + 1):
@@ -71,7 +71,7 @@ def find_anomalies(conn, day=None, now=None):
     expected, used = expected_counts(conn, day, now)
     if not used:
         return []
-    cutoff = _cutoff(day, now)
+    cutoff = seconds_so_far(day, now)
     counts = counts_until(conn, day, cutoff)
     found = []
     for zone in HEALTH_ZONES:
