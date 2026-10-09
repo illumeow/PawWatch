@@ -111,7 +111,7 @@ def week_rows(conn, day):
         d = day - timedelta(days=i)
         evs = events_on(conn, d)
         simulated = bool(evs) and all(e.simulated for e in evs)
-        label = ("today" if d == date.today() else d.strftime("%a")) + ("*" if simulated else "")
+        label = ("today" if d == date.today() else f"{d:%a} {d.day}") + ("*" if simulated else "")  # 8 days: weekdays repeat
         for z in ZONES:
             rows[z].append({"day": d.isoformat(), "label": label, "count": sum(e.zone == z for e in evs), "Data": "simulated" if simulated else "real"})
     return rows
