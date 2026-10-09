@@ -150,3 +150,14 @@ def test_quitting_the_window_still_stores_the_open_visit(tmp_path, zones_file):
     run.process([video], zones_file, StubDetector(), store.connect(tmp_path / "events.db"), fps=5, window=window)
     assert rows(tmp_path / "events.db") == [("cam_food", "food", 0.0, pytest.approx(7.8), False)]
     assert window.closed
+
+
+def test_each_file_logs_what_was_recorded(tmp_path, zones_file):
+    early = write_video(tmp_path / "food_2026-10-09T1830.mp4", [(6, LEFT)])
+    late = write_video(tmp_path / "food_2026-10-09T1840.mp4", [(4, None)])
+    conn = store.connect(tmp_path / "events.db")
+    run.process([late, early], zones_file, StubDetector(), conn, fps=1)
+    assert [(r.camera, r.zones, r.start_ts - T0, r.end_ts - T0) for r in store.recordings_between(conn, 0, 2e10)] == [
+        ("cam_food", ("food", "water"), 0.0, 5.0),
+        ("cam_food", ("food", "water"), 600.0, 603.0),
+    ]

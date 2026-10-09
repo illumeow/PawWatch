@@ -1,9 +1,10 @@
 """Streamlit dashboard. Owner: B.
 
-Run: uv run streamlit run dashboard/app.py
+Run: uv run streamlit run dashboard/app.py   (PAWWATCH_DB=data/demo.db to open another database)
 One page: daily report, today's counts vs usual, alerts, timeline, 7-day trend (simulated days marked), stored data.
 Reads only through pawwatch.store / anomaly / report.
 """
+import os
 from datetime import date, datetime, timedelta
 
 import altair as alt
@@ -50,8 +51,18 @@ def frame(events):
     return df
 
 
-def timeline_chart(df, day):
-    """One row per zone, a tick per visit, across the day. Simulated visits are faded only when mixed with real ones."""
+def watched_frame(spans, day):
+    """Rows for the shaded "on camera" bands: one per zone and watched span."""
+    day0 = datetime.combine(day, datetime.min.time())
+    return pd.DataFrame([{"Zone": LABELS[z], "from": day0 + timedelta(seconds=s), "to": day0 + timedelta(seconds=e)}
+                         for z in ZONES for s, e in spans[z]], columns=["Zone", "from", "to"])
+
+
+def timeline_chart(df, day, spans=None):
+    """One row per zone, a tick per visit, across the day. Simulated visits are faded only when mixed with real ones.
+
+    spans: watched hours per zone, drawn as shaded bands when only part of the day was filmed.
+    """
     mixed = df["simulated"].nunique() > 1
     day0 = datetime.combine(day, datetime.min.time())
     base = alt.Chart(df).encode(
@@ -69,6 +80,12 @@ def timeline_chart(df, day):
         ],
     )
     layers = [ticks]
+    if spans is not None:
+        bands = alt.Chart(watched_frame(spans, day)).mark_rect(opacity=0.12, color="gray").encode(
+            x="from:T", x2="to:T", y=alt.Y("Zone:N", sort=[LABELS[z] for z in ZONES]),
+            tooltip=[alt.Tooltip("Zone:N"), alt.Tooltip("from:T", title="On camera from", format="%H:%M"),
+                     alt.Tooltip("to:T", title="until", format="%H:%M")])
+        layers.insert(0, bands)
     if day == date.today():
         now = pd.DataFrame({"now": [datetime.now()]})
         layers.append(alt.Chart(now).mark_rule(strokeDash=[4, 3], strokeWidth=1, opacity=0.6).encode(x="now:T"))
@@ -94,7 +111,7 @@ def week_rows(conn, day):
         d = day - timedelta(days=i)
         evs = events_on(conn, d)
         simulated = bool(evs) and all(e.simulated for e in evs)
-        label = ("today" if d == date.today() else d.strftime("%a")) + ("*" if simulated else "")
+        label = ("today" if d == date.today() else f"{d:%a} {d.day}") + ("*" if simulated else "")  # 8 days: weekdays repeat
         for z in ZONES:
             rows[z].append({"day": d.isoformat(), "label": label, "count": sum(e.zone == z for e in evs), "Data": "simulated" if simulated else "real"})
     return rows
@@ -102,7 +119,7 @@ def week_rows(conn, day):
 
 with st.sidebar:
     st.header("PawWatch")
-    db_path = st.text_input("Database", str(store.DEFAULT_DB))
+    db_path = st.text_input("Database", os.environ.get("PAWWATCH_DB", str(store.DEFAULT_DB)))
     cat = st.text_input("Cat's name", "Tangerine")
     live = st.toggle("Auto-refresh every 10 s", value=True)
 
@@ -134,20 +151,27 @@ def body():
         st.markdown(f"**Daily report**  \n{report.daily_report(conn, day, cat_name=cat, now=now)}")
 
     for a in anomaly.find_anomalies(conn, day, now):
-        st.warning(report.describe_anomaly(a, cat), icon=":material/warning:")
+        st.warning(report.describe_anomaly(a, cat, when.lower() if day == now.date() else f"on {when}"),
+                   icon=":material/warning:")
 
-    seconds = anomaly.seconds_so_far(day, now)
-    counts = anomaly.counts_until(conn, day, seconds)
-    expected, history = anomaly.expected_counts(conn, day, now)
-    so_far = "by now" if seconds < 86400 else "a day"
+    spans = anomaly.watched(conn, day, now)
+    counts = anomaly.counts(conn, day, spans)
+    expected, _ = anomaly.expected_counts(conn, day, now)
     for col, z in zip(st.columns(4), ZONES):
-        diff = counts[z] - round(expected[z]) if history else None
-        delta = None if diff is None else (f"same as usual {so_far}" if diff == 0 else f"{diff:+d} vs usual {so_far}")
+        if not spans[z]:
+            col.metric(LABELS[z], "–", delta="not on camera", delta_color="off", delta_arrow="off", border=True)
+            continue
+        usual = {"day": "a day", "so_far": "by now", "recorded": "in these hours"}[anomaly.scope(spans[z], day, now)]
+        diff = counts[z] - round(expected[z]) if z in expected else None
+        delta = None if diff is None else (f"same as usual {usual}" if diff == 0 else f"{diff:+d} vs usual {usual}")
         col.metric(LABELS[z], counts[z], delta=delta, delta_color="off", delta_arrow="off" if diff == 0 else "auto", border=True)
 
     st.subheader("Visits through the day")
+    partly_filmed = any(anomaly.scope(spans[z], day, now) == "recorded" for z in ZONES)
     if day_events:
-        st.altair_chart(timeline_chart(frame(day_events), day), width="stretch")
+        st.altair_chart(timeline_chart(frame(day_events), day, spans if partly_filmed else None), width="stretch")
+        if partly_filmed:
+            st.caption("Shaded: hours on camera. Only those hours are compared with the usual.")
     else:
         st.caption("No visits recorded on this day.")
 
