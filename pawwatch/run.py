@@ -5,7 +5,8 @@ Usage:
     uv run python -m pawwatch.run data/videos/food_*.mp4 --zones config/zones/cam_food.json --fps 1 --device cuda
 
 Per sampled frame: detector.infer -> highest-score box center -> zones.zone_at -> events.VisitTracker
--> store.insert_event for each finished visit. Frames are only read, never written anywhere.
+-> store.insert_event for each finished visit, and alarm.trigger on every frame the cat is in a forbidden zone
+(the alarm applies its own cooldown). Frames are only read, never written anywhere.
 Timestamps are video time: the recording start from the filename (<zone>_YYYY-MM-DDTHHMM.mp4) plus the
 frame offset. Files are processed in time order with one tracker, so a visit spanning two files is one visit.
 """
@@ -16,7 +17,7 @@ from pathlib import Path
 
 import cv2
 
-from pawwatch import events, store, zones
+from pawwatch import alarm, events, store, zones
 from pawwatch.detector import make_detector
 
 FILENAME_START = re.compile(r"_(\d{4}-\d{2}-\d{2}T\d{4})$")
@@ -63,11 +64,13 @@ def sampled_frames(path, fps):
 
 
 def process(paths, zones_path, detector, conn, fps=1.0, start=None,
-            min_dwell=events.MIN_DWELL_S, gap_tolerance=events.GAP_TOLERANCE_S):
-    """Run one camera's videos through the pipeline and store each visit as it finishes. Returns the visits."""
+            min_dwell=events.MIN_DWELL_S, gap_tolerance=events.GAP_TOLERANCE_S,
+            forbidden_dwell=events.FORBIDDEN_DWELL_S):
+    """Run one camera's videos through the pipeline, ring the alarm on forbidden frames and store each visit as it
+    finishes. Returns the visits."""
     camera, zone_list = zones.load_zones(zones_path)
     files = sorted((parse_start(p, start), Path(p)) for p in paths)
-    tracker = events.VisitTracker(min_dwell, gap_tolerance)
+    tracker = events.VisitTracker(min_dwell, gap_tolerance, forbidden_dwell)
     stored = []
 
     def save(visits):
@@ -80,20 +83,27 @@ def process(paths, zones_path, detector, conn, fps=1.0, start=None,
     for t0, path in files:
         print(f"{path.name}: start {datetime.fromtimestamp(t0):%Y-%m-%d %H:%M}", flush=True)
         for offset, frame in sampled_frames(path, fps):
-            save(tracker.update(t0 + offset, cat_zone(detector.infer(frame), zone_list)))
+            ts = t0 + offset
+            save(tracker.update(ts, cat_zone(detector.infer(frame), zone_list)))
+            if tracker.alarm_zone:
+                alarm.trigger(camera, tracker.alarm_zone, ts)
     save(tracker.close())
     return stored
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="Video files of one camera + its zones file -> visits in SQLite.")
+    ap = argparse.ArgumentParser(
+        description="Video files of one camera + its zones file -> visits in SQLite.",
+        epilog="The cat in a forbidden zone rings the alarm. Set PAWWATCH_MUTE=1 to keep bulk runs silent.")
     ap.add_argument("videos", nargs="+", help="video files of one camera, any order")
     ap.add_argument("--zones", required=True, help="zones file, e.g. config/zones/cam_food.json")
     ap.add_argument("--db", default=str(store.DEFAULT_DB), help="events database (default: %(default)s)")
     ap.add_argument("--fps", type=float, default=1.0, help="frames per second to process: ~5 live, 1 bulk (default: %(default)s)")
     ap.add_argument("--device", help="detector device: cpu, cuda or mps (default: the detector's choice)")
     ap.add_argument("--start", help="recording start, e.g. 2026-10-09T18:30, for a single file without a dated name")
-    ap.add_argument("--min-dwell", type=float, default=events.MIN_DWELL_S, help="seconds in a zone to count a visit")
+    ap.add_argument("--min-dwell", type=float, default=events.MIN_DWELL_S, help="seconds in a zone to count a visit, except forbidden zones")
+    ap.add_argument("--forbidden-dwell", type=float, default=events.FORBIDDEN_DWELL_S,
+                    help="seconds in a forbidden zone to count a visit (default: %(default)s)")
     ap.add_argument("--gap-tolerance", type=float, default=events.GAP_TOLERANCE_S, help="dropout seconds that don't end a visit")
     args = ap.parse_args(argv)
     if args.fps <= 0:
@@ -109,7 +119,7 @@ def main(argv=None):
         ap.error(str(e))
     detector = make_detector(device=args.device)
     stored = process(args.videos, args.zones, detector, store.connect(args.db), args.fps, args.start,
-                     args.min_dwell, args.gap_tolerance)
+                     args.min_dwell, args.gap_tolerance, args.forbidden_dwell)
     print(f"stored {len(stored)} visits in {args.db}")
 
 

@@ -1,4 +1,4 @@
-from pawwatch.events import Visit, visits
+from pawwatch.events import Visit, VisitTracker, visits
 
 
 def samples(zone, start, end, step=1.0):
@@ -43,3 +43,21 @@ def test_dwell_and_tolerance_are_configurable():
     stream = samples("food", 0, 3) + samples(None, 4, 8) + samples("food", 9, 12)
     assert visits(stream, min_dwell=2, gap_tolerance=6) == [Visit("food", 0, 12)]
     assert visits(stream, min_dwell=4) == []
+
+
+def test_forbidden_entry_is_signalled_before_the_visit_closes():
+    tracker = VisitTracker()
+    assert tracker.update(0, None) == [] and tracker.alarm_zone is None
+    assert tracker.update(1, "forbidden") == []  # visit still open, nothing stored yet
+    assert tracker.alarm_zone == "forbidden"
+    tracker.update(2, None)  # dropout: the cat is not seen on the counter in this frame
+    assert tracker.alarm_zone is None
+    tracker.update(3, "food")
+    assert tracker.alarm_zone is None
+
+
+def test_short_forbidden_jump_counts_with_its_own_dwell():
+    stream = samples("forbidden", 0, 1) + samples(None, 2, 10) + samples("food", 11, 13) + samples(None, 14, 20)
+    assert visits(stream) == [Visit("forbidden", 0, 1)]
+    assert visits(stream, min_dwell=2) == [Visit("forbidden", 0, 1), Visit("food", 11, 13)]
+    assert visits(stream, forbidden_dwell=2) == []

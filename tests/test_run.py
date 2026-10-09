@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 import pytest
 
-from pawwatch import run, store
+from pawwatch import alarm, run, store
 
 T0 = datetime(2026, 10, 9, 18, 30).timestamp()
 W, H, FPS = 160, 120, 10
@@ -103,3 +103,19 @@ def test_cli_processes_files_in_time_order(tmp_path, zones_file, monkeypatch):
 def test_cli_start_override_needs_a_single_file(tmp_path, zones_file):
     with pytest.raises(SystemExit):
         run.main(["a.mp4", "b.mp4", "--zones", str(zones_file), "--start", "2026-10-09T18:30"])
+
+
+def test_forbidden_zone_triggers_alarm_on_every_frame(tmp_path, monkeypatch):
+    zones_path = tmp_path / "cam_counter.json"
+    zones_path.write_text(json.dumps({"camera": "cam_counter", "zones": [
+        {"name": "food", "polygon": [[0, 0], [80, 0], [80, 120], [0, 120]]},
+        {"name": "forbidden", "polygon": [[80, 0], [160, 0], [160, 120], [80, 120]]},
+    ]}))
+    calls = []
+    monkeypatch.setattr(alarm, "trigger", lambda camera, zone, ts: calls.append((camera, zone, ts - T0)))
+    video = write_video(tmp_path / "counter_2026-10-09T1830.mp4", [(2, None), (2, RIGHT), (2, None), (2, LEFT)])
+    db = tmp_path / "events.db"
+    run.process([video], zones_path, StubDetector(), store.connect(db), fps=5)
+    # every sampled frame on the counter (2.0-3.8 s at 5 fps) rings, in video time; the 2 s jump beats the 1 s dwell
+    assert calls == [("cam_counter", "forbidden", pytest.approx(2 + i / 5)) for i in range(10)]
+    assert rows(db) == [("cam_counter", "forbidden", 2.0, pytest.approx(1.8), False)]
