@@ -119,3 +119,34 @@ def test_forbidden_zone_triggers_alarm_on_every_frame(tmp_path, monkeypatch):
     # every sampled frame on the counter (2.0-3.8 s at 5 fps) rings, in video time; the 2 s jump beats the 1 s dwell
     assert calls == [("cam_counter", "forbidden", pytest.approx(2 + i / 5)) for i in range(10)]
     assert rows(db) == [("cam_counter", "forbidden", 2.0, pytest.approx(1.8), False)]
+
+
+class FakeWindow:
+    """Stands in for overlay.Window: records what it was shown, quits after `frames` frames if given."""
+
+    def __init__(self, frames=None):
+        self.frames, self.shown, self.closed = frames, [], False
+
+    def show(self, img, offset):
+        self.shown.append(offset)
+        return self.frames is None or len(self.shown) < self.frames
+
+    def close(self):
+        self.closed = True
+
+
+def test_windowed_and_headless_runs_store_the_same_rows(tmp_path, zones_file):
+    video = write_video(tmp_path / "food_2026-10-09T1830.mp4", [(8, LEFT), (4, None), (7, RIGHT)])
+    run.process([video], zones_file, StubDetector(), store.connect(tmp_path / "headless.db"), fps=5)
+    window = FakeWindow()
+    run.process([video], zones_file, StubDetector(), store.connect(tmp_path / "shown.db"), fps=5, window=window)
+    assert rows(tmp_path / "shown.db") == rows(tmp_path / "headless.db") != []
+    assert len(window.shown) == 19 * 5 and window.closed
+
+
+def test_quitting_the_window_still_stores_the_open_visit(tmp_path, zones_file):
+    video = write_video(tmp_path / "food_2026-10-09T1830.mp4", [(20, LEFT)])
+    window = FakeWindow(frames=40)  # q pressed at 7.8 s, mid-visit
+    run.process([video], zones_file, StubDetector(), store.connect(tmp_path / "events.db"), fps=5, window=window)
+    assert rows(tmp_path / "events.db") == [("cam_food", "food", 0.0, pytest.approx(7.8), False)]
+    assert window.closed
