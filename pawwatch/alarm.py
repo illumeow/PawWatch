@@ -48,16 +48,9 @@ def _play_sound():
     custom = os.environ.get("PAWWATCH_ALARM_SOUND")
     system = platform.system()
     try:
-        if system == "Darwin":
+        if system == "Darwin":  # development laptops
             subprocess.Popen(["afplay", custom or "/System/Library/Sounds/Sosumi.aiff"])
-        elif system == "Windows":
-            import winsound
-
-            if custom:
-                winsound.PlaySound(custom, winsound.SND_FILENAME | winsound.SND_ASYNC)
-            else:
-                winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS | winsound.SND_ASYNC)
-        else:
+        else:  # Linux host
             subprocess.Popen(["paplay", custom or "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"])
     except Exception as e:  # noqa: BLE001 — a missing player must never stop the pipeline
         print(f"[alarm] sound failed ({e}); ringing the terminal bell", flush=True)
