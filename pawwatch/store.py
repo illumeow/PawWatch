@@ -1,0 +1,84 @@
+"""Event storage. SHARED CONTRACT between A (writes) and B (reads): change only with a heads-up.
+
+Only finished visits are stored: no frames, ever. Timestamps are unix seconds derived from
+video time (recording start + frame offset), not wall clock at processing time.
+"""
+import sqlite3
+from dataclasses import dataclass
+from datetime import date, datetime, time, timedelta
+from pathlib import Path
+
+DEFAULT_DB = Path("data/pawwatch.db")
+ZONES = ("food", "water", "litter", "forbidden")
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS events (
+  id         INTEGER PRIMARY KEY,
+  camera     TEXT NOT NULL,
+  zone       TEXT NOT NULL,
+  start_ts   REAL NOT NULL,
+  end_ts     REAL NOT NULL,
+  duration_s REAL NOT NULL,
+  simulated  INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS events_start ON events (start_ts);
+"""
+
+
+@dataclass(frozen=True)
+class Event:
+    camera: str
+    zone: str
+    start_ts: float
+    end_ts: float
+    duration_s: float
+    simulated: bool
+
+
+def connect(path=DEFAULT_DB):
+    """Open (and create if needed) the events database."""
+    path = Path(path)
+    if str(path) != ":memory:":
+        path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(path)
+    conn.executescript(SCHEMA)
+    return conn
+
+
+def insert_event(conn, camera, zone, start_ts, end_ts, simulated=False):
+    """Store one finished visit. Returns its row id."""
+    if zone not in ZONES:
+        raise ValueError(f"unknown zone {zone!r}, expected one of {ZONES}")
+    if end_ts < start_ts:
+        raise ValueError("end_ts is before start_ts")
+    cur = conn.execute(
+        "INSERT INTO events (camera, zone, start_ts, end_ts, duration_s, simulated) VALUES (?, ?, ?, ?, ?, ?)",
+        (camera, zone, start_ts, end_ts, end_ts - start_ts, int(simulated)),
+    )
+    conn.commit()
+    return cur.lastrowid
+
+
+def events_between(conn, start_ts, end_ts):
+    """Visits that started in [start_ts, end_ts), oldest first."""
+    rows = conn.execute(
+        "SELECT camera, zone, start_ts, end_ts, duration_s, simulated FROM events"
+        " WHERE start_ts >= ? AND start_ts < ? ORDER BY start_ts",
+        (start_ts, end_ts),
+    ).fetchall()
+    return [Event(c, z, s, e, d, bool(sim)) for c, z, s, e, d, sim in rows]
+
+
+def daily_counts(conn, days, today=None):
+    """Visit counts per local day and zone for the last `days` days, today included.
+
+    Returns {date: {zone: count}}, oldest day first, every day and zone present (zero-filled).
+    """
+    today = today or date.today()
+    first = today - timedelta(days=days - 1)
+    counts = {first + timedelta(days=i): dict.fromkeys(ZONES, 0) for i in range(days)}
+    start = datetime.combine(first, time()).timestamp()
+    end = datetime.combine(today + timedelta(days=1), time()).timestamp()
+    for ev in events_between(conn, start, end):
+        counts[datetime.fromtimestamp(ev.start_ts).date()][ev.zone] += 1
+    return counts
