@@ -6,7 +6,7 @@ Three people deliver PawWatch by 2026-10-14. Two build the code in parallel, spl
 Half A (vision) writes events from real cat video; half B (output) reads them into the dashboard, anomaly alerts and daily report.
 C owns the slides, research and the architecture diagram.
 
-## Status and next steps (updated 2026-10-09)
+## Status and next steps (updated 2026-10-10)
 
 We're finishing in **3 days (Fri 10/9 to Sun 10/11)**, with 10/12 to 10/14 as buffer. See Schedule below.
 
