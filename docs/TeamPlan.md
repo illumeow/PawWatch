@@ -25,7 +25,7 @@ Two real clips of our cat (Tangerine) are tested end to end; the footage itself 
 
 | Clip | Zones file | Result |
 | --- | --- | --- |
-| `TangerineEat.mp4`, 13 min, starts 2026-10-09 21:48:22; cat only in the last ~50 s | `config/zones/cam_food2.json` | 1 food visit, 22:00:40, 30 s |
+| `TangerineEatCut.mp4`, 69 s, starts 2026-10-09 22:00:22 (last 69 s of the 13-min `TangerineEat.mp4`) | `config/zones/cam_food2.json` | 1 food visit, 22:00:41, 31 s |
 | `TangerineJumpOntoBed.MOV`, 69 s, starts 22:22:20 | `config/zones/cam_bed.json` (mattress = forbidden) | Alarm rings; 4 short forbidden visits (petting hides the cat, splitting the stay) |
 
 The bed clip replaces the staged counter jump. The eat clip is from a different camera than the overnight one, hence `cam_food2`.
@@ -33,7 +33,7 @@ The bed clip replaces the staged counter jump. The eat clip is from a different 
 To run them (the database flag keeps demo rows out of the default database):
 
 ```bash
-uv run python -m pawwatch.run data/videos/TangerineEat.mp4 --zones config/zones/cam_food2.json --start 2026-10-09T21:48:22 --fps 5 --show --db data/demo.db
+uv run python -m pawwatch.run data/videos/TangerineEatCut.mp4 --zones config/zones/cam_food2.json --start 2026-10-09T22:00:22 --fps 5 --show --db data/demo.db
 uv run python -m pawwatch.run data/videos/TangerineJumpOntoBed.MOV --zones config/zones/cam_bed.json --start 2026-10-09T22:22:20 --fps 5 --show --db data/demo.db
 ```
 
