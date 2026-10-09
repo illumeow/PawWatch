@@ -19,16 +19,31 @@ uv run python scripts/seed_fake.py --with-today
 uv run streamlit run dashboard/app.py
 ```
 
+**Half A's pipeline is done on `develop`:** `run.py` writes real visits to SQLite, rings the alarm in forbidden zones and,
+with `--show`, draws the detection window (boxes, zones, counts, laptop caption). `scripts/draw_zones.py` makes zones files.
+Two real clips of our cat (Tangerine) are tested end to end; the footage itself is in the shared Drive, not the repo:
+
+| Clip | Zones file | Result |
+| --- | --- | --- |
+| `TangerineEat.mp4`, 13 min, starts 2026-10-09 21:48:22; cat only in the last ~50 s | `config/zones/cam_food2.json` | 1 food visit, 22:00:40, 30 s |
+| `TangerineJumpOntoBed.MOV`, 69 s, starts 22:22:20 | `config/zones/cam_bed.json` (mattress = forbidden) | Alarm rings; 4 short forbidden visits (petting hides the cat, splitting the stay) |
+
+The bed clip replaces the staged counter jump. The eat clip is from a different camera than the overnight one, hence `cam_food2`.
+
+To run them (the database flag keeps demo rows out of the default database):
+
+```bash
+uv run python -m pawwatch.run data/videos/TangerineEat.mp4 --zones config/zones/cam_food2.json --start 2026-10-09T21:48:22 --fps 5 --show --db data/demo.db
+uv run python -m pawwatch.run data/videos/TangerineJumpOntoBed.MOV --zones config/zones/cam_bed.json --start 2026-10-09T22:22:20 --fps 5 --show --db data/demo.db
+```
+
 **@meander (A):**
-- Read PR #1's description: it touched two shared contracts. `store.delete_simulated()` is new (additive, table unchanged), and
-  `alarm.trigger(camera, zone, ts)` is implemented with a 30 s cooldown per camera, so call it on every frame the cat
-  is in a forbidden zone. Set `PAWWATCH_MUTE=1` for bulk runs.
-- Day 1: cameras up, 1-minute test (`uv run python scripts/check_clip.py <clip>`), record overnight, stage a counter jump.
-- Day 2: zones files, visit logic, `run.py` writing real events by the evening. Use the GPU if there is one
-  (`device="cuda"`; `"mps"` on Macs) and 1 frame per second for the overnight footage.
-- Day 3 morning: screen captures of detection and the airplane-mode shot.
-- Check the alarm sound on Fedora once:
-  `uv run python -c "import time; from pawwatch import alarm; alarm.trigger('cam_counter','forbidden',time.time()); time.sleep(1)"`
+- Tonight: fix the overnight cameras, `check_clip.py` and `draw_zones.py` on a short test clip from each, then record overnight.
+  Name files `<zone>_YYYY-MM-DDTHHMM.mp4` with the start time.
+- Day 2: time one hour of footage on the Fedora laptop (CPU only, no NVIDIA GPU), then run all overnight footage at
+  `--fps 1` with `PAWWATCH_MUTE=1`; real events in the database by the evening.
+- Day 2 evening: screen recordings of the detection window on the eat and bed clips to C and B.
+- Day 3 morning: the airplane-mode shot.
 
 **@bbwinner (C):** slides live in the repo under `slides/`, on branch `feat/slides` off `develop`.
 - Day 1: research, slide outline, business model page (35% of the score).
