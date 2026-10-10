@@ -1,0 +1,244 @@
+# Sources for the slides. Keys match the IDs in docs/PawWatchResearch.md.
+# Cite with @R4 (or #cite(<K-a>)); only cited entries appear in the reference list,
+# numbered in order of first use. "Surname et al." stands in for author lists we didn't record.
+
+# Veterinary research and guidelines
+
+R1:
+  type: article
+  title: "Facial expressions of pain in cats: the development and validation of a Feline Grimace Scale"
+  author: "Evangelista et al., M. C."
+  date: 2019
+  parent:
+    type: periodical
+    title: Scientific Reports
+  url: https://ucalgary.ca/news/cats-faces-reveal-their-hidden-pain
+
+R2:
+  type: web
+  title: Recognizing Signs of Illness in Your Cat
+  author: VCA Animal Hospitals
+  url: https://vcahospitals.com/resources/conditions-cat/recognizing-signs-of-illness-in-your-cat
+
+R4:
+  type: article
+  title: ISFM Consensus Guidelines on the Diagnosis and Management of Feline Chronic Kidney Disease
+  author: "Sparkes et al., A. H."
+  date: 2016
+  parent:
+    type: periodical
+    title: Journal of Feline Medicine and Surgery
+  url: https://journals.sagepub.com/doi/10.1177/1098612x16631234
+
+R5:
+  type: article
+  title: "Chronic kidney disease in cats attending primary-care practice in the UK: a VetCompass study"
+  author: ["Conroy, M.", "Brodbelt, D. C.", "O'Neill, D.", "Chang, Y.", "Elliott, J."]
+  date: 2019
+  parent:
+    type: periodical
+    title: Veterinary Record
+  url: https://rvc-repository.worktribe.com/OutputFile/1382711
+
+R6:
+  type: article
+  title: Feline hyperthyroidism reported in primary-care veterinary practices in England
+  author: "Stephens et al., M. J."
+  date: 2014
+  parent:
+    type: periodical
+    title: Veterinary Record
+  url: https://rvc-repository.worktribe.com/output/1404762
+
+R7:
+  type: article
+  title: Evaluation of body weight, body condition, and muscle condition in cats with hyperthyroidism
+  author: ["Peterson, M. E.", "Castellano, C. A.", "Rishniw, M."]
+  date: 2016
+  parent:
+    type: periodical
+    title: Journal of Veterinary Internal Medicine
+    volume: 30
+    issue: 6
+  page-range: 1780-1789
+  url: https://pmc.ncbi.nlm.nih.gov/articles/PMC5115195/
+
+R8:
+  type: article
+  title: Epidemiology of diabetes mellitus among 193,435 cats attending primary-care veterinary practices in England
+  author: "O'Neill et al., D. G."
+  date: 2016
+  parent:
+    type: periodical
+    title: Journal of Veterinary Internal Medicine
+  url: https://www.rvc.ac.uk/vetcompass/news/epidemiology-of-feline-diabetes-mellitus
+
+R9:
+  type: web
+  title: "Diabetes in cats: FAQ"
+  author: Merck Animal Health
+  url: https://www.merck-animal-health-usa.com/mkt/pet-diabetes-month/cats-faq-2
+
+R10:
+  type: web
+  title: Feline Lower Urinary Tract Disease
+  author: Cornell Feline Health Center
+  url: https://vet.cornell.edu/departments-centers-and-institutes/cornell-feline-health-center/health-information/feline-health-topics/feline-lower-urinary-tract-disease
+
+R11:
+  type: article
+  title: Enhancing Detection of Chronic Kidney Disease Through Smart Litter Box Monitoring
+  author: "Langenfield-McCoy et al."
+  date: 2026
+  parent:
+    type: periodical
+    title: Animals
+    volume: 16
+    issue: 9
+  page-range: "1319"
+  url: https://www.mdpi.com/2076-2615/16/9/1319
+
+# Products, prices, privacy
+
+C1:
+  type: web
+  title: Furbo 360° Cat Camera
+  author: Furbo
+  url:
+    value: https://furbo.com/us/products/furbo-360-cat-camera
+    date: 2026-10-10
+
+C2:
+  type: web
+  title: How much does a Furbo subscription cost?
+  author: ThePricer
+  url: https://www.thepricer.org/how-much-does-furbo-subscription-cost/
+
+C3:
+  type: web
+  title: What is Petcube Care membership
+  author: Petcube
+  url: https://petcube.com/support/article/petcube-care-membership/
+
+C4:
+  type: web
+  title: Petivity product list
+  author: Petivity (Purina)
+  url: https://www.petivity.com/llms.txt
+
+C5:
+  type: web
+  title: Litter-Robot 4 Insights Bundle
+  author: Whisker
+  url: https://www.whisker.com/litter-robot-4-insights-bundle
+
+C6:
+  type: web
+  title: Purobot Ultra product introduction
+  author: PETKIT
+  url: https://ipet.ch/media/file_attachments/attachment/PETKIT_PUROBOT_ULTRA_-_Product_Introduction.pdf
+
+C7:
+  type: web
+  title: Felaqua Connect
+  author: Sure Petcare
+  url: https://www.surepetcare.com/en-us/felaqua-connect
+
+C8:
+  type: web
+  title: How To (Responsibly) Spy On Your Pets
+  author: "Ehrenkranz, M."
+  date: 2021
+  parent:
+    type: web
+    title: Mozilla Foundation
+  url: https://www.mozillafoundation.org/en/blog/how-responsibly-spy-your-pets
+
+C11:
+  type: web
+  title: Petlibro's new AI-powered feeder is a game changer for multi-cat homes
+  author: TechCrunch
+  date: 2026-10-06
+  url: https://techcrunch.com/2026/10/06/petlibros-new-ai-powered-feeder-is-a-game-changer-for-multi-cat-homes/
+
+C12:
+  type: web
+  title: ASUS UGen300 USB AI module (Hailo-10H, 8 GB)
+  author: SHI
+  url: https://texas.gs.shi.com/product/52158156/ASUS-UGEN300-USB-AI-MODULE-HAILO-10H-8-GB-LPDDR4-USB-3.1-GEN2
+
+C13:
+  type: web
+  title: ASUS UGen300 press release (NT$6,380, 2.5 W, 40 TOPS)
+  author: iThome
+  url: https://www.ithome.com.tw/pr/175676
+
+C14:
+  type: web
+  title: Raspberry Pi 5 now costs up to $205 due to RAM crisis
+  author: Notebookcheck
+  date: 2026-02-02
+  url: https://www.notebookcheck.net/Raspberry-Pi-5-now-costs-up-to-205-due-to-RAM-crisis.1218213.0.html
+
+C15:
+  type: web
+  title: TP-Link Tapo C110 indoor Wi-Fi camera, 4-pack deal
+  author: Slickdeals
+  date: 2024
+  url: https://slickdeals.net/f/17777847-4-pack-tp-link-tapo-c110-3mp-indoor-wi-fi-security-camera-with-night-vision-50-free-s-h-49-99
+
+P1:
+  type: report
+  title: "Feline House-Soiling: Useful Information for Cat Owners"
+  author: AAFP and ISFM
+  date: 2014
+  url: https://catvets.com/wp-content/uploads/2024/01/HouseSoiling-B&W.pdf
+
+P2:
+  type: web
+  title: Acclimate your cat to Litter-Robot
+  author: Whisker
+  url: https://www.whisker.com/acclimate-your-cat
+
+P3:
+  type: web
+  title: Ring agrees to pay $5.6 million after cameras were used to spy on customers
+  author: Malwarebytes
+  date: 2024-04-25
+  url: https://www.malwarebytes.com/nl/blog/news/2024/04/ring-agrees-to-pay-5-6-million-after-cameras-were-used-to-spy-on-customers
+
+# Market data
+
+K-a:
+  type: web
+  title: Ministry of Agriculture 2025 household dog and cat survey
+  author: PTS News
+  date: 2026-04-20
+  url: https://news.pts.org.tw/article/804498
+
+K-c:
+  type: web
+  title: "Report: Cat ownership grows to 53 million U.S. households (APPA 2026 Cat Report)"
+  author: PetfoodIndustry
+  date: 2026-09-15
+  url: https://www.petfoodindustry.com/pet-food-market/market-trends-and-reports/news/15834866/report-cat-ownership-grows-to-53-million-us-households
+
+K-d:
+  type: web
+  title: Japan's ageing cats feeling paw-sitive effects of AI healthcare
+  author: Asia News Network
+  date: 2024-06-04
+  url: https://asianews.network/japans-ageing-cats-feeling-paw-sitive-effects-of-ai-healthcare
+
+K-e:
+  type: web
+  title: Japanese pet market
+  author: GlobalPETS
+  date: 2018
+  url: https://globalpetindustry.com/article/japanese-pet-market/
+
+K-f:
+  type: report
+  title: Pet Tech Market report
+  author: Global Market Insights
+  url: https://gminsights.com/industry-analysis/pet-tech-market

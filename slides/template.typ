@@ -47,9 +47,9 @@
   pagebreak(weak: true)
 }
 
-// Shaded box for definitions / takeaways
-#let callout(title: none, body) = context {
-  let c = accent.get()
+// Shaded box for definitions / takeaways; color: red.darken(20%) for warnings
+#let callout(title: none, color: none, body) = context {
+  let c = if color == none { accent.get() } else { color }
   block(
     width: 100%,
     inset: (x: 0.8em, y: 0.6em),
@@ -147,7 +147,8 @@
 
   set text(
     font: (
-      (name: "Liberation Serif", covers: "latin-in-cjk"),
+      // Latin font for everything up to arrows/math, incl. curly quotes; CJK font for the rest
+      (name: "Liberation Serif", covers: regex("[\u{0000}-\u{2FFF}]")),
       "Noto Serif CJK TC",
     ),
     size: 12pt,
