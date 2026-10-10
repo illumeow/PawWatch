@@ -12,8 +12,8 @@ the per-frame logic is the same either way, so windowed and headless runs store 
 Each file also gets a recordings row (camera, its zones, start to last processed frame), so the dashboard compares
 only the hours that were actually filmed.
 Frames are only read and displayed, never written anywhere.
-Timestamps are video time: the recording start from the filename (<zone>_YYYY-MM-DDTHHMM.mp4) plus the
-frame offset. Files are processed in time order with one tracker, so a visit spanning two files is one visit.
+Timestamps are video time: the recording start from the filename plus the frame offset. Two name formats:
+<zone>_YYYY-MM-DDTHHMM.mp4 (ours) and YYYYMMDD-HHMMSS-<microseconds>-<n>.avi (the overnight camera's segments). Files are processed in time order with one tracker, so a visit spanning two files is one visit.
 """
 import argparse
 import re
@@ -26,17 +26,22 @@ import cv2
 from pawwatch import alarm, events, overlay, store, zones
 from pawwatch.detector import make_detector
 
-FILENAME_START = re.compile(r"_(\d{4}-\d{2}-\d{2}T\d{4})$")
+FILENAME_STARTS = [  # (pattern on the file stem, strptime format of its first group)
+    (re.compile(r"_(\d{4}-\d{2}-\d{2}T\d{4})$"), "%Y-%m-%dT%H%M"),
+    (re.compile(r"^(\d{8}-\d{6})-\d+-\d+$"), "%Y%m%d-%H%M%S"),
+]
 
 
 def parse_start(path, override=None):
     """Recording start of a video file as unix seconds (local time), from its name or an ISO override."""
     if override:
         return datetime.fromisoformat(override).timestamp()
-    m = FILENAME_START.search(Path(path).stem)
-    if not m:
-        raise ValueError(f"{path}: name doesn't end in _YYYY-MM-DDTHHMM; pass --start to give the recording start")
-    return datetime.strptime(m.group(1), "%Y-%m-%dT%H%M").timestamp()
+    stem = Path(path).stem
+    for pattern, fmt in FILENAME_STARTS:
+        if m := pattern.search(stem):
+            return datetime.strptime(m.group(1), fmt).timestamp()
+    raise ValueError(f"{path}: name doesn't end in _YYYY-MM-DDTHHMM or look like YYYYMMDD-HHMMSS-...;"
+                     " pass --start to give the recording start")
 
 
 def cat_zone(detections, zone_list):

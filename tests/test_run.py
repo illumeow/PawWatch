@@ -16,6 +16,11 @@ def test_parse_start_from_filename():
     assert run.parse_start("data/videos/food_2026-10-09T1830.mp4") == T0
 
 
+def test_parse_start_from_camera_filename():
+    # the overnight camera names segments YYYYMMDD-HHMMSS-<microseconds>-<n>.avi; the seconds are kept
+    assert run.parse_start("data/videos/20261009/20261009-183005-077236-0.avi") == T0 + 5
+
+
 def test_parse_start_override():
     assert run.parse_start("clip.mp4", override="2026-10-09T18:30") == T0
     assert run.parse_start("food_2026-10-01T0000.mp4", override="2026-10-09T18:30") == T0
