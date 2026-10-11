@@ -1,7 +1,9 @@
 """Event storage. SHARED CONTRACT between A (writes) and B (reads): change only with a heads-up.
 
-Only finished visits are stored: no frames, ever. Timestamps are unix seconds derived from
-video time (recording start + frame offset), not wall clock at processing time.
+Only visits are stored: no frames, ever. A visit is written as soon as it qualifies (the cat stayed the minimum
+dwell time) and its end is moved forward while the cat stays, so the dashboard follows a live stream; a visit that
+never qualifies is never written. Timestamps are unix seconds derived from video time (recording start + frame
+offset), not wall clock at processing time.
 Each processed video file also gets a recordings row (which camera and zones were watched, and when), so a day
 with a few hours of footage is compared only over those hours. Days without recordings count as watched all day.
 """
@@ -59,7 +61,7 @@ def connect(path: str | Path = DEFAULT_DB) -> sqlite3.Connection:
 def insert_event(
     conn: sqlite3.Connection, camera: str, zone: str, start_ts: float, end_ts: float, simulated: bool = False
 ) -> int:
-    """Store one finished visit. Returns its row id."""
+    """Store one visit (in progress or finished). Returns its row id for extend_event."""
     if zone not in ZONES:
         raise ValueError(f"unknown zone {zone!r}, expected one of {ZONES}")
     if end_ts < start_ts:
@@ -71,6 +73,15 @@ def insert_event(
     conn.commit()
     assert cur.lastrowid is not None
     return cur.lastrowid
+
+
+def extend_event(conn: sqlite3.Connection, event_id: int, end_ts: float) -> None:
+    """Move a visit's end forward while the cat is still there."""
+    conn.execute(
+        "UPDATE events SET end_ts = MAX(end_ts, ?), duration_s = MAX(end_ts, ?) - start_ts WHERE id = ?",
+        (end_ts, end_ts, event_id),
+    )
+    conn.commit()
 
 
 @dataclass(frozen=True)
