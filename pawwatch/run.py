@@ -5,7 +5,7 @@ Usage:
     uv run python -m pawwatch.run data/videos/food_*.mp4 --zones config/zones/cam_food.json --fps 1 --device cuda
     uv run python -m pawwatch.run data/videos/food_2026-10-09T1830.mp4 --zones config/zones/cam_food.json --fps 5 --show
 
-Per sampled frame: detector.infer -> highest-score box center -> zones.zone_at -> events.VisitTracker
+Per sampled frame: detector.infer -> highest-score box -> zones.zone_for_box (most overlap) -> events.VisitTracker
 -> store.insert_event for each finished visit, and alarm.trigger on every frame the cat is in a forbidden zone
 (the alarm applies its own cooldown). With --show, each frame is also drawn in the detection window (pawwatch.overlay);
 the per-frame logic is the same either way, so windowed and headless runs store the same rows.
@@ -45,12 +45,11 @@ def parse_start(path, override=None):
 
 
 def cat_zone(detections, zone_list):
-    """Zone of the highest-score cat box's center, or None (single-cat MVP)."""
+    """Zone the highest-score cat box overlaps most, or None (single-cat MVP)."""
     cats = [d for d in detections if d[0] == "cat"]
     if not cats:
         return None
-    _, _, (x1, y1, x2, y2) = max(cats, key=lambda d: d[1])
-    return zones.zone_at(((x1 + x2) / 2, (y1 + y2) / 2), zone_list)
+    return zones.zone_for_box(max(cats, key=lambda d: d[1])[2], zone_list)
 
 
 def sampled_frames(path, fps):

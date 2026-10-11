@@ -9,7 +9,7 @@ from pawwatch import alarm, run, store
 
 T0 = datetime(2026, 10, 9, 18, 30).timestamp()
 W, H, FPS = 160, 120, 10
-LEFT, RIGHT = (40, 60), (120, 60)  # cat centers inside the food (left) and water (right) zones
+LEFT, RIGHT = (40, 60), (120, 60)  # cat centers; the 30 px cat sits inside the food (left) or water (right) zone
 
 
 def test_parse_start_from_filename():
@@ -31,7 +31,7 @@ def test_parse_start_rejects_unnamed_file():
         run.parse_start("IMG_0042.mp4")
 
 
-def test_cat_zone_uses_highest_score_box_center():
+def test_cat_zone_uses_the_highest_score_box():
     zs = [("food", [(0, 0), (80, 0), (80, 120), (0, 120)]), ("water", [(80, 0), (160, 0), (160, 120), (80, 120)])]
     dets = [("cat", 0.5, (10, 10, 50, 50)), ("cat", 0.9, (100, 10, 140, 50))]
     assert run.cat_zone(dets, zs) == "water"

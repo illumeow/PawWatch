@@ -11,8 +11,8 @@ In the window:
     s             save and quit (asks in the terminal before overwriting an existing file)
     q or Esc      quit without saving
 
-Zones already in the file are loaded, drawn and kept unless undone. Draw the food and water polygons around where
-the cat's body center is while it eats or drinks, not just the bowl. Only the JSON is written, never a frame.
+Zones already in the file are loaded, drawn and kept unless undone. Draw each polygon tight around the thing itself
+(bowl, litter box, bed): the cat is in the zone its detection box overlaps most. Only the JSON is written, never a frame.
 """
 import argparse
 from pathlib import Path
