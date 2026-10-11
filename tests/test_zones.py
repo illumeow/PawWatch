@@ -5,8 +5,8 @@ import pytest
 
 from pawwatch import zones
 
-SQUARE = [[0, 0], [10, 0], [10, 10], [0, 10]]
-TRIANGLE = [[20, 0], [30, 0], [20, 10]]
+SQUARE = [(0, 0), (10, 0), (10, 10), (0, 10)]  # (x, y) tuples, as load_zones returns them
+TRIANGLE = [(20, 0), (30, 0), (20, 10)]
 
 
 def test_area_and_clip():

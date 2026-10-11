@@ -42,7 +42,7 @@ def test_cat_zone_uses_the_highest_score_box():
 
 def write_video(path, script):
     """script: [(seconds, cat center or None)]; the cat is a white square on black."""
-    out = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"mp4v"), FPS, (W, H))
+    out = cv2.VideoWriter(str(path), cv2.VideoWriter.fourcc(*"mp4v"), FPS, (W, H))
     assert out.isOpened()
     for seconds, center in script:
         for _ in range(seconds * FPS):

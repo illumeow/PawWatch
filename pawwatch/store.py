@@ -7,12 +7,13 @@ with a few hours of footage is compared only over those hours. Days without reco
 """
 
 import sqlite3
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
 DEFAULT_DB = Path("data/pawwatch.db")
-ZONES = ("food", "water", "litter", "forbidden")
+ZONES: tuple[str, ...] = ("food", "water", "litter", "forbidden")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS events (
@@ -45,8 +46,8 @@ class Event:
     simulated: bool
 
 
-def connect(path=DEFAULT_DB):
-    """Open (and create if needed) the events database."""
+def connect(path: str | Path = DEFAULT_DB) -> sqlite3.Connection:
+    """Open (and create if needed) the events database. ":memory:" gives a throwaway one."""
     path = Path(path)
     if str(path) != ":memory:":
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -55,7 +56,9 @@ def connect(path=DEFAULT_DB):
     return conn
 
 
-def insert_event(conn, camera, zone, start_ts, end_ts, simulated=False):
+def insert_event(
+    conn: sqlite3.Connection, camera: str, zone: str, start_ts: float, end_ts: float, simulated: bool = False
+) -> int:
     """Store one finished visit. Returns its row id."""
     if zone not in ZONES:
         raise ValueError(f"unknown zone {zone!r}, expected one of {ZONES}")
@@ -66,19 +69,23 @@ def insert_event(conn, camera, zone, start_ts, end_ts, simulated=False):
         (camera, zone, start_ts, end_ts, end_ts - start_ts, int(simulated)),
     )
     conn.commit()
+    assert cur.lastrowid is not None
     return cur.lastrowid
 
 
 @dataclass(frozen=True)
 class Recording:
     camera: str
-    zones: tuple
+    zones: tuple[str, ...]
     start_ts: float
     end_ts: float
 
 
-def insert_recording(conn, camera, zones, start_ts, end_ts=None):
+def insert_recording(
+    conn: sqlite3.Connection, camera: str, zones: Iterable[str], start_ts: float, end_ts: float | None = None
+) -> int:
     """Start logging what a camera watched, from start_ts. Returns the row id for extend_recording."""
+    zones = list(zones)
     unknown = set(zones) - set(ZONES)
     if unknown:
         raise ValueError(f"unknown zones {sorted(unknown)}, expected some of {ZONES}")
@@ -87,16 +94,17 @@ def insert_recording(conn, camera, zones, start_ts, end_ts=None):
         (camera, ",".join(zones), start_ts, start_ts if end_ts is None else end_ts),
     )
     conn.commit()
+    assert cur.lastrowid is not None
     return cur.lastrowid
 
 
-def extend_recording(conn, rec_id, end_ts):
+def extend_recording(conn: sqlite3.Connection, rec_id: int, end_ts: float) -> None:
     """Move a recording's end forward as frames are processed."""
     conn.execute("UPDATE recordings SET end_ts = MAX(end_ts, ?) WHERE id = ?", (end_ts, rec_id))
     conn.commit()
 
 
-def recordings_between(conn, start_ts, end_ts):
+def recordings_between(conn: sqlite3.Connection, start_ts: float, end_ts: float) -> list[Recording]:
     """Recordings overlapping [start_ts, end_ts), oldest first."""
     rows = conn.execute(
         "SELECT camera, zones, start_ts, end_ts FROM recordings WHERE end_ts > ? AND start_ts < ? ORDER BY start_ts",
@@ -105,14 +113,14 @@ def recordings_between(conn, start_ts, end_ts):
     return [Recording(c, tuple(z.split(",")) if z else (), s, e) for c, z, s, e in rows]
 
 
-def delete_simulated(conn):
+def delete_simulated(conn: sqlite3.Connection) -> int:
     """Remove all seeded fake events. Returns how many were deleted."""
     cur = conn.execute("DELETE FROM events WHERE simulated = 1")
     conn.commit()
     return cur.rowcount
 
 
-def events_between(conn, start_ts, end_ts):
+def events_between(conn: sqlite3.Connection, start_ts: float, end_ts: float) -> list[Event]:
     """Visits that started in [start_ts, end_ts), oldest first."""
     rows = conn.execute(
         "SELECT camera, zone, start_ts, end_ts, duration_s, simulated FROM events"
@@ -122,7 +130,7 @@ def events_between(conn, start_ts, end_ts):
     return [Event(c, z, s, e, d, bool(sim)) for c, z, s, e, d, sim in rows]
 
 
-def daily_counts(conn, days, today=None):
+def daily_counts(conn: sqlite3.Connection, days: int, today: date | None = None) -> dict[date, dict[str, int]]:
     """Visit counts per local day and zone for the last `days` days, today included.
 
     Returns {date: {zone: count}}, oldest day first, every day and zone present (zero-filled).

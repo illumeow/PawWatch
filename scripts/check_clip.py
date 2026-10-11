@@ -14,7 +14,7 @@ from pawwatch.detector import make_detector
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     ap.add_argument("clip")
     ap.add_argument("--every", type=int, default=5, help="check every Nth frame")
     ap.add_argument("--conf", type=float, default=0.4)

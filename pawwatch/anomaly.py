@@ -10,8 +10,9 @@ with one meal is not "didn't drink all day". Days without recordings (simulated 
 Wording is up to the caller; it must suggest watching or seeing a vet, never a diagnosis.
 """
 
+import sqlite3
 from dataclasses import dataclass
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 
 from pawwatch import store
 
@@ -21,6 +22,8 @@ HIGH_RATIO = 2.0  # at least twice the usual...
 LOW_RATIO = 0.5  # ...or at most half of it
 MIN_GAP = 3  # and at least this many visits apart, so 1 vs 0 isn't an alert
 FULL_DAY = 86400.0
+
+Spans = list[tuple[float, float]]  # [(start, end)] in seconds into a day
 
 
 @dataclass(frozen=True)
@@ -32,17 +35,17 @@ class Anomaly:
     scope: str  # what was compared: "day" (all of it), "so_far" (today up to now) or "recorded" (some hours)
 
 
-def day_start(day):
+def day_start(day: date) -> float:
     return datetime.combine(day, time()).timestamp()
 
 
-def seconds_so_far(day, now):
+def seconds_so_far(day: date, now: datetime | None) -> float:
     """Seconds into `day` that count as "so far": the whole day once it's over."""
     elapsed = (now or datetime.now()).timestamp() - day_start(day)
     return min(max(elapsed, 0.0), FULL_DAY)
 
 
-def merge(spans):
+def merge(spans: Spans) -> Spans:
     """Sorted, non-overlapping version of [(start, end), ...]."""
     out = []
     for s, e in sorted(spans):
@@ -53,12 +56,12 @@ def merge(spans):
     return out
 
 
-def covers(outer, inner):
+def covers(outer: Spans, inner: Spans) -> bool:
     """True if every span in `inner` lies inside one span of `outer` (both merged)."""
     return all(any(os <= s and e <= oe for os, oe in outer) for s, e in inner)
 
 
-def watched(conn, day, now=None):
+def watched(conn: sqlite3.Connection, day: date, now: datetime | None = None) -> dict[str, Spans]:
     """{zone: [(start_s, end_s), ...]}: when each zone was on camera during `day`, in seconds into the day, up to now.
 
     A day without recordings counts as watched all day (so far) for every zone if it has visits (simulated history),
@@ -77,7 +80,7 @@ def watched(conn, day, now=None):
     return {zone: merge(s) for zone, s in spans.items()}
 
 
-def scope(spans, day, now=None):
+def scope(spans: Spans, day: date, now: datetime | None = None) -> str:
     """How a zone's watched spans read: "day", "so_far" (today up to now) or "recorded" (some hours)."""
     if spans == [(0.0, FULL_DAY)]:
         return "day"
@@ -86,7 +89,7 @@ def scope(spans, day, now=None):
     return "recorded"
 
 
-def counts(conn, day, spans):
+def counts(conn: sqlite3.Connection, day: date, spans: dict[str, Spans]) -> dict[str, int]:
     """Visits per zone on `day` that started inside that zone's spans ({zone: [(start_s, end_s), ...]})."""
     found = dict.fromkeys(store.ZONES, 0)
     start = day_start(day)
@@ -97,7 +100,9 @@ def counts(conn, day, spans):
     return found
 
 
-def expected_counts(conn, day, now=None, window=WINDOW_DAYS):
+def expected_counts(
+    conn: sqlite3.Connection, day: date, now: datetime | None = None, window: int = WINDOW_DAYS
+) -> tuple[dict[str, float], int]:
     """Average visits per zone over the previous `window` days, over the hours that zone was watched on `day`.
 
     A past day counts for a zone only if its cameras covered those hours. Returns ({zone: mean}, days_used):
@@ -120,7 +125,7 @@ def expected_counts(conn, day, now=None, window=WINDOW_DAYS):
     return expected, max(days.values())
 
 
-def find_anomalies(conn, day=None, now=None):
+def find_anomalies(conn: sqlite3.Connection, day: date | None = None, now: datetime | None = None) -> list[Anomaly]:
     """Health zones whose count over the watched hours of `day` differs a lot from the usual."""
     now = now or datetime.now()
     day = day or now.date()
