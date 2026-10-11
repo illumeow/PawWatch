@@ -1,0 +1,6 @@
+{
+  "camera": "cam_litter_box",
+  "zones": [
+    {"name": "litter", "polygon": [[560, 110], [1230, 110], [1230, 650], [560, 650]]}
+  ]
+}

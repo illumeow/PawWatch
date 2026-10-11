@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Data: footage, databases, debug frames. Never commit (privacy + size).
+data/
+*.db
+*.mp4
+*.mov
+
+# Model weights
+*.pt
+*.hef
+
+.DS_Store
