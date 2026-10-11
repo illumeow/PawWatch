@@ -1,7 +1,9 @@
 """Event storage. SHARED CONTRACT between A (writes) and B (reads): change only with a heads-up.
 
-Only finished visits are stored: no frames, ever. Timestamps are unix seconds derived from
-video time (recording start + frame offset), not wall clock at processing time.
+Only visits are stored: no frames, ever. A visit is written as soon as it qualifies (the cat stayed the minimum
+dwell time) and its end is moved forward while the cat stays, so the dashboard follows a live stream; a visit that
+never qualifies is never written. Timestamps are unix seconds derived from video time (recording start + frame
+offset), not wall clock at processing time.
 Each processed video file also gets a recordings row (which camera and zones were watched, and when), so a day
 with a few hours of footage is compared only over those hours. Days without recordings count as watched all day.
 """
@@ -31,7 +33,8 @@ CREATE TABLE IF NOT EXISTS recordings (
   camera   TEXT NOT NULL,
   zones    TEXT NOT NULL,  -- comma-separated zone names this camera watches
   start_ts REAL NOT NULL,
-  end_ts   REAL NOT NULL
+  end_ts   REAL NOT NULL,
+  simulated INTEGER NOT NULL DEFAULT 0  -- 1 = seeded with simulated history (may have outage gaps)
 );
 """
 
@@ -53,13 +56,16 @@ def connect(path: str | Path = DEFAULT_DB) -> sqlite3.Connection:
         path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(path)
     conn.executescript(SCHEMA)
+    if "simulated" not in [row[1] for row in conn.execute("PRAGMA table_info(recordings)")]:  # databases from 10/10
+        conn.execute("ALTER TABLE recordings ADD COLUMN simulated INTEGER NOT NULL DEFAULT 0")
+        conn.commit()
     return conn
 
 
 def insert_event(
     conn: sqlite3.Connection, camera: str, zone: str, start_ts: float, end_ts: float, simulated: bool = False
 ) -> int:
-    """Store one finished visit. Returns its row id."""
+    """Store one visit (in progress or finished). Returns its row id for extend_event."""
     if zone not in ZONES:
         raise ValueError(f"unknown zone {zone!r}, expected one of {ZONES}")
     if end_ts < start_ts:
@@ -73,6 +79,15 @@ def insert_event(
     return cur.lastrowid
 
 
+def extend_event(conn: sqlite3.Connection, event_id: int, end_ts: float) -> None:
+    """Move a visit's end forward while the cat is still there."""
+    conn.execute(
+        "UPDATE events SET end_ts = MAX(end_ts, ?), duration_s = MAX(end_ts, ?) - start_ts WHERE id = ?",
+        (end_ts, end_ts, event_id),
+    )
+    conn.commit()
+
+
 @dataclass(frozen=True)
 class Recording:
     camera: str
@@ -82,7 +97,12 @@ class Recording:
 
 
 def insert_recording(
-    conn: sqlite3.Connection, camera: str, zones: Iterable[str], start_ts: float, end_ts: float | None = None
+    conn: sqlite3.Connection,
+    camera: str,
+    zones: Iterable[str],
+    start_ts: float,
+    end_ts: float | None = None,
+    simulated: bool = False,
 ) -> int:
     """Start logging what a camera watched, from start_ts. Returns the row id for extend_recording."""
     zones = list(zones)
@@ -90,8 +110,8 @@ def insert_recording(
     if unknown:
         raise ValueError(f"unknown zones {sorted(unknown)}, expected some of {ZONES}")
     cur = conn.execute(
-        "INSERT INTO recordings (camera, zones, start_ts, end_ts) VALUES (?, ?, ?, ?)",
-        (camera, ",".join(zones), start_ts, start_ts if end_ts is None else end_ts),
+        "INSERT INTO recordings (camera, zones, start_ts, end_ts, simulated) VALUES (?, ?, ?, ?, ?)",
+        (camera, ",".join(zones), start_ts, start_ts if end_ts is None else end_ts, int(simulated)),
     )
     conn.commit()
     assert cur.lastrowid is not None
@@ -114,10 +134,12 @@ def recordings_between(conn: sqlite3.Connection, start_ts: float, end_ts: float)
 
 
 def delete_simulated(conn: sqlite3.Connection) -> int:
-    """Remove all seeded fake events. Returns how many were deleted."""
+    """Remove all seeded fake events and their recordings. Returns how many events were deleted."""
     cur = conn.execute("DELETE FROM events WHERE simulated = 1")
+    removed = cur.rowcount
+    conn.execute("DELETE FROM recordings WHERE simulated = 1")
     conn.commit()
-    return cur.rowcount
+    return removed
 
 
 def events_between(conn: sqlite3.Connection, start_ts: float, end_ts: float) -> list[Event]:

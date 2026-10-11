@@ -71,4 +71,4 @@ Record one file per part, so each lines up with its shot.
 ## Commands
 
 Every command for the recordings (detection window per clip, real-day and alert-day dashboards, live dashboard,
-zones) is in [Commands.md](Commands.md). Collapse the sidebar before recording the dashboard.
+zones) is in [Commands.md](Commands.md).

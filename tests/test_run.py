@@ -182,3 +182,32 @@ def test_each_file_logs_what_was_recorded(tmp_path, zones_file):
         ("cam_food", ("food", "water"), 0.0, 5.0),
         ("cam_food", ("food", "water"), 600.0, 603.0),
     ]
+
+
+class Peek:
+    """A window that reads the database on every frame, to see what a dashboard would see mid-clip."""
+
+    def __init__(self, db):
+        self.db, self.seen = db, []
+
+    def show(self, img, offset):
+        self.seen.append((offset, rows(self.db)))
+        return True
+
+    def close(self):
+        pass
+
+
+def test_visits_are_written_live_while_the_cat_stays(tmp_path, zones_file):
+    video = write_video(tmp_path / "food_2026-10-09T1830.mp4", [(20, LEFT)])
+    db = tmp_path / "events.db"
+    peek = Peek(db)
+    run.process([video], zones_file, StubDetector(), store.connect(db), fps=5, window=peek)
+
+    def at(seconds):
+        return min(peek.seen, key=lambda s: abs(s[0] - seconds))[1]
+
+    assert at(4.0) == []  # 4 s in: not a visit yet (5 s minimum)
+    assert at(5.0) == [("cam_food", "food", 0.0, pytest.approx(5.0), False)]  # qualifies: written
+    assert at(12.0) == [("cam_food", "food", 0.0, pytest.approx(12.0), False)]  # still growing
+    assert rows(db) == [("cam_food", "food", 0.0, pytest.approx(19.8), False)]  # one row in the end
