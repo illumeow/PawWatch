@@ -47,7 +47,9 @@ def _zone(path, name, points):
 
 def area(polygon):
     """Shoelace area of a simple polygon."""
-    return abs(sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(polygon, polygon[1:] + polygon[:1]))) / 2
+    return (
+        abs(sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(polygon, polygon[1:] + polygon[:1], strict=True))) / 2
+    )
 
 
 def clip_to_box(polygon, box):
@@ -61,9 +63,9 @@ def clip_to_box(polygon, box):
         lambda a, b: _at_y(a, b, y2),
     ]
     out = list(polygon)
-    for keep, cross in zip(inside, cut):
+    for keep, cross in zip(inside, cut, strict=True):
         pts, out = out, []
-        for a, b in zip(pts, pts[1:] + pts[:1]):
+        for a, b in zip(pts, pts[1:] + pts[:1], strict=True):
             if keep(a):
                 out.append(a)
             if keep(a) != keep(b):

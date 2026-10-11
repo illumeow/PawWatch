@@ -22,7 +22,7 @@ class UltralyticsDetector:
         return [
             (result.names[int(cls)], float(score), tuple(int(v) for v in box))
             for box, score, cls in zip(
-                result.boxes.xyxy.tolist(), result.boxes.conf.tolist(), result.boxes.cls.tolist()
+                result.boxes.xyxy.tolist(), result.boxes.conf.tolist(), result.boxes.cls.tolist(), strict=True
             )
         ]
 

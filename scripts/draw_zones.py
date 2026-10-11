@@ -12,7 +12,8 @@ In the window:
     q or Esc      quit without saving
 
 Zones already in the file are loaded, drawn and kept unless undone. Draw each polygon tight around the thing itself
-(bowl, litter box, bed): the cat is in the zone its detection box overlaps most. Only the JSON is written, never a frame.
+(bowl, litter box, bed): the cat is in the zone its detection box overlaps most.
+Only the JSON is written, never a frame.
 """
 
 import argparse

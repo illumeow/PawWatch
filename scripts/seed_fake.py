@@ -2,7 +2,7 @@
 
 Run: uv run python scripts/seed_fake.py                 # 7 days before today
      uv run python scripts/seed_fake.py --end 2026-10-10   # 7 days before the day the footage was recorded
-     uv run python scripts/seed_fake.py --with-today       # also fake "today", with extra litter visits, for dashboard work
+     uv run python scripts/seed_fake.py --with-today       # also fake "today", with extra litter visits
 Re-running replaces earlier simulated events. Days that already have real events are never overwritten.
 """
 

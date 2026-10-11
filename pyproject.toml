@@ -38,4 +38,6 @@ select = [
     "C4",      # comprehensions
     "PTH",     # pathlib over os.path
     "RUF",     # ruff's own checks
+    "BLE",     # blind `except Exception`: allowed only with a noqa that says why
 ]
+allowed-confusables = ["–"]  # en dash in time ranges like 22:00–22:02

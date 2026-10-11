@@ -13,7 +13,8 @@ Each file also gets a recordings row (camera, its zones, start to last processed
 only the hours that were actually filmed.
 Frames are only read and displayed, never written anywhere.
 Timestamps are video time: the recording start from the filename plus the frame offset. Two name formats:
-<zone>_YYYY-MM-DDTHHMM.mp4 (ours) and YYYYMMDD-HHMMSS-<microseconds>-<n>.avi (the overnight camera's segments). Files are processed in time order with one tracker, so a visit spanning two files is one visit.
+<zone>_YYYY-MM-DDTHHMM.mp4 (ours) and YYYYMMDD-HHMMSS-<microseconds>-<n>.avi (the overnight camera's segments).
+Files are processed in time order with one tracker, so a visit spanning two files is one visit.
 """
 
 import argparse

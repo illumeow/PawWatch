@@ -222,7 +222,7 @@ def body():
     spans = anomaly.watched(conn, day, now)
     counts = anomaly.counts(conn, day, spans)
     expected, _ = anomaly.expected_counts(conn, day, now)
-    for col, z in zip(st.columns(4), ZONES):
+    for col, z in zip(st.columns(4), ZONES, strict=True):
         if not spans[z]:
             col.metric(LABELS[z], "–", delta="not on camera", delta_color="off", delta_arrow="off", border=True)
             continue
@@ -251,7 +251,7 @@ def body():
     rows = week_rows(conn, day)
     ymax = max(max(r["count"] for r in rows[z]) for z in ZONES) + 1
     cols = st.columns(2) + st.columns(2)  # 2x2, so every day label fits
-    for col, z, color in zip(cols, ZONES, colors()):
+    for col, z, color in zip(cols, ZONES, colors(), strict=True):
         col.altair_chart(trend_chart(rows[z], z, color, ymax), width="stretch")
     if any(r["Data"] == "simulated" for r in rows[ZONES[0]]):
         st.caption("\\* Faded days use **simulated** data, to give the anomaly check a baseline.")
