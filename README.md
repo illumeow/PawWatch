@@ -44,7 +44,7 @@ PawWatch does the watching on a box at home and keeps only a log of visits.
 
 ```
  cameras, one per spot          detector                   visit logic                    SQLite
- (food, water, litter, ──frame──▶ YOLOv8n, cats only ──box──▶ zone of the cat's center, ──visit──▶ events
+ (food, water, litter, ──frame──▶ YOLOv8n, cats only ──box──▶ zone the box overlaps,  ──visit──▶ events
   no-go)                         (label, score, box)        dwell and dropout rules        recordings
                                                                    │                         │
                                                                    │ cat in no-go zone       ├──▶ change alerts
@@ -55,7 +55,7 @@ PawWatch does the watching on a box at home and keeps only a log of visits.
 | Module | Role |
 | --- | --- |
 | `pawwatch/detector.py` | Cat detection. Returns `(label, score, (x1, y1, x2, y2))`, the same contract as ASUS's UGen300 demos, so the backend swaps. |
-| `pawwatch/zones.py` | Zones file per camera; which zone a point is in. |
+| `pawwatch/zones.py` | Zones file per camera; which zone a cat box overlaps most. |
 | `pawwatch/events.py` | Detections over time to visits: minimum dwell, short dropouts tolerated. Pure logic, no model or video. |
 | `pawwatch/run.py` | CLI: video files and a zones file in, visits in SQLite out. `--show` opens the detection window. |
 | `pawwatch/store.py` | The events and recordings tables; everything downstream reads through it. |
@@ -104,7 +104,7 @@ PAWWATCH_DB=data/demo.db uv run streamlit run dashboard/app.py
    ```bash
    uv run python scripts/check_clip.py data/videos/food_2026-10-09T1830.mp4
    ```
-3. Draw the zones once per camera (click the polygon around where the cat's body is while it eats or drinks):
+3. Draw the zones once per camera, each polygon tight around the bowl, litter box or furniture:
    ```bash
    uv run python scripts/draw_zones.py data/videos/food_2026-10-09T1830.mp4 config/zones/cam_food.json
    ```

@@ -9,18 +9,25 @@ SQUARE = [[0, 0], [10, 0], [10, 10], [0, 10]]
 TRIANGLE = [[20, 0], [30, 0], [20, 10]]
 
 
-def test_point_in_polygon():
-    assert zones.point_in_polygon((5, 5), SQUARE)
-    assert not zones.point_in_polygon((15, 5), SQUARE)
-    assert zones.point_in_polygon((21, 2), TRIANGLE)
-    assert not zones.point_in_polygon((29, 9), TRIANGLE)  # inside the bounding box, outside the triangle
+def test_area_and_clip():
+    assert zones.area(SQUARE) == 100
+    assert zones.area(TRIANGLE) == 50
+    assert zones.area(zones.clip_to_box(SQUARE, (5, 5, 20, 20))) == 25
+    assert zones.clip_to_box(SQUARE, (50, 50, 60, 60)) == []
 
 
-def test_zone_at():
+def test_overlap_is_a_share_of_the_smaller_shape():
+    assert zones.overlap((0, 0, 100, 100), SQUARE) == 1.0  # a big cat box over a small bowl
+    assert zones.overlap((5, 0, 15, 10), SQUARE) == 0.5
+    assert zones.overlap((40, 40, 50, 50), SQUARE) == 0.0
+
+
+def test_zone_for_box_picks_the_most_overlap_and_ignores_grazes():
     zs = [("food", SQUARE), ("water", TRIANGLE)]
-    assert zones.zone_at((5, 5), zs) == "food"
-    assert zones.zone_at((21, 2), zs) == "water"
-    assert zones.zone_at((50, 50), zs) is None
+    assert zones.zone_for_box((2, 2, 8, 8), zs) == "food"
+    assert zones.zone_for_box((8, 0, 30, 10), zs) == "water"  # covers all of the triangle, a fifth of the square
+    assert zones.zone_for_box((9.5, 0, 14, 10), zs) is None  # grazes the square: 11% of the box
+    assert zones.zone_for_box((50, 50, 60, 60), zs) is None
 
 
 def write(tmp_path, data):
