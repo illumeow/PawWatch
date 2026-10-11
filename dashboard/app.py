@@ -81,7 +81,7 @@ def timeline_chart(df, day, spans=None):
 
     Detail: one row per zone; a visit is a rounded bar from its start to its end (a short one still shows on the full
     day), with a hover area HIT_PX / 2 wider on every side. Simulated visits are faded only when mixed with real ones.
-    spans: watched hours per zone, drawn as a thin line under each row when only part of the day was filmed.
+    spans: watched hours per zone, drawn as a thin line under each row (full on a day watched around the clock).
     """
     mixed = df["simulated"].nunique() > 1
     day0 = datetime.combine(day, datetime.min.time())
@@ -131,7 +131,7 @@ def timeline_chart(df, day, spans=None):
     if spans is not None:
         tracks = (  # a thin "camera on" line under each row; the outline keeps a 1-minute clip visible on 24 h
             alt.Chart(watched_frame(spans, day))
-            .mark_bar(size=2, yOffset=17, color="gray", opacity=0.6, stroke="gray", strokeWidth=2, clip=True)
+            .mark_bar(size=1, yOffset=17, color="gray", opacity=0.35, stroke="gray", strokeWidth=1.5, clip=True)
             .encode(
                 x="from:T",
                 x2="to:T",
@@ -287,14 +287,14 @@ def body():
         )
 
     st.subheader("Visits through the day")
-    partly_filmed = any(anomaly.scope(spans[z], day, now) == "recorded" for z in ZONES)
     if day_events:
-        chart = timeline_chart(frame(day_events), day, spans if partly_filmed else None)
+        chart = timeline_chart(frame(day_events), day, spans)
         st.altair_chart(chart, width="stretch", key="timeline")
-        hint = "Drag across the strip below the chart to zoom in; double-click it for the whole day."
-        if partly_filmed:
-            hint += " Grey line under a row: that camera was recording; only those hours are compared with the usual."
-        st.caption(hint)
+        st.caption(
+            "Grey line under a row: that camera was recording (a gap means it was off; only recorded hours are "
+            "compared with the usual). Drag across the strip below the chart to zoom in; double-click it for the "
+            "whole day."
+        )
     else:
         st.caption("No visits recorded on this day.")
 
