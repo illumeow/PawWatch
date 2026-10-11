@@ -4,8 +4,10 @@ version = "0.1.0"
 description = "Edge-AI cat health monitor: logs eat / drink / litter visits from fixed cameras, events only."
 requires-python = ">=3.10,<3.14"
 dependencies = [
+    "altair>=6.2.2",
     "numpy",
     "opencv-python",
+    "pandas>=2.3.3",
     "streamlit",
     "ultralytics",
 ]

@@ -1079,8 +1079,10 @@ name = "pawwatch"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "altair" },
     { name = "numpy" },
     { name = "opencv-python" },
+    { name = "pandas" },
     { name = "streamlit" },
     { name = "ultralytics", version = "8.4.123", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'darwin'" },
     { name = "ultralytics", version = "8.4.174", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'darwin'" },
@@ -1094,8 +1096,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "altair", specifier = ">=6.2.2" },
     { name = "numpy" },
     { name = "opencv-python" },
+    { name = "pandas", specifier = ">=2.3.3" },
     { name = "streamlit" },
     { name = "ultralytics" },
 ]
