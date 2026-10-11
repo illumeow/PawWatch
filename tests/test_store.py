@@ -29,7 +29,9 @@ def test_rejects_unknown_zone(conn):
 def test_daily_counts_zero_filled(conn):
     today = date(2026, 10, 9)
     store.insert_event(conn, "cam_litter", "litter", ts(today, 9), ts(today, 9) + 60)
-    store.insert_event(conn, "cam_litter", "litter", ts(date(2026, 10, 8), 9), ts(date(2026, 10, 8), 9) + 60, simulated=True)
+    store.insert_event(
+        conn, "cam_litter", "litter", ts(date(2026, 10, 8), 9), ts(date(2026, 10, 8), 9) + 60, simulated=True
+    )
     counts = store.daily_counts(conn, 7, today=today)
     assert list(counts) == [date(2026, 10, d) for d in range(3, 10)]
     assert counts[today] == {"food": 0, "water": 0, "litter": 1, "forbidden": 0}

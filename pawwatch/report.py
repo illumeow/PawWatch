@@ -2,6 +2,7 @@
 
 Wording suggests watching or seeing a vet, never a diagnosis. Simulated days are labeled.
 """
+
 from datetime import datetime
 
 from pawwatch import anomaly, store
@@ -81,7 +82,8 @@ def daily_report(conn, day=None, cat_name="Tangerine", now=None):
         parts.append(part)
     sentences = [f"{cat_name} {join(parts)} {when}."] if parts else []
     if any(anomaly.scope(spans[z], day, now) == "recorded" for z in store.ZONES if spans[z]):
-        sentences.append(f"Cameras were recording {on_camera(anomaly.merge(sum(spans.values(), [])))}.")
+        all_spans = anomaly.merge([s for zone_spans in spans.values() for s in zone_spans])
+        sentences.append(f"Cameras were recording {on_camera(all_spans)}.")
     if off_camera:
         verb = "wasn't" if len(off_camera) == 1 else "weren't"
         sentences.append(f"{join(off_camera)[0].upper()}{join(off_camera)[1:]} {verb} on camera.")
@@ -96,7 +98,9 @@ def daily_report(conn, day=None, cat_name="Tangerine", now=None):
     else:
         for a in alerts:
             usual = f"about {round(a.expected)} {USUAL[a.scope]}"
-            sentences.append(f"{NOUN[a.zone]} are well {'above' if a.direction == 'high' else 'below'} usual ({usual}).")
+            sentences.append(
+                f"{NOUN[a.zone]} are well {'above' if a.direction == 'high' else 'below'} usual ({usual})."
+            )
         sentences.append(ADVICE)
 
     return label + " ".join(sentences)

@@ -2,6 +2,7 @@
 
 Every event written from here is stored with simulated=1 and labeled "simulated" wherever it's shown.
 """
+
 from datetime import datetime, time, timedelta
 
 from pawwatch import store

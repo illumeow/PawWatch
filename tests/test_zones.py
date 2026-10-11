@@ -70,10 +70,13 @@ def test_save_zones_round_trips_through_the_loader(tmp_path):
     path = tmp_path / "cam_food.json"
     drawn = [("food", [(10.4, 20), (300, 20), (300, 200)]), ("water", [(310, 20), (600, 20), (600, 200), (310, 200)])]
     zones.save_zones(path, "cam_food", drawn)
-    assert zones.load_zones(path) == ("cam_food", [
-        ("food", [(10.0, 20.0), (300.0, 20.0), (300.0, 200.0)]),  # whole pixels
-        ("water", [(310.0, 20.0), (600.0, 20.0), (600.0, 200.0), (310.0, 200.0)]),
-    ])
+    assert zones.load_zones(path) == (
+        "cam_food",
+        [
+            ("food", [(10.0, 20.0), (300.0, 20.0), (300.0, 200.0)]),  # whole pixels
+            ("water", [(310.0, 20.0), (600.0, 20.0), (600.0, 200.0), (310.0, 200.0)]),
+        ],
+    )
 
 
 def test_save_zones_rejects_what_the_loader_would(tmp_path):

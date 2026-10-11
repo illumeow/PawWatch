@@ -68,10 +68,17 @@ class StubDetector:
 @pytest.fixture
 def zones_file(tmp_path):
     path = tmp_path / "cam_food.json"
-    path.write_text(json.dumps({"camera": "cam_food", "zones": [
-        {"name": "food", "polygon": [[0, 0], [80, 0], [80, 120], [0, 120]]},
-        {"name": "water", "polygon": [[80, 0], [160, 0], [160, 120], [80, 120]]},
-    ]}))
+    path.write_text(
+        json.dumps(
+            {
+                "camera": "cam_food",
+                "zones": [
+                    {"name": "food", "polygon": [[0, 0], [80, 0], [80, 120], [0, 120]]},
+                    {"name": "water", "polygon": [[80, 0], [160, 0], [160, 120], [80, 120]]},
+                ],
+            }
+        )
+    )
     return path
 
 
@@ -81,7 +88,9 @@ def rows(db):
 
 
 def test_pipeline_writes_visits(tmp_path, zones_file):
-    video = write_video(tmp_path / "food_2026-10-09T1830.mp4", [(8, LEFT), (4, None), (2, RIGHT), (6, None), (7, RIGHT)])
+    video = write_video(
+        tmp_path / "food_2026-10-09T1830.mp4", [(8, LEFT), (4, None), (2, RIGHT), (6, None), (7, RIGHT)]
+    )
     db = tmp_path / "events.db"
     run.process([video], zones_file, StubDetector(), store.connect(db), fps=5)
     # food 0-7.8 s; water 12-13.8 s and 20-26.8 s are 6.2 s apart (beyond tolerance): the 2 s one is too short
@@ -112,10 +121,17 @@ def test_cli_start_override_needs_a_single_file(tmp_path, zones_file):
 
 def test_forbidden_zone_triggers_alarm_on_every_frame(tmp_path, monkeypatch):
     zones_path = tmp_path / "cam_counter.json"
-    zones_path.write_text(json.dumps({"camera": "cam_counter", "zones": [
-        {"name": "food", "polygon": [[0, 0], [80, 0], [80, 120], [0, 120]]},
-        {"name": "forbidden", "polygon": [[80, 0], [160, 0], [160, 120], [80, 120]]},
-    ]}))
+    zones_path.write_text(
+        json.dumps(
+            {
+                "camera": "cam_counter",
+                "zones": [
+                    {"name": "food", "polygon": [[0, 0], [80, 0], [80, 120], [0, 120]]},
+                    {"name": "forbidden", "polygon": [[80, 0], [160, 0], [160, 120], [80, 120]]},
+                ],
+            }
+        )
+    )
     calls = []
     monkeypatch.setattr(alarm, "trigger", lambda camera, zone, ts: calls.append((camera, zone, ts - T0)))
     video = write_video(tmp_path / "counter_2026-10-09T1830.mp4", [(2, None), (2, RIGHT), (2, None), (2, LEFT)])

@@ -3,6 +3,7 @@
 render() draws on a copy of a frame and is pure; Window only displays. Nothing here saves a frame:
 the demo video is a screen capture taken outside the program.
 """
+
 import time
 
 import cv2
@@ -31,8 +32,16 @@ def render(frame, detections, zone_list, zone, counts):
     for i, (label, score, (x1, y1, x2, y2)) in enumerate(cats):
         color = RED if i == 0 and zone == "forbidden" else GREEN
         cv2.rectangle(img, (x1, y1), (x2, y2), color, max(2, round(3 * s)))
-        cv2.putText(img, f"{label} {score:.2f}", (x1, max(y1 - round(8 * s), band + round(24 * s))),
-                    FONT, 0.8 * s, color, thick, cv2.LINE_AA)
+        cv2.putText(
+            img,
+            f"{label} {score:.2f}",
+            (x1, max(y1 - round(8 * s), band + round(24 * s))),
+            FONT,
+            0.8 * s,
+            color,
+            thick,
+            cv2.LINE_AA,
+        )
 
     img[:band] //= 3  # darkened bands keep the text readable on any footage
     img[-band:] //= 3
@@ -61,8 +70,16 @@ def draw_zones(img, zone_list, top=0):
         pts = [(round(x), round(y)) for x, y in polygon]
         cv2.polylines(img, [np.array(pts, np.int32)], True, color, max(1, round(2 * s)), cv2.LINE_AA)
         x, y = min(p[0] for p in pts), min(p[1] for p in pts)
-        cv2.putText(img, name, (x + round(8 * s), max(y, top) + round(32 * s)),
-                    FONT, 0.9 * s, color, max(1, round(2 * s)), cv2.LINE_AA)
+        cv2.putText(
+            img,
+            name,
+            (x + round(8 * s), max(y, top) + round(32 * s)),
+            FONT,
+            0.9 * s,
+            color,
+            max(1, round(2 * s)),
+            cv2.LINE_AA,
+        )
 
 
 def _text(img, text, org, scale, color):

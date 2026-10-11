@@ -75,10 +75,12 @@ uv run python scripts/draw_zones.py data/videos/TangerineJumpOntoBed.mov config/
 
 After changing a zone, rerun `build_demo.py` so the real-day dashboard matches.
 
-## Tests
+## Tests, lint, format
 
 ```bash
 uv run pytest
+uv run ruff check            # --fix applies the safe fixes
+uv run ruff format           # rewrites files; --check only reports
 ```
 
 ## Ship develop to main
