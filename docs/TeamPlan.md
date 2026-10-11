@@ -58,8 +58,8 @@ uv run python -m pawwatch.run data/videos/TangerineEat.mp4 --zones config/zones/
 **@illumeow (B):** all code. Images for the slides are in `slides/images/` on `develop`: four detection-window stills
 (`detect_*.jpg`; the drinking one is Ami, our other cat) and two dashboards (`dashboard_real_day.png` from the real
 clips, `dashboard_alert_simulated.png`, which must be captioned as simulated). To get them on `feat/slides`:
-`git merge develop` there, then push (no conflicts: `slides/images/` is new; don't rebase a shared branch). Next for B: merge `develop` into `main`, then the
-demo video (shot list, narration and timings in `docs/DemoVideo.md`).
+`git merge develop` there, then push (no conflicts: `slides/images/` is new; don't rebase a shared branch). Next for B: the demo video (shot list and narration
+in `docs/DemoVideo.md`, every command in `docs/Commands.md`).
 
 **Cut for time:** Hailo backend port, Telegram setup, LLM-written daily report, overnight recording and bulk runs.
 

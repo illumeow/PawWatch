@@ -12,8 +12,10 @@ In the window:
     q or Esc      quit without saving
 
 Zones already in the file are loaded, drawn and kept unless undone. Draw each polygon tight around the thing itself
-(bowl, litter box, bed): the cat is in the zone its detection box overlaps most. Only the JSON is written, never a frame.
+(bowl, litter box, bed): the cat is in the zone its detection box overlaps most.
+Only the JSON is written, never a frame.
 """
+
 import argparse
 from pathlib import Path
 from types import SimpleNamespace
@@ -38,7 +40,7 @@ def read_frame(clip, at_s):
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     ap.add_argument("clip", help="a video from the camera, at its native resolution")
     ap.add_argument("out", help="zones file to write, e.g. config/zones/cam_food.json")
     ap.add_argument("--at", type=float, default=0.0, help="seconds into the clip to draw on (default: %(default)s)")
@@ -46,7 +48,7 @@ def main():
     args = ap.parse_args()
 
     out = Path(args.out)
-    camera, drawn = (zones.load_zones(out) if out.exists() else (out.stem, []))
+    camera, drawn = zones.load_zones(out) if out.exists() else (out.stem, [])
     camera = args.camera or camera
     frame = read_frame(args.clip, args.at)
     h, w = frame.shape[:2]
@@ -105,8 +107,16 @@ def draw(frame, drawn, name, points, scale):
     img = cv2.resize(img, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA) if scale < 1 else img
     names = "  ".join(f"{i}:{z}" for i, z in enumerate(store.ZONES, 1))
     img[:HELP_H] //= 3
-    cv2.putText(img, f"zone: {name}   [{names}]   n close  u undo  s save  q quit", (10, 24),
-                overlay.FONT, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
+    cv2.putText(
+        img,
+        f"zone: {name}   [{names}]   n close  u undo  s save  q quit",
+        (10, 24),
+        overlay.FONT,
+        0.6,
+        (255, 255, 255),
+        1,
+        cv2.LINE_AA,
+    )
     return img
 
 

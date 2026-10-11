@@ -52,7 +52,8 @@ def test_high_litter_gets_comparison_and_advice():
 
 def test_describe_anomaly_stands_alone():
     assert report.describe_anomaly(Anomaly("food", 0, 4, "low", "day")) == (
-        "Tangerine didn't eat today; usually about 4 a day. Keep an eye on it, and consider a vet visit if it continues."
+        "Tangerine didn't eat today; usually about 4 a day. "
+        "Keep an eye on it, and consider a vet visit if it continues."
     )
     assert report.describe_anomaly(Anomaly("water", 1, 4.4, "low", "so_far")).startswith(
         "Tangerine only drank water once today; usually about 4 by this time."

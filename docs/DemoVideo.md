@@ -68,13 +68,7 @@ Check before recording:
 
 Record one file per part, so each lines up with its shot.
 
-## Dashboard recording
+## Commands
 
-The alert day must be a full past day, or "today" before any simulated visit has happened looks empty:
-
-```bash
-uv run python scripts/seed_fake.py --db data/video.db --with-today --end <yesterday>
-PAWWATCH_DB=data/video.db uv run streamlit run dashboard/app.py
-```
-
-Pick yesterday in the sidebar, collapse the sidebar, and record the browser window.
+Every command for the recordings (detection window per clip, real-day and alert-day dashboards, live dashboard,
+zones) is in [Commands.md](Commands.md). Collapse the sidebar before recording the dashboard.

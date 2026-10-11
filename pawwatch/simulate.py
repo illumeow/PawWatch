@@ -2,7 +2,10 @@
 
 Every event written from here is stored with simulated=1 and labeled "simulated" wherever it's shown.
 """
-from datetime import datetime, time, timedelta
+
+import random
+import sqlite3
+from datetime import date, datetime, time, timedelta
 
 from pawwatch import store
 
@@ -21,11 +24,11 @@ FORBIDDEN_HOURS = (9, 23)
 FORBIDDEN_DURATION = (5, 25)
 
 
-def _at(day, hour):
+def _at(day: date, hour: float) -> float:
     return datetime.combine(day, time()).timestamp() + hour * 3600
 
 
-def simulate_day(day, rng):
+def simulate_day(day: date, rng: random.Random) -> list[tuple[str, str, float, float]]:
     """One day of visits: [(camera, zone, start_ts, end_ts)], sorted by start."""
     visits = []
 
@@ -47,12 +50,12 @@ def simulate_day(day, rng):
     return sorted(visits, key=lambda v: v[2])
 
 
-def has_real_events(conn, day):
+def has_real_events(conn: sqlite3.Connection, day: date) -> bool:
     start = _at(day, 0)
     return any(not ev.simulated for ev in store.events_between(conn, start, start + 86400))
 
 
-def seed(conn, days, end_day, rng):
+def seed(conn: sqlite3.Connection, days: int, end_day: date, rng: random.Random) -> tuple[int, int]:
     """Write `days` days of simulated history ending with `end_day`. Days that have real events are skipped.
 
     Returns (days_seeded, events_written).

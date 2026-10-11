@@ -2,7 +2,9 @@
 
 Wording suggests watching or seeing a vet, never a diagnosis. Simulated days are labeled.
 """
-from datetime import datetime
+
+import sqlite3
+from datetime import date, datetime
 
 from pawwatch import anomaly, store
 
@@ -14,26 +16,26 @@ USUAL = {"day": "a day", "so_far": "by this time", "recorded": "in the same hour
 ADVICE = "Keep an eye on it, and consider a vet visit if it continues."
 
 
-def times(n):
+def times(n: int) -> str:
     return {1: "once", 2: "twice"}.get(n, f"{n} times")
 
 
-def join(parts):
+def join(parts: list[str]) -> str:
     return parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
 
 
-def clock(seconds):
+def clock(seconds: float) -> str:
     return f"{int(seconds) // 3600:02d}:{int(seconds) % 3600 // 60:02d}"
 
 
-def on_camera(spans):
+def on_camera(spans: anomaly.Spans) -> str:
     """Watched hours in words, e.g. "22:00–22:02 and 22:22–22:24", or "about 9 hours" when there are many spans."""
     if len(spans) > 3:
         return f"about {round(sum(e - s for s, e in spans) / 3600)} hours"
     return join([f"{clock(s)}–{clock(e + 59)}" for s, e in spans])
 
 
-def describe_anomaly(a, cat_name="Tangerine", when="today"):
+def describe_anomaly(a: anomaly.Anomaly, cat_name: str = "Tangerine", when: str = "today") -> str:
     """One alert sentence, e.g. for the dashboard or a notification."""
     usual = f"usually about {round(a.expected)} {USUAL[a.scope]}"
     if a.count == 0:
@@ -42,7 +44,9 @@ def describe_anomaly(a, cat_name="Tangerine", when="today"):
     return f"{cat_name} {only}{DID[a.zone]} {times(a.count)} {when}; {usual}. {ADVICE}"
 
 
-def daily_report(conn, day=None, cat_name="Tangerine", now=None):
+def daily_report(
+    conn: sqlite3.Connection, day: date | None = None, cat_name: str = "Tangerine", now: datetime | None = None
+) -> str:
     """Plain-language summary, e.g. "Tangerine ate 4 times, drank water 6 times (2 more than usual) and ..."
 
     Only watched hours count: zones whose camera wasn't recording are named as such, never as "didn't eat".
@@ -81,7 +85,8 @@ def daily_report(conn, day=None, cat_name="Tangerine", now=None):
         parts.append(part)
     sentences = [f"{cat_name} {join(parts)} {when}."] if parts else []
     if any(anomaly.scope(spans[z], day, now) == "recorded" for z in store.ZONES if spans[z]):
-        sentences.append(f"Cameras were recording {on_camera(anomaly.merge(sum(spans.values(), [])))}.")
+        all_spans = anomaly.merge([s for zone_spans in spans.values() for s in zone_spans])
+        sentences.append(f"Cameras were recording {on_camera(all_spans)}.")
     if off_camera:
         verb = "wasn't" if len(off_camera) == 1 else "weren't"
         sentences.append(f"{join(off_camera)[0].upper()}{join(off_camera)[1:]} {verb} on camera.")
@@ -96,7 +101,9 @@ def daily_report(conn, day=None, cat_name="Tangerine", now=None):
     else:
         for a in alerts:
             usual = f"about {round(a.expected)} {USUAL[a.scope]}"
-            sentences.append(f"{NOUN[a.zone]} are well {'above' if a.direction == 'high' else 'below'} usual ({usual}).")
+            sentences.append(
+                f"{NOUN[a.zone]} are well {'above' if a.direction == 'high' else 'below'} usual ({usual})."
+            )
         sentences.append(ADVICE)
 
     return label + " ".join(sentences)
