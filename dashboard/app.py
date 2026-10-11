@@ -78,8 +78,8 @@ def timeline_chart(df, day, spans=None):
     """Visits through the day: a detail chart over a full-day overview strip. Drag on the strip to zoom the detail
     chart to that time range, drag the selection to pan, double-click to go back to the whole day.
 
-    Detail: one row per zone; a visit is a tick (visible at any zoom) over a bar from its start to its end (its length
-    shows once zoomed in), with a HIT_PX-wide hover box. Simulated visits are faded only when mixed with real ones.
+    Detail: one row per zone; a visit is a rounded bar from its start to its end (a short one still shows on the full
+    day), with a hover area HIT_PX / 2 wider on every side. Simulated visits are faded only when mixed with real ones.
     spans: watched hours per zone, drawn as shaded bands when only part of the day was filmed.
     """
     mixed = df["simulated"].nunique() > 1
@@ -103,28 +103,31 @@ def timeline_chart(df, day, spans=None):
     detail_x = alt.X("start:T", title=None, scale=detail_scale, axis=axis)  # the range, declared on one layer only
     y = alt.Y("Zone:N", title=None, sort=rows, scale=alt.Scale(domain=rows), axis=y_axis)
     base = alt.Chart(df).encode(x=alt.X("start:T", title=None, axis=axis), y=y)
-    durations = base.mark_bar(height=14, cornerRadius=2, clip=True).encode(
-        x=detail_x, x2="end:T", color=color, opacity=opacity
-    )
-    ticks = base.mark_tick(thickness=3, cornerRadius=1.5, clip=True).encode(
+    # One rounded bar per visit, start to end. Its outline in the same color adds a few pixels on every side, so a
+    # 30 s visit still shows on a 24 h axis; zoomed in it is a plain rounded bar. The hovered visit gets thicker.
+    visits = base.mark_bar(cornerRadius=3, strokeWidth=4, strokeJoin="round", clip=True).encode(
+        x=detail_x,
+        x2="end:T",
         color=color,
+        stroke=alt.Stroke("Zone:N", scale=zone_scale(), legend=None),
         opacity=opacity,
-        size=alt.condition(hover, alt.value(34), alt.value(22)),  # the hovered visit lifts, keeping its color
+        size=alt.condition(hover, alt.value(22), alt.value(12)),
     )
-    hits = (  # invisible box around each visit, wider than the 3 px tick so it's easy to hover
-        base.mark_tick(thickness=HIT_PX, size=22, opacity=0, clip=True)
+    hits = (  # invisible, the bar plus HIT_PX / 2 on every side, so a short visit is easy to hover
+        base.mark_bar(opacity=0, stroke="black", strokeWidth=HIT_PX, size=22, clip=True)
         .encode(
+            x2="end:T",
             tooltip=[
                 alt.Tooltip("Zone:N"),
                 alt.Tooltip("start:T", title="Started", format="%H:%M:%S"),
                 alt.Tooltip("end:T", title="Ended", format="%H:%M:%S"),
                 alt.Tooltip("duration_s:Q", title="Seconds", format=".0f"),
                 alt.Tooltip("Data:N"),
-            ]
+            ],
         )
         .add_params(hover)
     )
-    layers = [durations, ticks, hits]
+    layers = [visits, hits]
     if spans is not None:
         bands = (  # the outline keeps a 1-minute clip visible on a 24 h axis without widening it when zoomed in
             alt.Chart(watched_frame(spans, day))
