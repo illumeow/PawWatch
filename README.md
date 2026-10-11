@@ -122,7 +122,8 @@ PAWWATCH_DB=data/demo.db uv run streamlit run dashboard/app.py
    uv run python scripts/seed_fake.py --end 2026-10-09
    uv run streamlit run dashboard/app.py
    ```
-   `--db` (or `PAWWATCH_DB=` for the dashboard) points both at another database.
+   `--db` (or `PAWWATCH_DB=` for the dashboard) points both at another database; `PAWWATCH_CAT=` sets the cat's
+   name the dashboard and report use (default Tangerine).
 
 ### Alarm settings
 

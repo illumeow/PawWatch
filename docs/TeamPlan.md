@@ -92,8 +92,10 @@ Handoffs to C:
 
 Two things cross the A/B line, so we fix both on day 1. Changing either needs a heads-up to the other person.
 
-1. The events table in `pawwatch/store.py`, for finished visits.
-2. The live alarm hook in `pawwatch/alarm.py`, for the moment the cat enters a forbidden zone. It can't go through SQLite, because a visit is written only after it ends.
+1. The events table in `pawwatch/store.py`, for visits: written once a visit qualifies (minimum dwell), its end moved
+   forward while the cat stays (`extend_event`), so a dashboard follows a live stream.
+2. The live alarm hook in `pawwatch/alarm.py`, for the moment the cat enters a forbidden zone. It can't go through
+   SQLite, because a visit is written only once it qualifies, and the alarm must ring on the first frame.
 
 ```sql
 CREATE TABLE events (
