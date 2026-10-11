@@ -55,9 +55,11 @@ uv run python -m pawwatch.run data/videos/TangerineEat.mp4 --zones config/zones/
   A and B put their screenshots in `slides/images/` on Day 2 evening.
 - Day 3: finish slides, add the demo video link, submit.
 
-**@illumeow (B):** all code. Next: dashboard screenshots (real day from `build_demo.py`, simulated alert day) into
-`slides/images/` for C, merge `develop` into `main`, then the demo video (shot list, narration and timings in
-`docs/DemoVideo.md`).
+**@illumeow (B):** all code. Images for the slides are in `slides/images/` on `develop`: four detection-window stills
+(`detect_*.jpg`; the drinking one is Ami, our other cat) and two dashboards (`dashboard_real_day.png` from the real
+clips, `dashboard_alert_simulated.png`, which must be captioned as simulated). @bbwinner: `git rebase develop` on
+`feat/slides` to get them (no conflicts: `slides/images/` is new). Next for B: merge `develop` into `main`, then the
+demo video (shot list, narration and timings in `docs/DemoVideo.md`).
 
 **Cut for time:** Hailo backend port, Telegram setup, LLM-written daily report, overnight recording and bulk runs.
 
