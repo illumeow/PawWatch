@@ -86,7 +86,7 @@ uv run python scripts/seed_fake.py --with-today   # 7 simulated days, plus a day
 uv run streamlit run dashboard/app.py
 ```
 
-Simulated days are labeled as such everywhere: faded and starred in charts, "[Simulated data]" in the report.
+Simulated days are labeled as such everywhere: faded in charts, "[Simulated data]" in the report.
 
 ### Rebuild our demo from the real clips
 

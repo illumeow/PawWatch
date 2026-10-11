@@ -183,7 +183,7 @@ def timeline_chart(df, day, spans=None):
 
 
 def trend_chart(rows, zone, color, ymax):
-    """Daily visits for one zone; simulated days faded and starred."""
+    """Daily visits for one zone; simulated days faded."""
     df = pd.DataFrame(rows)
     bars = (
         alt.Chart(df)
@@ -210,9 +210,7 @@ def week_rows(conn, day):
         d = day - timedelta(days=i)
         evs = events_on(conn, d)
         simulated = bool(evs) and all(e.simulated for e in evs)
-        label = ("today" if d == date.today() else f"{d:%a} {d.day}") + (
-            "*" if simulated else ""
-        )  # 8 days: weekdays repeat
+        label = "today" if d == date.today() else f"{d:%a} {d.day}"  # 8 days: weekdays repeat, so add the date
         for z in ZONES:
             rows[z].append(
                 {
@@ -305,7 +303,7 @@ def body():
     for col, z, color in zip(cols, ZONES, colors(), strict=True):
         col.altair_chart(trend_chart(rows[z], z, color, ymax), width="stretch")
     if any(r["Data"] == "simulated" for r in rows[ZONES[0]]):
-        st.caption("\\* Faded days use **simulated** data, to give the anomaly check a baseline.")
+        st.caption("Faded bars are **simulated** days, to give the anomaly check a baseline.")
 
     with st.expander("What PawWatch stores"):
         total = len(all_events(conn))
