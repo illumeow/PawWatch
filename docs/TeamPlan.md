@@ -30,7 +30,7 @@ Real clips, all tested end to end (footage in the shared Drive, not the repo):
 | `TangerineEat.mp4`, 58 s, portrait | Tangerine | `cam_food.json` | 1 food visit, 31 s |
 | `AmiDrink.mp4`, 90 s, portrait | Ami | `cam_water.json` | 1 water visit, 66 s |
 | `TangerinePee.mp4`, 60 s | Tangerine | `cam_litter_box.json` | 1 litter box visit, 24 s |
-| `AmiPee.mp4`, 117 s | Ami | `cam_litter_box.json` | 2 litter box visits (one stay split by a 4 s dropout) |
+| `AmiPee.mp4`, 117 s | Ami | `cam_litter_box.json` | 2 litter box visits: 48 s, then 9 s after a 9 s gap |
 | `TangerineJumpOntoBed.mov`, 15 s, cropped to leave the person out | Tangerine | `cam_bed.json` (mattress = forbidden) | Alarm rings; 1 forbidden visit, 9 s |
 
 Demo database: Tangerine's three clips on one day at made-up but plausible times, plus 7 simulated days before it.

@@ -81,13 +81,13 @@ def rows(db):
 
 
 def test_pipeline_writes_visits(tmp_path, zones_file):
-    video = write_video(tmp_path / "food_2026-10-09T1830.mp4", [(8, LEFT), (4, None), (2, RIGHT), (4, None), (7, RIGHT)])
+    video = write_video(tmp_path / "food_2026-10-09T1830.mp4", [(8, LEFT), (4, None), (2, RIGHT), (6, None), (7, RIGHT)])
     db = tmp_path / "events.db"
     run.process([video], zones_file, StubDetector(), store.connect(db), fps=5)
-    # food 0-7.8 s; water 12-13.8 s and 18-24.8 s are 4.2 s apart (beyond tolerance): the 2 s one is too short
+    # food 0-7.8 s; water 12-13.8 s and 20-26.8 s are 6.2 s apart (beyond tolerance): the 2 s one is too short
     assert rows(db) == [
         ("cam_food", "food", 0.0, pytest.approx(7.8), False),
-        ("cam_food", "water", 18.0, pytest.approx(6.8), False),
+        ("cam_food", "water", 20.0, pytest.approx(6.8), False),
     ]
 
 

@@ -13,7 +13,7 @@ from dataclasses import dataclass
 
 MIN_DWELL_S = 5.0
 FORBIDDEN_DWELL_S = 1.0
-GAP_TOLERANCE_S = 3.0
+GAP_TOLERANCE_S = 5.0  # 3 s split real stays when a cat turned or was briefly hidden (petting, litter box rim)
 FORBIDDEN = "forbidden"
 
 
