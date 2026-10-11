@@ -122,7 +122,6 @@ def timeline_chart(df, day, spans=None):
                 alt.Tooltip("start:T", title="Started", format="%H:%M:%S"),
                 alt.Tooltip("end:T", title="Ended", format="%H:%M:%S"),
                 alt.Tooltip("duration_s:Q", title="Seconds", format=".0f"),
-                alt.Tooltip("Data:N"),
             ],
         )
         .add_params(hover)
