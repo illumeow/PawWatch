@@ -22,10 +22,9 @@ COLORS = {
     "dark": ["#3987e5", "#d95926", "#199e70", "#c98500"],
 }
 SIM_OPACITY = 0.4
-HIT_PX = 12  # width of the hover box around each visit
+HIT_PX = 24  # width of the hover box around each visit
+AXIS_PX = 80  # zone-label column of the timeline, the same in its detail and overview charts
 REFRESH_S = 3  # visits processed while the page is open show up within this
-MIN_BAND = 1 / 96  # bands are drawn at least this share of the visible time range wide
-STEPS = [f"{m // 60:02d}:{m % 60:02d}" for m in range(0, 24 * 60 + 1, 15)]  # hours slider, every 15 min
 
 st.set_page_config(page_title="PawWatch", page_icon=":material/pets:", layout="wide")
 
@@ -64,52 +63,49 @@ def frame(events):
     return df
 
 
-def watched_frame(spans, day, hours=(0.0, 24.0)):
-    """Rows for the shaded "on camera" bands: one per zone and watched span.
-
-    Bands are drawn at least MIN_BAND of the visible range wide, so a 1-minute clip shows on a 24 h axis without
-    looking longer than it was once zoomed in; tooltips keep the real times.
-    """
-    min_band = (hours[1] - hours[0]) * 3600 * MIN_BAND
+def watched_frame(spans, day):
+    """Rows for the shaded "on camera" bands: one per zone and watched span."""
     day0 = datetime.combine(day, datetime.min.time())
-    rows = []
-    for z in ZONES:
-        for s, e in spans[z]:
-            mid, half = (s + e) / 2, max(e - s, min_band) / 2
-            rows.append(
-                {
-                    "Zone": LABELS[z],
-                    "from": day0 + timedelta(seconds=s),
-                    "to": day0 + timedelta(seconds=e),
-                    "x": day0 + timedelta(seconds=mid - half),
-                    "x2": day0 + timedelta(seconds=mid + half),
-                }
-            )
-    return pd.DataFrame(rows, columns=["Zone", "from", "to", "x", "x2"])
+    rows = [
+        {"Zone": LABELS[z], "from": day0 + timedelta(seconds=a), "to": day0 + timedelta(seconds=b)}
+        for z in ZONES
+        for a, b in spans[z]
+    ]
+    return pd.DataFrame(rows, columns=["Zone", "from", "to"])
 
 
-def timeline_chart(df, day, spans=None, hours=(0.0, 24.0)):
-    """One row per zone, one mark per visit. Simulated visits are faded only when mixed with real ones.
+def timeline_chart(df, day, spans=None):
+    """Visits through the day: a detail chart over a full-day overview strip. Drag on the strip to zoom the detail
+    chart to that time range, drag the selection to pan, double-click to go back to the whole day.
 
-    A visit is a tick (visible at any zoom) over a bar from its start to its end (its length shows once zoomed in).
-    Each visit has a HIT_PX-wide hover box, so a 30 s visit on a 24 h axis doesn't need pixel-perfect aim.
+    Detail: one row per zone; a visit is a tick (visible at any zoom) over a bar from its start to its end (its length
+    shows once zoomed in), with a HIT_PX-wide hover box. Simulated visits are faded only when mixed with real ones.
     spans: watched hours per zone, drawn as shaded bands when only part of the day was filmed.
-    hours: the part of the day to show, in hours, e.g. (7.0, 9.5).
     """
     mixed = df["simulated"].nunique() > 1
     day0 = datetime.combine(day, datetime.min.time())
+    full_day = [day0, day0 + timedelta(days=1)]
     rows = [LABELS[z] for z in ZONES]
-    time_scale = alt.Scale(domain=[day0 + timedelta(hours=hours[0]), day0 + timedelta(hours=hours[1])])
-    x = alt.X("start:T", title=None, scale=time_scale, axis=alt.Axis(format="%H:%M", tickCount=12, grid=True))
-    y = alt.Y("Zone:N", title=None, sort=rows, scale=alt.Scale(domain=rows))
+    zoom = alt.selection_interval(name="zoom", encodings=["x"])
+    hover = alt.selection_point(on="pointerover", fields=["visit"], empty=False, clear="pointerout")
     color = alt.Color("Zone:N", scale=zone_scale(), legend=None)
     opacity = alt.Opacity(
-        "Data:N", scale=alt.Scale(domain=["real", "simulated"], range=[1.0, SIM_OPACITY if mixed else 1.0]), legend=None
+        "Data:N",
+        sort=["real", "simulated"],
+        scale=alt.Scale(domain=["real", "simulated"], range=[1.0, SIM_OPACITY if mixed else 1.0]),
+        legend=None,
     )
-    hover = alt.selection_point(on="pointerover", fields=["visit"], empty=False, clear="pointerout")
-    base = alt.Chart(df).encode(x=x, y=y)
+    y_axis = alt.Axis(minExtent=AXIS_PX, maxExtent=AXIS_PX)  # same width in both charts, so their times line up
 
-    durations = base.mark_bar(height=14, cornerRadius=2, clip=True).encode(x2="end:T", color=color, opacity=opacity)
+    # Detail: the whole day, or the zoom selection once there is one (domainRaw overrides domain when set).
+    detail_scale = alt.Scale(domain=full_day, domainRaw={"expr": "zoom.start"})
+    axis = alt.Axis(format="%H:%M", tickCount=12, grid=True)
+    detail_x = alt.X("start:T", title=None, scale=detail_scale, axis=axis)  # the range, declared on one layer only
+    y = alt.Y("Zone:N", title=None, sort=rows, scale=alt.Scale(domain=rows), axis=y_axis)
+    base = alt.Chart(df).encode(x=alt.X("start:T", title=None, axis=axis), y=y)
+    durations = base.mark_bar(height=14, cornerRadius=2, clip=True).encode(
+        x=detail_x, x2="end:T", color=color, opacity=opacity
+    )
     ticks = base.mark_tick(thickness=3, cornerRadius=1.5, clip=True).encode(
         color=color,
         opacity=opacity,
@@ -130,12 +126,12 @@ def timeline_chart(df, day, spans=None, hours=(0.0, 24.0)):
     )
     layers = [durations, ticks, hits]
     if spans is not None:
-        bands = (
-            alt.Chart(watched_frame(spans, day, hours))
-            .mark_rect(opacity=0.18, color="gray", clip=True)
+        bands = (  # the outline keeps a 1-minute clip visible on a 24 h axis without widening it when zoomed in
+            alt.Chart(watched_frame(spans, day))
+            .mark_rect(color="gray", fillOpacity=0.18, strokeOpacity=0.18, strokeWidth=4, clip=True)
             .encode(
-                x=alt.X("x:T", scale=time_scale),
-                x2="x2:T",
+                x="from:T",
+                x2="to:T",
                 y=alt.Y("Zone:N", sort=rows),
                 tooltip=[
                     alt.Tooltip("Zone:N"),
@@ -145,12 +141,42 @@ def timeline_chart(df, day, spans=None, hours=(0.0, 24.0)):
             )
         )
         layers.insert(0, bands)
-    if day == date.today():
-        now = pd.DataFrame({"now": [datetime.now()]})
+    if day == date.today():  # to the minute, so the chart (and a zoom selection) isn't rebuilt on every refresh
+        now = pd.DataFrame({"now": [datetime.now().replace(second=0, microsecond=0)]})
         layers.append(
             alt.Chart(now).mark_rule(strokeDash=[4, 3], strokeWidth=1, opacity=0.6, clip=True).encode(x="now:T")
         )
-    return alt.layer(*layers).properties(height=200)
+    detail = alt.layer(*layers).properties(height=200, width="container")
+
+    # Overview: the whole day, small; the selection lives here.
+    overview = (
+        alt.Chart(df)
+        .mark_tick(thickness=2, size=8)
+        .encode(
+            x=alt.X(
+                "start:T",
+                title=None,
+                scale=alt.Scale(domain=full_day),
+                axis=alt.Axis(format="%H:%M", tickCount=8, labelFontSize=10, grid=False),
+            ),
+            y=alt.Y(
+                "Zone:N",
+                title=None,
+                sort=rows,
+                scale=alt.Scale(domain=rows),
+                axis=alt.Axis(labels=False, ticks=False, domain=False, minExtent=AXIS_PX, maxExtent=AXIS_PX),
+            ),
+            color=color,
+            opacity=opacity,
+        )
+        .add_params(zoom)
+        .properties(height=44, width="container")
+    )
+    return (
+        alt.vconcat(detail, overview, spacing=6)
+        .resolve_scale(x="independent")  # the overview always shows the whole day
+        .properties(autosize=alt.AutoSizeParams(type="fit-x", contains="padding"))  # both fit the page width
+    )
 
 
 def trend_chart(rows, zone, color, ymax):
@@ -163,7 +189,10 @@ def trend_chart(rows, zone, color, ymax):
             x=alt.X("label:N", title=None, sort=None, axis=alt.Axis(labelAngle=0)),
             y=alt.Y("count:Q", title=None, scale=alt.Scale(domain=[0, ymax]), axis=alt.Axis(tickMinStep=1, grid=True)),
             opacity=alt.Opacity(
-                "Data:N", scale=alt.Scale(domain=["real", "simulated"], range=[1.0, SIM_OPACITY]), legend=None
+                "Data:N",
+                sort=["real", "simulated"],
+                scale=alt.Scale(domain=["real", "simulated"], range=[1.0, SIM_OPACITY]),
+                legend=None,
             ),
             tooltip=[alt.Tooltip("day:N", title="Day"), alt.Tooltip("count:Q", title="Visits"), alt.Tooltip("Data:N")],
         )
@@ -257,12 +286,12 @@ def body():
     st.subheader("Visits through the day")
     partly_filmed = any(anomaly.scope(spans[z], day, now) == "recorded" for z in ZONES)
     if day_events:
-        start, end = st.select_slider("Hours shown", STEPS, value=(STEPS[0], STEPS[-1]), key="hours")
-        hours = (STEPS.index(start) / 4, max(STEPS.index(end), STEPS.index(start) + 1) / 4)
-        chart = timeline_chart(frame(day_events), day, spans if partly_filmed else None, hours)
-        st.altair_chart(chart, width="stretch")
+        chart = timeline_chart(frame(day_events), day, spans if partly_filmed else None)
+        st.altair_chart(chart, width="stretch", key="timeline")
+        hint = "Drag across the strip below the chart to zoom in; double-click it for the whole day."
         if partly_filmed:
-            st.caption("Shaded: hours on camera. Only those hours are compared with the usual.")
+            hint += " Shaded: hours on camera; only those hours are compared with the usual."
+        st.caption(hint)
     else:
         st.caption("No visits recorded on this day.")
 
