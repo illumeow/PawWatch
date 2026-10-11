@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS recordings (
   camera   TEXT NOT NULL,
   zones    TEXT NOT NULL,  -- comma-separated zone names this camera watches
   start_ts REAL NOT NULL,
-  end_ts   REAL NOT NULL
+  end_ts   REAL NOT NULL,
+  simulated INTEGER NOT NULL DEFAULT 0  -- 1 = seeded with simulated history (may have outage gaps)
 );
 """
 
@@ -55,6 +56,9 @@ def connect(path: str | Path = DEFAULT_DB) -> sqlite3.Connection:
         path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(path)
     conn.executescript(SCHEMA)
+    if "simulated" not in [row[1] for row in conn.execute("PRAGMA table_info(recordings)")]:  # databases from 10/10
+        conn.execute("ALTER TABLE recordings ADD COLUMN simulated INTEGER NOT NULL DEFAULT 0")
+        conn.commit()
     return conn
 
 
@@ -93,7 +97,12 @@ class Recording:
 
 
 def insert_recording(
-    conn: sqlite3.Connection, camera: str, zones: Iterable[str], start_ts: float, end_ts: float | None = None
+    conn: sqlite3.Connection,
+    camera: str,
+    zones: Iterable[str],
+    start_ts: float,
+    end_ts: float | None = None,
+    simulated: bool = False,
 ) -> int:
     """Start logging what a camera watched, from start_ts. Returns the row id for extend_recording."""
     zones = list(zones)
@@ -101,8 +110,8 @@ def insert_recording(
     if unknown:
         raise ValueError(f"unknown zones {sorted(unknown)}, expected some of {ZONES}")
     cur = conn.execute(
-        "INSERT INTO recordings (camera, zones, start_ts, end_ts) VALUES (?, ?, ?, ?)",
-        (camera, ",".join(zones), start_ts, start_ts if end_ts is None else end_ts),
+        "INSERT INTO recordings (camera, zones, start_ts, end_ts, simulated) VALUES (?, ?, ?, ?, ?)",
+        (camera, ",".join(zones), start_ts, start_ts if end_ts is None else end_ts, int(simulated)),
     )
     conn.commit()
     assert cur.lastrowid is not None
@@ -125,10 +134,12 @@ def recordings_between(conn: sqlite3.Connection, start_ts: float, end_ts: float)
 
 
 def delete_simulated(conn: sqlite3.Connection) -> int:
-    """Remove all seeded fake events. Returns how many were deleted."""
+    """Remove all seeded fake events and their recordings. Returns how many events were deleted."""
     cur = conn.execute("DELETE FROM events WHERE simulated = 1")
+    removed = cur.rowcount
+    conn.execute("DELETE FROM recordings WHERE simulated = 1")
     conn.commit()
-    return cur.rowcount
+    return removed
 
 
 def events_between(conn: sqlite3.Connection, start_ts: float, end_ts: float) -> list[Event]:
