@@ -65,7 +65,7 @@ def frame(events):
 
 
 def watched_frame(spans, day):
-    """Rows for the shaded "on camera" bands: one per zone and watched span."""
+    """Rows for the "camera on" lines: one per zone and watched span."""
     day0 = datetime.combine(day, datetime.min.time())
     rows = [
         {"Zone": LABELS[z], "from": day0 + timedelta(seconds=a), "to": day0 + timedelta(seconds=b)}
@@ -81,7 +81,7 @@ def timeline_chart(df, day, spans=None):
 
     Detail: one row per zone; a visit is a rounded bar from its start to its end (a short one still shows on the full
     day), with a hover area HIT_PX / 2 wider on every side. Simulated visits are faded only when mixed with real ones.
-    spans: watched hours per zone, drawn as shaded bands when only part of the day was filmed.
+    spans: watched hours per zone, drawn as a thin line under each row when only part of the day was filmed.
     """
     mixed = df["simulated"].nunique() > 1
     day0 = datetime.combine(day, datetime.min.time())
@@ -129,9 +129,9 @@ def timeline_chart(df, day, spans=None):
     )
     layers = [visits, hits]
     if spans is not None:
-        bands = (  # the outline keeps a 1-minute clip visible on a 24 h axis without widening it when zoomed in
+        tracks = (  # a thin "camera on" line under each row; the outline keeps a 1-minute clip visible on 24 h
             alt.Chart(watched_frame(spans, day))
-            .mark_rect(color="gray", fillOpacity=0.18, strokeOpacity=0.18, strokeWidth=4, clip=True)
+            .mark_bar(size=2, yOffset=17, color="gray", opacity=0.6, stroke="gray", strokeWidth=2, clip=True)
             .encode(
                 x="from:T",
                 x2="to:T",
@@ -143,7 +143,7 @@ def timeline_chart(df, day, spans=None):
                 ],
             )
         )
-        layers.insert(0, bands)
+        layers.insert(0, tracks)
     if day == date.today():  # to the minute, so the chart (and a zoom selection) isn't rebuilt on every refresh
         now = pd.DataFrame({"now": [datetime.now().replace(second=0, microsecond=0)]})
         layers.append(
@@ -293,7 +293,7 @@ def body():
         st.altair_chart(chart, width="stretch", key="timeline")
         hint = "Drag across the strip below the chart to zoom in; double-click it for the whole day."
         if partly_filmed:
-            hint += " Shaded: hours on camera; only those hours are compared with the usual."
+            hint += " Grey line under a row: that camera was recording; only those hours are compared with the usual."
         st.caption(hint)
     else:
         st.caption("No visits recorded on this day.")
