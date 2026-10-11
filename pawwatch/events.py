@@ -9,6 +9,7 @@ A visit runs from the first to the last sample that saw the cat in its zone.
 Forbidden zones use a shorter dwell, so a quick jump still counts, and are signalled on every sample the cat is in one
 (VisitTracker.alarm_zone), because the alarm can't wait for the visit to end.
 """
+
 from dataclasses import dataclass
 
 MIN_DWELL_S = 5.0

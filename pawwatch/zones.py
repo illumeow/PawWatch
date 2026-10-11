@@ -5,6 +5,7 @@ File format (config/zones/<camera>.json):
 Zone names are store.ZONES. A cat is in the zone its box overlaps most, so a zone can be drawn tight around the bowl,
 litter box or furniture: overlap is measured against the smaller of box and zone, and must be at least MIN_OVERLAP.
 """
+
 import json
 from pathlib import Path
 
@@ -19,7 +20,9 @@ def load_zones(path):
     try:
         return data["camera"], [_zone(path, z["name"], z["polygon"]) for z in data["zones"]]
     except (KeyError, TypeError) as e:
-        raise ValueError(f'{path}: expected {{"camera": ..., "zones": [{{"name": ..., "polygon": [[x, y], ...]}}]}}') from e
+        raise ValueError(
+            f'{path}: expected {{"camera": ..., "zones": [{{"name": ..., "polygon": [[x, y], ...]}}]}}'
+        ) from e
 
 
 def save_zones(path, camera, zone_list):
@@ -51,8 +54,12 @@ def clip_to_box(polygon, box):
     """Part of the polygon inside box (x1, y1, x2, y2): Sutherland-Hodgman against each of the box's 4 edges."""
     x1, y1, x2, y2 = box
     inside = [lambda p: p[0] >= x1, lambda p: p[0] <= x2, lambda p: p[1] >= y1, lambda p: p[1] <= y2]
-    cut = [lambda a, b: _at_x(a, b, x1), lambda a, b: _at_x(a, b, x2),
-           lambda a, b: _at_y(a, b, y1), lambda a, b: _at_y(a, b, y2)]
+    cut = [
+        lambda a, b: _at_x(a, b, x1),
+        lambda a, b: _at_x(a, b, x2),
+        lambda a, b: _at_y(a, b, y1),
+        lambda a, b: _at_y(a, b, y2),
+    ]
     out = list(polygon)
     for keep, cross in zip(inside, cut):
         pts, out = out, []

@@ -7,6 +7,7 @@ The clips were filmed on different days; their start times here are made up but 
 one real day with every health zone on camera. Only Tangerine's clips go in: the dashboard is hers, and the drinking
 clip is of Ami, our other cat, so water shows as "not on camera". The alarm stays muted while building.
 """
+
 import argparse
 import os
 import random
@@ -26,10 +27,16 @@ CLIPS = [  # file in data/videos, zones file, made-up start time on the demo day
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--db", default="data/demo.db", help="rebuilt from scratch (default: %(default)s)")
-    ap.add_argument("--day", type=date.fromisoformat, default=date.today() - timedelta(days=1),
-                    help="the real day (default: yesterday, so the whole day is in the past)")
+    ap.add_argument(
+        "--day",
+        type=date.fromisoformat,
+        default=date.today() - timedelta(days=1),
+        help="the real day (default: yesterday, so the whole day is in the past)",
+    )
     ap.add_argument("--videos", default="data/videos")
-    ap.add_argument("--fps", type=float, default=5.0, help="same as the --show runs in the video (default: %(default)s)")
+    ap.add_argument(
+        "--fps", type=float, default=5.0, help="same as the --show runs in the video (default: %(default)s)"
+    )
     ap.add_argument("--device", help="detector device: cpu, cuda or mps")
     args = ap.parse_args()
 

@@ -9,6 +9,7 @@ with one meal is not "didn't drink all day". Days without recordings (simulated 
 
 Wording is up to the caller; it must suggest watching or seeing a vet, never a diagnosis.
 """
+
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta
 

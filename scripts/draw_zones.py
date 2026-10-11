@@ -14,6 +14,7 @@ In the window:
 Zones already in the file are loaded, drawn and kept unless undone. Draw each polygon tight around the thing itself
 (bowl, litter box, bed): the cat is in the zone its detection box overlaps most. Only the JSON is written, never a frame.
 """
+
 import argparse
 from pathlib import Path
 from types import SimpleNamespace
@@ -46,7 +47,7 @@ def main():
     args = ap.parse_args()
 
     out = Path(args.out)
-    camera, drawn = (zones.load_zones(out) if out.exists() else (out.stem, []))
+    camera, drawn = zones.load_zones(out) if out.exists() else (out.stem, [])
     camera = args.camera or camera
     frame = read_frame(args.clip, args.at)
     h, w = frame.shape[:2]
@@ -105,8 +106,16 @@ def draw(frame, drawn, name, points, scale):
     img = cv2.resize(img, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA) if scale < 1 else img
     names = "  ".join(f"{i}:{z}" for i, z in enumerate(store.ZONES, 1))
     img[:HELP_H] //= 3
-    cv2.putText(img, f"zone: {name}   [{names}]   n close  u undo  s save  q quit", (10, 24),
-                overlay.FONT, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
+    cv2.putText(
+        img,
+        f"zone: {name}   [{names}]   n close  u undo  s save  q quit",
+        (10, 24),
+        overlay.FONT,
+        0.6,
+        (255, 255, 255),
+        1,
+        cv2.LINE_AA,
+    )
     return img
 
 

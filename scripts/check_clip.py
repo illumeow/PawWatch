@@ -4,6 +4,7 @@ Run: uv run python scripts/check_clip.py data/videos/test_food.mp4
 Prints the detection rate and saves a few annotated frames to data/check/ (gitignored) to eyeball.
 If the cat is missed often, move the camera or add light before the long recording.
 """
+
 import argparse
 from pathlib import Path
 
@@ -43,7 +44,9 @@ def main():
                 scores.append(max(s for _, s, _ in cats))
             for _, score, (x1, y1, x2, y2) in cats:
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 220, 0), 3)
-                cv2.putText(frame, f"cat {score:.2f}", (x1, max(y1 - 8, 20)), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 220, 0), 2)
+                cv2.putText(
+                    frame, f"cat {score:.2f}", (x1, max(y1 - 8, 20)), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 220, 0), 2
+                )
             if cats and saved_hit < 3:
                 cv2.imwrite(str(out / f"{stem}_hit{saved_hit}.jpg"), frame)
                 saved_hit += 1
@@ -60,7 +63,9 @@ def main():
     print(f"{stem}: cat in {hits}/{checked} checked frames ({rate:.0%}), mean confidence {mean:.2f}")
     print(f"sample frames in {out}/")
     if rate < 0.5:
-        print("Low rate. If the cat was in frame most of the clip, move the camera closer, change the angle or add light.")
+        print(
+            "Low rate. If the cat was in frame most of the clip, move the camera closer, change the angle or add light."
+        )
 
 
 if __name__ == "__main__":

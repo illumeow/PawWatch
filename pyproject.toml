@@ -11,7 +11,10 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest"]
+dev = [
+    "pytest",
+    "ruff>=0.17.0",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -19,3 +22,20 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["pawwatch"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"  # lowest Python we support (HailoRT's range)
+
+[tool.ruff.lint]
+select = [
+    "E", "W",  # pycodestyle
+    "F",       # pyflakes: unused names, undefined names
+    "I",       # import order
+    "B",       # bugbear: likely bugs
+    "UP",      # pyupgrade: syntax for the target Python
+    "SIM",     # simplifications
+    "C4",      # comprehensions
+    "PTH",     # pathlib over os.path
+    "RUF",     # ruff's own checks
+]

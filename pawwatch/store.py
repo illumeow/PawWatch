@@ -5,6 +5,7 @@ video time (recording start + frame offset), not wall clock at processing time.
 Each processed video file also gets a recordings row (which camera and zones were watched, and when), so a day
 with a few hours of footage is compared only over those hours. Days without recordings count as watched all day.
 """
+
 import sqlite3
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta

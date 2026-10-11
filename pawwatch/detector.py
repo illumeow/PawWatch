@@ -21,7 +21,9 @@ class UltralyticsDetector:
         result = self.model(frame_bgr, conf=self.conf, classes=[COCO_CAT], device=self.device, verbose=False)[0]
         return [
             (result.names[int(cls)], float(score), tuple(int(v) for v in box))
-            for box, score, cls in zip(result.boxes.xyxy.tolist(), result.boxes.conf.tolist(), result.boxes.cls.tolist())
+            for box, score, cls in zip(
+                result.boxes.xyxy.tolist(), result.boxes.conf.tolist(), result.boxes.cls.tolist()
+            )
         ]
 
 

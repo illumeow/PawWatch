@@ -2,6 +2,7 @@
 
 Wording suggests watching or seeing a vet, never a diagnosis. Simulated days are labeled.
 """
+
 from datetime import datetime
 
 from pawwatch import anomaly, store
@@ -96,7 +97,9 @@ def daily_report(conn, day=None, cat_name="Tangerine", now=None):
     else:
         for a in alerts:
             usual = f"about {round(a.expected)} {USUAL[a.scope]}"
-            sentences.append(f"{NOUN[a.zone]} are well {'above' if a.direction == 'high' else 'below'} usual ({usual}).")
+            sentences.append(
+                f"{NOUN[a.zone]} are well {'above' if a.direction == 'high' else 'below'} usual ({usual})."
+            )
         sentences.append(ADVICE)
 
     return label + " ".join(sentences)
