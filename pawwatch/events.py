@@ -60,8 +60,8 @@ class VisitTracker:
 
     @property
     def counting(self) -> str | None:
-        """Zone of the open visit once it has lasted long enough to count, else None. For live displays: a visit
-        that qualifies will be stored when it ends, so a screen can count it now."""
+        """Zone of the open visit once it has lasted long enough to count, else None. A visit that qualifies is
+        never dropped, so run.py writes it to the database at this point and screens can count it."""
         return self.open.zone if self.open and self._long_enough(self.open) else None
 
     def close(self) -> list[Visit]:

@@ -6,7 +6,8 @@ Usage:
     uv run python -m pawwatch.run data/videos/food_2026-10-09T1830.mp4 --zones config/zones/cam_food.json --fps 5 --show
 
 Per sampled frame: detector.infer -> highest-score box -> zones.zone_for_box (most overlap) -> events.VisitTracker
--> store.insert_event for each finished visit, and alarm.trigger on every frame the cat is in a forbidden zone
+-> store.insert_event once a visit qualifies, store.extend_event while it lasts, and alarm.trigger on every frame
+the cat is in a forbidden zone
 (the alarm applies its own cooldown). With --show, each frame is also drawn in the detection window (pawwatch.overlay);
 the per-frame logic is the same either way, so windowed and headless runs store the same rows.
 Each file also gets a recordings row (camera, its zones, start to last processed frame), so the dashboard compares
@@ -100,8 +101,8 @@ def process(
     forbidden_dwell: float = events.FORBIDDEN_DWELL_S,
     window: overlay.Display | None = None,
 ) -> list[events.Visit]:
-    """Run one camera's videos through the pipeline, ring the alarm on forbidden frames and store each visit as it
-    finishes. Returns the visits.
+    """Run one camera's videos through the pipeline, ring the alarm on forbidden frames and store each visit live:
+    written once it qualifies, its end moved forward while the cat stays. Returns the finished visits.
 
     window: an overlay.Window to draw each frame in, or None for headless. Closing it stops early; the open visit
     is still stored.
@@ -113,10 +114,20 @@ def process(
     counts = Counter()  # visits stored so far per zone, for the window
     watched = [z for z in store.ZONES if any(name == z for name, _ in zone_list)]
     recordings = {}  # file start -> recordings row id
+    rows = {}  # (zone, start) of a visit already written -> its events row id
+
+    def write(v: events.Visit) -> None:
+        """Insert the visit the first time it's written, then move its end forward."""
+        key = (v.zone, v.start_ts)
+        if key in rows:
+            store.extend_event(conn, rows[key], v.end_ts)
+        else:
+            rows[key] = store.insert_event(conn, camera, v.zone, v.start_ts, v.end_ts)
 
     def save(visits: list[events.Visit]) -> None:
         for v in visits:
-            store.insert_event(conn, camera, v.zone, v.start_ts, v.end_ts)
+            write(v)
+            rows.pop((v.zone, v.start_ts), None)
             print(
                 f"{camera} {v.zone:6} {datetime.fromtimestamp(v.start_ts):%Y-%m-%d %H:%M:%S}"
                 f" {v.end_ts - v.start_ts:6.1f} s",
@@ -134,6 +145,8 @@ def process(
             detections = detector.infer(frame)
             zone = cat_zone(detections, zone_list)
             save(tracker.update(ts, zone))
+            if tracker.counting and tracker.open:  # live: the visit qualified, so it will be stored; write it now
+                write(tracker.open)
             if tracker.alarm_zone:
                 alarm.trigger(camera, tracker.alarm_zone, ts)
             shown = counts + Counter(

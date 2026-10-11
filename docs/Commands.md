@@ -35,11 +35,12 @@ uv run python scripts/seed_fake.py --db data/alert.db --with-today --end 2026-10
 PAWWATCH_DB=data/alert.db uv run streamlit run dashboard/app.py
 ```
 
-Pick Sat, Oct 10 in the sidebar. Stop one dashboard (Ctrl+C) before starting another; they share the port.
+Pick Sat, Oct 10 in the Day picker at the top right. Stop one dashboard (Ctrl+C) before starting another; they share the port.
 
 ## Live: feed a clip while the dashboard is open
 
-The dashboard opens on Today with every zone "not on camera", and picks up each visit within 3 s of it ending.
+The dashboard opens on Today with every zone "not on camera". A visit appears once it qualifies (5 s in a zone,
+1 s on a no-go spot) and its bar grows while the cat stays; the page refreshes every 3 s.
 Keep `--show`: it plays at real speed, so visits get real times. Without it a clip finishes in seconds and its visits
 land in the future.
 
@@ -58,7 +59,7 @@ uv run python -m pawwatch.run data/videos/TangerineJumpOntoBed.mov --zones confi
 ```
 
 The drinking clip is Ami, our other cat; the dashboard is titled Tangerine, so leave it out of a live dashboard shot
-or change the cat's name in the sidebar.
+or start the dashboard with `PAWWATCH_CAT=Ami` in front.
 
 ## Zones
 

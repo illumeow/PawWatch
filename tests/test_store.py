@@ -47,3 +47,12 @@ def test_recordings_grow_and_overlap_queries():
     assert store.recordings_between(conn, 160, 200) == []
     with pytest.raises(ValueError):
         store.insert_recording(conn, "cam_x", ["sofa"], 0.0)
+
+
+def test_extend_event_moves_the_end_forward_only():
+    conn = store.connect(":memory:")
+    ev = store.insert_event(conn, "cam_food", "food", 100.0, 105.0)
+    store.extend_event(conn, ev, 130.0)
+    store.extend_event(conn, ev, 120.0)  # never shrinks
+    [e] = store.events_between(conn, 0, 1000)
+    assert (e.end_ts, e.duration_s) == (130.0, 30.0)

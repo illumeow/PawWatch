@@ -1,6 +1,7 @@
 """Streamlit dashboard. Owner: B.
 
-Run: uv run streamlit run dashboard/app.py   (PAWWATCH_DB=data/demo.db to open another database)
+Run: uv run streamlit run dashboard/app.py
+Setup by environment: PAWWATCH_DB (default data/pawwatch.db), PAWWATCH_CAT (default Tangerine).
 One page: daily report, today's counts vs usual, alerts, timeline, 7-day trend (simulated days marked), stored data.
 Reads only through pawwatch.store / anomaly / report.
 """
@@ -224,26 +225,27 @@ def week_rows(conn, day):
     return rows
 
 
-with st.sidebar:
-    st.header("PawWatch")
-    db_path = st.text_input("Database", os.environ.get("PAWWATCH_DB", str(store.DEFAULT_DB)))
-    cat = st.text_input("Cat's name", "Tangerine")
-    live = st.toggle(f"Auto-refresh every {REFRESH_S} s", value=True)
+# Setup, not UI: an owner never picks a database file or retypes the cat's name.
+db_path = os.environ.get("PAWWATCH_DB", str(store.DEFAULT_DB))
+cat = os.environ.get("PAWWATCH_CAT", "Tangerine")
 
 # Today is always offered, so a dashboard opened before the first visit picks up footage processed while it's open.
 events = all_events(store.connect(db_path))
 days = sorted({datetime.fromtimestamp(e.start_ts).date() for e in events} | {date.today()}, reverse=True)
 real_days = [datetime.fromtimestamp(e.start_ts).date() for e in events if not e.simulated]
-with st.sidebar:
+title_col, day_col = st.columns([4, 1], vertical_alignment="bottom")
+with day_col:  # the page's one control, in the header row
     day = st.selectbox(
         "Day",
         days,
         index=days.index(max(real_days, default=date.today())),
         format_func=lambda d: "Today" if d == date.today() else d.strftime("%a, %b %d"),
     )
+with title_col:
+    st.title(f"{cat} · {'Today' if day == date.today() else day.strftime('%A, %B %d')}")
 
 
-@st.fragment(run_every=f"{REFRESH_S}s" if live else None)
+@st.fragment(run_every=f"{REFRESH_S}s")
 def body():
     conn = store.connect(db_path)
     now = datetime.now()
@@ -251,7 +253,6 @@ def body():
     simulated_day = bool(day_events) and all(e.simulated for e in day_events)
     when = "Today" if day == now.date() else day.strftime("%A, %B %d")
 
-    st.title(f"{cat} · {when}")
     st.caption(
         "Laptop prototype · events only, no video stored"
         + (" · **this day uses simulated data**" if simulated_day else "")
