@@ -42,7 +42,7 @@ def test_cat_zone_uses_the_highest_score_box():
 
 def write_video(path, script):
     """script: [(seconds, cat center or None)]; the cat is a white square on black."""
-    out = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"mp4v"), FPS, (W, H))
+    out = cv2.VideoWriter(str(path), cv2.VideoWriter.fourcc(*"mp4v"), FPS, (W, H))
     assert out.isOpened()
     for seconds, center in script:
         for _ in range(seconds * FPS):
@@ -68,10 +68,17 @@ class StubDetector:
 @pytest.fixture
 def zones_file(tmp_path):
     path = tmp_path / "cam_food.json"
-    path.write_text(json.dumps({"camera": "cam_food", "zones": [
-        {"name": "food", "polygon": [[0, 0], [80, 0], [80, 120], [0, 120]]},
-        {"name": "water", "polygon": [[80, 0], [160, 0], [160, 120], [80, 120]]},
-    ]}))
+    path.write_text(
+        json.dumps(
+            {
+                "camera": "cam_food",
+                "zones": [
+                    {"name": "food", "polygon": [[0, 0], [80, 0], [80, 120], [0, 120]]},
+                    {"name": "water", "polygon": [[80, 0], [160, 0], [160, 120], [80, 120]]},
+                ],
+            }
+        )
+    )
     return path
 
 
@@ -81,7 +88,9 @@ def rows(db):
 
 
 def test_pipeline_writes_visits(tmp_path, zones_file):
-    video = write_video(tmp_path / "food_2026-10-09T1830.mp4", [(8, LEFT), (4, None), (2, RIGHT), (6, None), (7, RIGHT)])
+    video = write_video(
+        tmp_path / "food_2026-10-09T1830.mp4", [(8, LEFT), (4, None), (2, RIGHT), (6, None), (7, RIGHT)]
+    )
     db = tmp_path / "events.db"
     run.process([video], zones_file, StubDetector(), store.connect(db), fps=5)
     # food 0-7.8 s; water 12-13.8 s and 20-26.8 s are 6.2 s apart (beyond tolerance): the 2 s one is too short
@@ -112,10 +121,17 @@ def test_cli_start_override_needs_a_single_file(tmp_path, zones_file):
 
 def test_forbidden_zone_triggers_alarm_on_every_frame(tmp_path, monkeypatch):
     zones_path = tmp_path / "cam_counter.json"
-    zones_path.write_text(json.dumps({"camera": "cam_counter", "zones": [
-        {"name": "food", "polygon": [[0, 0], [80, 0], [80, 120], [0, 120]]},
-        {"name": "forbidden", "polygon": [[80, 0], [160, 0], [160, 120], [80, 120]]},
-    ]}))
+    zones_path.write_text(
+        json.dumps(
+            {
+                "camera": "cam_counter",
+                "zones": [
+                    {"name": "food", "polygon": [[0, 0], [80, 0], [80, 120], [0, 120]]},
+                    {"name": "forbidden", "polygon": [[80, 0], [160, 0], [160, 120], [80, 120]]},
+                ],
+            }
+        )
+    )
     calls = []
     monkeypatch.setattr(alarm, "trigger", lambda camera, zone, ts: calls.append((camera, zone, ts - T0)))
     video = write_video(tmp_path / "counter_2026-10-09T1830.mp4", [(2, None), (2, RIGHT), (2, None), (2, LEFT)])
@@ -166,3 +182,32 @@ def test_each_file_logs_what_was_recorded(tmp_path, zones_file):
         ("cam_food", ("food", "water"), 0.0, 5.0),
         ("cam_food", ("food", "water"), 600.0, 603.0),
     ]
+
+
+class Peek:
+    """A window that reads the database on every frame, to see what a dashboard would see mid-clip."""
+
+    def __init__(self, db):
+        self.db, self.seen = db, []
+
+    def show(self, img, offset):
+        self.seen.append((offset, rows(self.db)))
+        return True
+
+    def close(self):
+        pass
+
+
+def test_visits_are_written_live_while_the_cat_stays(tmp_path, zones_file):
+    video = write_video(tmp_path / "food_2026-10-09T1830.mp4", [(20, LEFT)])
+    db = tmp_path / "events.db"
+    peek = Peek(db)
+    run.process([video], zones_file, StubDetector(), store.connect(db), fps=5, window=peek)
+
+    def at(seconds):
+        return min(peek.seen, key=lambda s: abs(s[0] - seconds))[1]
+
+    assert at(4.0) == []  # 4 s in: not a visit yet (5 s minimum)
+    assert at(5.0) == [("cam_food", "food", 0.0, pytest.approx(5.0), False)]  # qualifies: written
+    assert at(12.0) == [("cam_food", "food", 0.0, pytest.approx(12.0), False)]  # still growing
+    assert rows(db) == [("cam_food", "food", 0.0, pytest.approx(19.8), False)]  # one row in the end

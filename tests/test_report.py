@@ -52,18 +52,19 @@ def test_high_litter_gets_comparison_and_advice():
 
 def test_describe_anomaly_stands_alone():
     assert report.describe_anomaly(Anomaly("food", 0, 4, "low", "day")) == (
-        "Tangerine didn't eat today; usually about 4 a day. Keep an eye on it, and consider a vet visit if it continues."
+        "Tangerine didn't eat today; usually about 4 a day. "
+        "Keep an eye on it, and consider a vet visit if it continues."
     )
     assert report.describe_anomaly(Anomaly("water", 1, 4.4, "low", "so_far")).startswith(
         "Tangerine only drank water once today; usually about 4 by this time."
     )
 
 
-def test_past_day_wording_and_simulated_label():
+def test_past_day_wording():
     conn = store.connect(":memory:")
     usual_week(conn)
     text = report.daily_report(conn, TODAY - timedelta(days=1), now=at(TODAY, 12))
-    assert text.startswith("[Simulated data] Tangerine ate twice")
+    assert text.startswith("Tangerine ate twice")  # simulated or not: the dashboard labels demo data, not the report
     assert "on Thursday, Oct 8." in text
 
 
@@ -90,3 +91,18 @@ def test_short_clips_name_what_was_on_camera():
         "Tangerine jumped onto a no-go spot once. "
         "Nothing unusual compared with the past week."
     )
+
+
+def test_an_outage_names_the_camera_and_when_it_was_off():
+    conn = store.connect(":memory:")
+    usual_week(conn)
+    day0 = datetime.combine(TODAY, datetime.min.time()).timestamp()
+    for zone in ("food", "litter", "forbidden"):
+        store.insert_recording(conn, f"cam_{zone}", [zone], day0, day0 + 86400)
+    store.insert_recording(conn, "cam_water", ["water"], day0, day0 + 13 * 3600)  # off 13:00-16:30
+    store.insert_recording(conn, "cam_water", ["water"], day0 + 16.5 * 3600, day0 + 86400)
+    for zone, hour in [("food", 7), ("food", 18), ("water", 9), ("litter", 10), ("litter", 20)]:
+        add(conn, zone, TODAY, hour)
+    text = report.daily_report(conn, TODAY, now=at(TODAY + timedelta(days=1), 12))
+    assert "The water bowl camera was off 13:00–16:30." in text
+    assert "Cameras were recording" not in text

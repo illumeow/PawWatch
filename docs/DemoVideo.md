@@ -1,7 +1,7 @@
 # Demo video
 
 Under 3 minutes, English, uploaded to YouTube as unlisted. Owner: @illumeow (edit and voice-over).
-Narration is TTS; total speech is about 2 minutes, which leaves room for the alarm sound and for shots to breathe.
+Narration is recorded by @illumeow; total speech is about 2 minutes, which leaves room for the alarm sound and for shots to breathe.
 
 ## Shot list
 
@@ -25,7 +25,8 @@ The dashboard is Tangerine's, on simulated data.
 
 ## Narration
 
-Spellings like "U Gen 300" are for the TTS voice; captions use the normal spelling.
+Spellings like "U Gen 300" show how to say it; captions use the normal spelling (UGen300, Hailo-10H, YOLOv8).
+Times per part are from a test read at a calm pace.
 
 **1 (13 s).** These are our cats. If one of them started drinking twice as much water, or visiting the litter box three
 times as often, would you notice? Changes like these are often the first sign that a cat is unwell, and cats are very good at
@@ -65,19 +66,9 @@ Check before recording:
 
 ## Voice-over
 
-macOS, one file per section so each lines up with its shot:
+Record one file per part, so each lines up with its shot.
 
-```bash
-say -v Samantha -r 165 -f 1.txt -o 1.aiff   # repeat per section; durations above are from this voice and rate
-```
+## Commands
 
-## Dashboard recording
-
-The alert day must be a full past day, or "today" before any simulated visit has happened looks empty:
-
-```bash
-uv run python scripts/seed_fake.py --db data/video.db --with-today --end <yesterday>
-PAWWATCH_DB=data/video.db uv run streamlit run dashboard/app.py
-```
-
-Pick yesterday in the sidebar, collapse the sidebar, and record the browser window.
+Every command for the recordings (detection window per clip, real-day and alert-day dashboards, live dashboard,
+zones) is in [Commands.md](Commands.md).

@@ -38,3 +38,29 @@ def test_delete_simulated_keeps_real_events():
     store.insert_event(conn, "cam_food", "food", 100, 160, simulated=True)
     assert store.delete_simulated(conn) == 1
     assert len(store.events_between(conn, 0, 1000)) == 1
+
+
+def test_seeded_days_have_recordings_with_an_outage_now_and_then():
+    conn = store.connect(":memory:")
+    end = date(2026, 10, 8)
+    simulate.seed(conn, 7, end, random.Random(0))
+    days = [date(2026, 10, d) for d in range(2, 9)]
+    outages = {d: simulate.outage(d) for d in days if simulate.outage(d)}
+    assert 2 <= len(outages) <= 3  # about one day in three
+    for d in days:
+        day0 = datetime.combine(d, datetime.min.time()).timestamp()
+        recs = store.recordings_between(conn, day0, day0 + 86400)
+        off = outages.get(d)
+        assert len(recs) == 4 + (1 if off else 0)  # one per camera, split in two around the outage
+        if off:
+            zone, start, end_ts = off
+            seen = [ev for ev in store.events_between(conn, start, end_ts) if ev.zone == zone]
+            assert seen == []  # nobody saw visits while the camera was off
+
+
+def test_delete_simulated_also_removes_simulated_recordings():
+    conn = store.connect(":memory:")
+    simulate.seed(conn, 3, date(2026, 10, 8), random.Random(0))
+    store.insert_recording(conn, "cam_food", ["food"], 0.0, 60.0)  # a real one stays
+    store.delete_simulated(conn)
+    assert len(store.recordings_between(conn, -1, 2e10)) == 1

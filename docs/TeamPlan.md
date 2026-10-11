@@ -58,8 +58,8 @@ uv run python -m pawwatch.run data/videos/TangerineEat.mp4 --zones config/zones/
 **@illumeow (B):** all code. Images for the slides are in `slides/images/` on `develop`: four detection-window stills
 (`detect_*.jpg`; the drinking one is Ami, our other cat) and two dashboards (`dashboard_real_day.png` from the real
 clips, `dashboard_alert_simulated.png`, which must be captioned as simulated). To get them on `feat/slides`:
-`git merge develop` there, then push (no conflicts: `slides/images/` is new; don't rebase a shared branch). Next for B: merge `develop` into `main`, then the
-demo video (shot list, narration and timings in `docs/DemoVideo.md`).
+`git merge develop` there, then push (no conflicts: `slides/images/` is new; don't rebase a shared branch). Next for B: the demo video (shot list and narration
+in `docs/DemoVideo.md`, every command in `docs/Commands.md`).
 
 **Cut for time:** Hailo backend port, Telegram setup, LLM-written daily report, overnight recording and bulk runs.
 
@@ -92,8 +92,10 @@ Handoffs to C:
 
 Two things cross the A/B line, so we fix both on day 1. Changing either needs a heads-up to the other person.
 
-1. The events table in `pawwatch/store.py`, for finished visits.
-2. The live alarm hook in `pawwatch/alarm.py`, for the moment the cat enters a forbidden zone. It can't go through SQLite, because a visit is written only after it ends.
+1. The events table in `pawwatch/store.py`, for visits: written once a visit qualifies (minimum dwell), its end moved
+   forward while the cat stays (`extend_event`), so a dashboard follows a live stream.
+2. The live alarm hook in `pawwatch/alarm.py`, for the moment the cat enters a forbidden zone. It can't go through
+   SQLite, because a visit is written only once it qualifies, and the alarm must ring on the first frame.
 
 ```sql
 CREATE TABLE events (

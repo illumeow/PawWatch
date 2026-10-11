@@ -75,6 +75,8 @@ Requires macOS or Linux and [uv](https://docs.astral.sh/uv/). `uv` installs Pyth
 ```bash
 uv sync
 uv run pytest
+uv run ruff check && uv run ruff format --check   # lint and formatting
+uv run pyright                                    # type check
 ```
 
 ### See the dashboard with simulated data
@@ -84,7 +86,8 @@ uv run python scripts/seed_fake.py --with-today   # 7 simulated days, plus a day
 uv run streamlit run dashboard/app.py
 ```
 
-Simulated days are labeled as such everywhere: faded and starred in charts, "[Simulated data]" in the report.
+The dashboard labels simulated data once, at the top ("Demo data: 7 simulated days"); a real deployment has none,
+so it never shows the note.
 
 ### Rebuild our demo from the real clips
 
@@ -120,7 +123,8 @@ PAWWATCH_DB=data/demo.db uv run streamlit run dashboard/app.py
    uv run python scripts/seed_fake.py --end 2026-10-09
    uv run streamlit run dashboard/app.py
    ```
-   `--db` (or `PAWWATCH_DB=` for the dashboard) points both at another database.
+   `--db` (or `PAWWATCH_DB=` for the dashboard) points both at another database; `PAWWATCH_CAT=` sets the cat's
+   name the dashboard and report use (default Tangerine).
 
 ### Alarm settings
 

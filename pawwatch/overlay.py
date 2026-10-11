@@ -3,7 +3,10 @@
 render() draws on a copy of a frame and is pure; Window only displays. Nothing here saves a frame:
 the demo video is a screen capture taken outside the program.
 """
+
 import time
+from collections.abc import Mapping, Sequence
+from typing import Protocol
 
 import cv2
 import numpy as np
@@ -14,12 +17,18 @@ ZONE_COLORS = {"food": (0, 165, 255), "water": (255, 180, 0), "litter": (200, 12
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 
-def counts_text(zone_list, counts):
+def counts_text(zone_list: Sequence[tuple[str, object]], counts: Mapping[str, int]) -> str:
     """Visits logged so far for each of the camera's zones, e.g. 'food 2 · water 0'."""
     return " · ".join(f"{name} {counts.get(name, 0)}" for name, _ in zone_list)
 
 
-def render(frame, detections, zone_list, zone, counts):
+def render(
+    frame: np.ndarray,
+    detections: Sequence[tuple[str, float, tuple[int, int, int, int]]],
+    zone_list: Sequence[tuple[str, Sequence[tuple[float, float]]]],
+    zone: str | None,
+    counts: Mapping[str, int],
+) -> np.ndarray:
     """Annotated copy of a frame. zone is the cat's current zone; the top cat box turns red in a forbidden one."""
     img = frame.copy()
     s = scale(img)
@@ -31,8 +40,16 @@ def render(frame, detections, zone_list, zone, counts):
     for i, (label, score, (x1, y1, x2, y2)) in enumerate(cats):
         color = RED if i == 0 and zone == "forbidden" else GREEN
         cv2.rectangle(img, (x1, y1), (x2, y2), color, max(2, round(3 * s)))
-        cv2.putText(img, f"{label} {score:.2f}", (x1, max(y1 - round(8 * s), band + round(24 * s))),
-                    FONT, 0.8 * s, color, thick, cv2.LINE_AA)
+        cv2.putText(
+            img,
+            f"{label} {score:.2f}",
+            (x1, max(y1 - round(8 * s), band + round(24 * s))),
+            FONT,
+            0.8 * s,
+            color,
+            thick,
+            cv2.LINE_AA,
+        )
 
     img[:band] //= 3  # darkened bands keep the text readable on any footage
     img[-band:] //= 3
@@ -48,12 +65,12 @@ def render(frame, detections, zone_list, zone, counts):
     return img
 
 
-def scale(img):
+def scale(img: np.ndarray) -> float:
     """Sizes are tuned for 1280 px on the long side, so portrait phone clips get the same text size as landscape."""
     return max(img.shape[:2]) / 1280
 
 
-def draw_zones(img, zone_list, top=0):
+def draw_zones(img: np.ndarray, zone_list: Sequence[tuple[str, Sequence[tuple[float, float]]]], top: int = 0) -> None:
     """Zone outlines with their names, in place. Labels stay below `top` px (the counts band)."""
     s = scale(img)
     for name, polygon in zone_list:
@@ -61,11 +78,19 @@ def draw_zones(img, zone_list, top=0):
         pts = [(round(x), round(y)) for x, y in polygon]
         cv2.polylines(img, [np.array(pts, np.int32)], True, color, max(1, round(2 * s)), cv2.LINE_AA)
         x, y = min(p[0] for p in pts), min(p[1] for p in pts)
-        cv2.putText(img, name, (x + round(8 * s), max(y, top) + round(32 * s)),
-                    FONT, 0.9 * s, color, max(1, round(2 * s)), cv2.LINE_AA)
+        cv2.putText(
+            img,
+            name,
+            (x + round(8 * s), max(y, top) + round(32 * s)),
+            FONT,
+            0.9 * s,
+            color,
+            max(1, round(2 * s)),
+            cv2.LINE_AA,
+        )
 
 
-def _text(img, text, org, scale, color):
+def _text(img: np.ndarray, text: str, org: tuple[int, int], scale: float, color: tuple[int, int, int]) -> None:
     """putText with ' · ' drawn as a dot: Hershey fonts are ASCII only."""
     thick = max(1, round(2 * scale))
     x, y = org
@@ -89,16 +114,24 @@ def closed_by_user(win):
     return win.seen_visible and not visible
 
 
+class Display(Protocol):
+    """Where run.process sends each rendered frame: the Window below, or a stand-in in tests."""
+
+    def show(self, img: np.ndarray, offset: float) -> bool: ...
+
+    def close(self) -> None: ...
+
+
 class Window:
     """Shows rendered frames paced to video time, so recorded footage plays back like a live feed."""
 
-    def __init__(self, title="PawWatch"):
+    def __init__(self, title: str = "PawWatch"):
         self.title = title
         self.last = None  # (video offset, monotonic time) of the frame on screen
         self.seen_visible = False
         cv2.namedWindow(title, cv2.WINDOW_NORMAL)
 
-    def show(self, img, offset):
+    def show(self, img: np.ndarray, offset: float) -> bool:
         """Display img once its video offset is due. Returns False when the user presses q or closes the window."""
         keys = []
         if self.last and offset >= self.last[0]:  # an earlier offset means a new file: show at once
@@ -110,6 +143,6 @@ class Window:
         self.last = (offset, time.monotonic())
         return not closed_by_user(self) and not any(k & 0xFF == ord("q") for k in keys if k != -1)
 
-    def close(self):
+    def close(self) -> None:
         cv2.destroyWindow(self.title)
         cv2.waitKey(1)

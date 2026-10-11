@@ -29,7 +29,9 @@ def test_rejects_unknown_zone(conn):
 def test_daily_counts_zero_filled(conn):
     today = date(2026, 10, 9)
     store.insert_event(conn, "cam_litter", "litter", ts(today, 9), ts(today, 9) + 60)
-    store.insert_event(conn, "cam_litter", "litter", ts(date(2026, 10, 8), 9), ts(date(2026, 10, 8), 9) + 60, simulated=True)
+    store.insert_event(
+        conn, "cam_litter", "litter", ts(date(2026, 10, 8), 9), ts(date(2026, 10, 8), 9) + 60, simulated=True
+    )
     counts = store.daily_counts(conn, 7, today=today)
     assert list(counts) == [date(2026, 10, d) for d in range(3, 10)]
     assert counts[today] == {"food": 0, "water": 0, "litter": 1, "forbidden": 0}
@@ -45,3 +47,26 @@ def test_recordings_grow_and_overlap_queries():
     assert store.recordings_between(conn, 160, 200) == []
     with pytest.raises(ValueError):
         store.insert_recording(conn, "cam_x", ["sofa"], 0.0)
+
+
+def test_extend_event_moves_the_end_forward_only():
+    conn = store.connect(":memory:")
+    ev = store.insert_event(conn, "cam_food", "food", 100.0, 105.0)
+    store.extend_event(conn, ev, 130.0)
+    store.extend_event(conn, ev, 120.0)  # never shrinks
+    [e] = store.events_between(conn, 0, 1000)
+    assert (e.end_ts, e.duration_s) == (130.0, 30.0)
+
+
+def test_old_databases_get_the_recordings_simulated_column(tmp_path):
+    import sqlite3
+
+    db = tmp_path / "old.db"
+    old = sqlite3.connect(db)
+    old.execute("CREATE TABLE recordings (id INTEGER PRIMARY KEY, camera TEXT, zones TEXT, start_ts REAL, end_ts REAL)")
+    old.commit()
+    old.close()
+    conn = store.connect(db)
+    store.insert_recording(conn, "cam_food", ["food"], 0.0, 60.0, simulated=True)
+    assert store.delete_simulated(conn) == 0
+    assert store.recordings_between(conn, -1, 100) == []

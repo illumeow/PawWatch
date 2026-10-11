@@ -7,6 +7,7 @@ Environment (all optional):
     PAWWATCH_ALARM_SOUND=path          custom sound file instead of the system alert
     TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID   also send a text message; nothing is sent unless both are set
 """
+
 import json
 import os
 import platform
