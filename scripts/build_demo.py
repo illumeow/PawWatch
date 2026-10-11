@@ -25,7 +25,7 @@ CLIPS = [  # file in data/videos, zones file, made-up start time on the demo day
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     ap.add_argument("--db", default="data/demo.db", help="rebuilt from scratch (default: %(default)s)")
     ap.add_argument(
         "--day",

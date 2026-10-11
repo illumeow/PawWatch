@@ -15,7 +15,7 @@ from pawwatch.simulate import CAMERAS, has_real_events, seed, simulate_day
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     ap.add_argument("--db", default=store.DEFAULT_DB)
     ap.add_argument("--days", type=int, default=7, help="days of history")
     ap.add_argument(

@@ -27,8 +27,9 @@ Current status and each person's next steps: the top section of `docs/TeamPlan.m
   Use video time, not wall clock, so recorded footage replays correctly.
 - Python 3.10–3.13 supported (HailoRT's range); develop on 3.12. No cloud services.
 - Managed with uv: `uv sync` to set up, `uv run` to execute, `uv add` / `uv remove` for dependencies. No bare `pip`.
-- Lint and format with ruff (config in `pyproject.toml`): `uv run ruff format` and `uv run ruff check` stay clean,
-  alongside `uv run pytest`.
+- Lint and format with ruff, type-check with pyright (config in `pyproject.toml`; Pylance reads the same settings):
+  `uv run ruff format`, `uv run ruff check`, `uv run pyright` and `uv run pytest` all stay clean.
+  Annotate public functions.
 
 ## Conventions
 

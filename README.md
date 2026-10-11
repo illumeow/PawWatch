@@ -76,6 +76,7 @@ Requires macOS or Linux and [uv](https://docs.astral.sh/uv/). `uv` installs Pyth
 uv sync
 uv run pytest
 uv run ruff check && uv run ruff format --check   # lint and formatting
+uv run pyright                                    # type check
 ```
 
 ### See the dashboard with simulated data

@@ -40,7 +40,7 @@ def read_frame(clip, at_s):
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     ap.add_argument("clip", help="a video from the camera, at its native resolution")
     ap.add_argument("out", help="zones file to write, e.g. config/zones/cam_food.json")
     ap.add_argument("--at", type=float, default=0.0, help="seconds into the clip to draw on (default: %(default)s)")

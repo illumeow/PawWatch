@@ -19,14 +19,17 @@ Files are processed in time order with one tracker, so a visit spanning two file
 
 import argparse
 import re
+import sqlite3
 from collections import Counter
+from collections.abc import Iterable, Iterator, Sequence
 from datetime import datetime
 from pathlib import Path
 
 import cv2
+import numpy as np
 
 from pawwatch import alarm, events, overlay, store, zones
-from pawwatch.detector import make_detector
+from pawwatch.detector import Detection, Detector, make_detector
 
 FILENAME_STARTS = [  # (pattern on the file stem, strptime format of its first group)
     (re.compile(r"_(\d{4}-\d{2}-\d{2}T\d{4})$"), "%Y-%m-%dT%H%M"),
@@ -34,7 +37,7 @@ FILENAME_STARTS = [  # (pattern on the file stem, strptime format of its first g
 ]
 
 
-def parse_start(path, override=None):
+def parse_start(path: str | Path, override: str | None = None) -> float:
     """Recording start of a video file as unix seconds (local time), from its name or an ISO override."""
     if override:
         return datetime.fromisoformat(override).timestamp()
@@ -48,7 +51,7 @@ def parse_start(path, override=None):
     )
 
 
-def cat_zone(detections, zone_list):
+def cat_zone(detections: Sequence[Detection], zone_list: Iterable[zones.Zone]) -> str | None:
     """Zone the highest-score cat box overlaps most, or None (single-cat MVP)."""
     cats = [d for d in detections if d[0] == "cat"]
     if not cats:
@@ -56,7 +59,7 @@ def cat_zone(detections, zone_list):
     return zones.zone_for_box(max(cats, key=lambda d: d[1])[2], zone_list)
 
 
-def sampled_frames(path, fps):
+def sampled_frames(path: str | Path, fps: float) -> Iterator[tuple[float, np.ndarray]]:
     """Yield (offset_s, frame) at about `fps` frames per second of video.
 
     Offsets are the container's frame timestamps, so variable-frame-rate phone footage stays in sync.
@@ -77,7 +80,7 @@ def sampled_frames(path, fps):
         cap.release()
 
 
-def frames_in_order(files, fps):
+def frames_in_order(files: Iterable[tuple[float, Path]], fps: float) -> Iterator[tuple[float, float, np.ndarray]]:
     """Yield (t0, offset_s, frame) over [(t0, path), ...] in order."""
     for t0, path in files:
         print(f"{path.name}: start {datetime.fromtimestamp(t0):%Y-%m-%d %H:%M}", flush=True)
@@ -86,17 +89,17 @@ def frames_in_order(files, fps):
 
 
 def process(
-    paths,
-    zones_path,
-    detector,
-    conn,
-    fps=1.0,
-    start=None,
-    min_dwell=events.MIN_DWELL_S,
-    gap_tolerance=events.GAP_TOLERANCE_S,
-    forbidden_dwell=events.FORBIDDEN_DWELL_S,
-    window=None,
-):
+    paths: Iterable[str | Path],
+    zones_path: str | Path,
+    detector: Detector,
+    conn: sqlite3.Connection,
+    fps: float = 1.0,
+    start: str | None = None,
+    min_dwell: float = events.MIN_DWELL_S,
+    gap_tolerance: float = events.GAP_TOLERANCE_S,
+    forbidden_dwell: float = events.FORBIDDEN_DWELL_S,
+    window: overlay.Display | None = None,
+) -> list[events.Visit]:
     """Run one camera's videos through the pipeline, ring the alarm on forbidden frames and store each visit as it
     finishes. Returns the visits.
 
@@ -111,7 +114,7 @@ def process(
     watched = [z for z in store.ZONES if any(name == z for name, _ in zone_list)]
     recordings = {}  # file start -> recordings row id
 
-    def save(visits):
+    def save(visits: list[events.Visit]) -> None:
         for v in visits:
             store.insert_event(conn, camera, v.zone, v.start_ts, v.end_ts)
             print(
@@ -145,7 +148,7 @@ def process(
     return stored
 
 
-def main(argv=None):
+def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(
         description="Video files of one camera + its zones file -> visits in SQLite.",
         epilog="The cat in a forbidden zone rings the alarm. Set PAWWATCH_MUTE=1 to keep bulk runs silent.",

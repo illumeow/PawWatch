@@ -7,14 +7,20 @@ litter box or furniture: overlap is measured against the smaller of box and zone
 """
 
 import json
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 
 from pawwatch import store
 
 MIN_OVERLAP = 0.2  # a box grazing a zone's edge doesn't count
 
+Point = tuple[float, float]
+Polygon = list[Point]
+Zone = tuple[str, Sequence[Point]]  # (zone name, polygon in original-image pixels)
+Box = tuple[float, float, float, float]  # x1, y1, x2, y2
 
-def load_zones(path):
+
+def load_zones(path: str | Path) -> tuple[str, list[Zone]]:
     """Return (camera, [(zone_name, polygon), ...]). Raises ValueError on an unknown zone name or a bad polygon."""
     data = json.loads(Path(path).read_text())
     try:
@@ -25,7 +31,7 @@ def load_zones(path):
         ) from e
 
 
-def save_zones(path, camera, zone_list):
+def save_zones(path: str | Path, camera: str, zone_list: Iterable[tuple[str, Sequence[Sequence[float]]]]) -> None:
     """Write [(zone_name, polygon), ...] as a zones file, vertices rounded to whole pixels.
 
     Validates like load_zones and writes nothing if a zone is invalid.
@@ -36,7 +42,7 @@ def save_zones(path, camera, zone_list):
     Path(path).write_text(f'{{\n  "camera": {json.dumps(camera)},\n  "zones": [\n    {body}\n  ]\n}}\n')
 
 
-def _zone(path, name, points):
+def _zone(path: str | Path, name: str, points: Iterable[Sequence[float]]) -> Zone:
     if name not in store.ZONES:
         raise ValueError(f"{path}: unknown zone {name!r}, expected one of {store.ZONES}")
     polygon = [(float(x), float(y)) for x, y in points]
@@ -45,14 +51,13 @@ def _zone(path, name, points):
     return name, polygon
 
 
-def area(polygon):
+def area(polygon: Sequence[Point]) -> float:
     """Shoelace area of a simple polygon."""
-    return (
-        abs(sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(polygon, polygon[1:] + polygon[:1], strict=True))) / 2
-    )
+    pts = list(polygon)
+    return abs(sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(pts, pts[1:] + pts[:1], strict=True))) / 2
 
 
-def clip_to_box(polygon, box):
+def clip_to_box(polygon: Sequence[Point], box: Box) -> Polygon:
     """Part of the polygon inside box (x1, y1, x2, y2): Sutherland-Hodgman against each of the box's 4 edges."""
     x1, y1, x2, y2 = box
     inside = [lambda p: p[0] >= x1, lambda p: p[0] <= x2, lambda p: p[1] >= y1, lambda p: p[1] <= y2]
@@ -75,15 +80,15 @@ def clip_to_box(polygon, box):
     return out
 
 
-def _at_x(a, b, x):
+def _at_x(a: Point, b: Point, x: float) -> Point:
     return x, a[1] + (x - a[0]) * (b[1] - a[1]) / (b[0] - a[0])
 
 
-def _at_y(a, b, y):
+def _at_y(a: Point, b: Point, y: float) -> Point:
     return a[0] + (y - a[1]) * (b[0] - a[0]) / (b[1] - a[1]), y
 
 
-def overlap(box, polygon):
+def overlap(box: Box, polygon: Sequence[Point]) -> float:
     """Overlap of a box and a zone, as a share of the smaller of the two (0 to 1)."""
     x1, y1, x2, y2 = box
     smaller = min((x2 - x1) * (y2 - y1), area(polygon))
@@ -93,7 +98,7 @@ def overlap(box, polygon):
     return area(part) / smaller if len(part) >= 3 else 0.0
 
 
-def zone_for_box(box, zones):
+def zone_for_box(box: Box, zones: Iterable[Zone]) -> str | None:
     """Name of the zone the box (x1, y1, x2, y2) overlaps most, or None if none reaches MIN_OVERLAP."""
     best, name = MIN_OVERLAP, None
     for zone_name, polygon in zones:
