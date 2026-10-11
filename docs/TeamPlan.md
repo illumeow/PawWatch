@@ -47,8 +47,7 @@ For the detection window shots, write to a throwaway database so demo.db stays c
 uv run python -m pawwatch.run data/videos/TangerineEat.mp4 --zones config/zones/cam_food.json --start 2026-10-10T07:30 --fps 5 --show --db data/scratch.db
 ```
 
-**@meander (A):** code is handed over. Remaining: the airplane-mode shot (a screen recording of the pipeline running
-on a clip while Wi-Fi goes off), and screen recordings of the detection window if you are doing them.
+**@meander (A):** done; code and recordings are handed over to B. Free to help C.
 
 **@bbwinner (C):** slides live in the repo under `slides/`, on branch `feat/slides` off `develop`.
 - Day 1: research, slide outline, business model page (35% of the score).
@@ -189,13 +188,12 @@ and argues that the UGen300 port is low-risk. Never present laptop footage as ru
 | Recorded footage through the real pipeline: boxes, zones, counts ticking up, alarm, then dashboard and report | A, B | Proves it works |
 | Caption on the detection window: "Running on laptop · YOLOv8n · target: ASUS UGen300" | A | Honest about hardware |
 | Frame-rate limit per camera (`run.py --fps`, about 5 live, 1 for bulk runs) | A | Edge-sized load; makes bulk processing feasible |
-| Airplane mode on camera while the pipeline keeps running | A records, B edits | Shows "no cloud" |
 | Database rows with no images, empty frames folder | B | Shows "events only" |
 | Architecture slide: laptop backend today, Hailo backend after; same `(label, score, box)` contract as ASUS's UGen300 demos | C | Port is a swap, not a rewrite |
 | Stock COCO YOLOv8: Hailo publishes precompiled versions for Hailo-10H, so no training or model conversion | C | No model risk |
 | Load fits the chip: 3 cameras × 5 fps = 15 inferences/s vs Hailo's published YOLOv8 speed on Hailo-10H (look up and cite) | C | Hardware is sufficient |
 
-Video: the 0:50–2:10 live section adds the airplane-mode shot and the caption; the "fits the chip" numbers go in 2:10–2:45.
+Video: shot list and narration in `docs/DemoVideo.md`. The airplane-mode shot is cut; "no cloud" is argued in the architecture part.
 
 ### Compute
 
@@ -258,5 +256,5 @@ Three working days; real clips reach the dashboard on Day 2 evening, everything 
 | --- | --- | --- | --- |
 | Fri 10/9 | Pipeline, eat clip, film the bed jump | Half B done and merged (PR #1); README | Research, slide outline, business model page |
 | Sat 10/10 | Drinking and litter clips, zones, runs with `--show`; screen recordings by evening | Dashboard on real clips' events; send screenshots and repo link | Slide text, architecture diagram, Hailo speed number |
-| Sun 10/11 | Morning: screen captures, airplane-mode shot | Edit demo video, TTS voice-over, upload unlisted to YouTube | Finish slides, add video link, submit |
+| Sun 10/11 | Done | Detection window recordings, edit demo video, TTS voice-over, upload unlisted to YouTube | Finish slides, add video link, submit |
 | 10/12–10/14 | Buffer | Buffer: check every link in slides and README | Buffer |

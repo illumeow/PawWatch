@@ -9,10 +9,9 @@ Narration is TTS; total speech is about 2 minutes, which leaves room for the ala
 | --- | --- | --- | --- |
 | 0:00–0:18 | Tangerine eating, raw footage | `TangerineEat.mp4` (Drive) | 1 |
 | 0:18–0:35 | Problem and existing products | Slides 2–3 (C) | 2 |
-| 0:35–1:00 | Detection window: eating (Tangerine, `TangerineEat.mp4`, count goes 0 → 1), then quick cuts of drinking (Ami, `AmiDrink.mp4`) and the litter box (Tangerine, `TangerinePee.mp4`) | Screen recordings, `run.py --show` | 3a |
-| 1:00–1:12 | Detection window on the bed clip, red box, **alarm sound audible** | Screen recording (A) | 3b |
-| 1:12–1:20 | Turning on airplane mode while the pipeline keeps running | Phone or screen recording (A) | 3c |
-| 1:20–1:45 | Dashboard on the simulated alert day: alert, tiles, timeline, past week; open "What PawWatch stores" | Screen recording (B) | 3d |
+| 0:35–1:00 | Detection window: eating (Tangerine, `TangerineEat.mp4`, count goes 0 → 1), then quick cuts of drinking (Ami, `AmiDrink.mp4`) and the litter box (Tangerine, `TangerinePee.mp4`) | Screen recordings, `run.py --show` (B) | 3a |
+| 1:00–1:12 | Detection window on the bed clip: red box and border, "ALARM", **alarm sound audible** | Screen recording (B) | 3b |
+| 1:12–1:45 | Dashboard: first the real day from `build_demo.py` ("Each visit becomes one row…"; open "What PawWatch stores"), then the simulated alert day ("In this simulated example…") | Screen recording (B) | 3d |
 | 1:45–1:52 | Zoom on the daily report box | Same recording (B) | 3e |
 | 1:52–2:35 | Architecture diagram, then the "fits the chip" numbers | Slides (C) | 4 |
 | 2:35–2:50 | Future work, then logo and repo link | Slides (C) | 5 |
@@ -41,8 +40,6 @@ it lasted. The frame itself is thrown away.
 
 **3b (7 s).** Some spots are off-limits. The moment Tangerine jumps onto the bed, PawWatch sounds an alarm, and it can text
 your phone.
-
-**3c (4 s).** Everything runs at home. We switch off the internet, and it keeps working.
 
 **3d (20 s).** Each visit becomes one row in a local database. No images, no video. The dashboard compares today with
 Tangerine's usual week. In this simulated example, she used the litter box eight times, almost three times her usual,
