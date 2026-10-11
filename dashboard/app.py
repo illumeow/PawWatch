@@ -22,6 +22,7 @@ COLORS = {
     "dark": ["#3987e5", "#d95926", "#199e70", "#c98500"],
 }
 SIM_OPACITY = 0.4
+HIT_PX = 12  # width of the hover box around each visit
 REFRESH_S = 3  # visits processed while the page is open show up within this
 MIN_BAND = 1 / 96  # bands are drawn at least this share of the visible time range wide
 STEPS = [f"{m // 60:02d}:{m % 60:02d}" for m in range(0, 24 * 60 + 1, 15)]  # hours slider, every 15 min
@@ -91,7 +92,7 @@ def timeline_chart(df, day, spans=None, hours=(0.0, 24.0)):
     """One row per zone, one mark per visit. Simulated visits are faded only when mixed with real ones.
 
     A visit is a tick (visible at any zoom) over a bar from its start to its end (its length shows once zoomed in).
-    Hover snaps to the nearest visit, so a 30 s visit on a 24 h axis doesn't need pixel-perfect aim.
+    Each visit has a HIT_PX-wide hover box, so a 30 s visit on a 24 h axis doesn't need pixel-perfect aim.
     spans: watched hours per zone, drawn as shaded bands when only part of the day was filmed.
     hours: the part of the day to show, in hours, e.g. (7.0, 9.5).
     """
@@ -105,7 +106,7 @@ def timeline_chart(df, day, spans=None, hours=(0.0, 24.0)):
     opacity = alt.Opacity(
         "Data:N", scale=alt.Scale(domain=["real", "simulated"], range=[1.0, SIM_OPACITY if mixed else 1.0]), legend=None
     )
-    hover = alt.selection_point(on="pointerover", nearest=True, fields=["visit"], empty=False, clear="pointerout")
+    hover = alt.selection_point(on="pointerover", fields=["visit"], empty=False, clear="pointerout")
     base = alt.Chart(df).encode(x=x, y=y)
 
     durations = base.mark_bar(height=14, cornerRadius=2, clip=True).encode(x2="end:T", color=color, opacity=opacity)
@@ -114,8 +115,8 @@ def timeline_chart(df, day, spans=None, hours=(0.0, 24.0)):
         opacity=opacity,
         size=alt.condition(hover, alt.value(34), alt.value(22)),  # the hovered visit lifts, keeping its color
     )
-    hits = (  # invisible, larger than the mark: the pointer only has to be closest
-        base.mark_point(size=700, opacity=0, clip=True)
+    hits = (  # invisible box around each visit, wider than the 3 px tick so it's easy to hover
+        base.mark_tick(thickness=HIT_PX, size=22, opacity=0, clip=True)
         .encode(
             tooltip=[
                 alt.Tooltip("Zone:N"),
