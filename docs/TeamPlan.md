@@ -6,7 +6,7 @@ Three people deliver PawWatch by 2026-10-14. Two build the code in parallel, spl
 Half A (vision) writes events from real cat video; half B (output) reads them into the dashboard, anomaly alerts and daily report.
 C owns the slides, research and the architecture diagram.
 
-## Status and next steps (updated 2026-10-09)
+## Status and next steps (updated 2026-10-10)
 
 We're finishing in **3 days (Fri 10/9 to Sun 10/11)**, with 10/12 to 10/14 as buffer. See Schedule below.
 
@@ -19,16 +19,35 @@ uv run python scripts/seed_fake.py --with-today
 uv run streamlit run dashboard/app.py
 ```
 
-**@meander (A):**
-- Read PR #1's description: it touched two shared contracts. `store.delete_simulated()` is new (additive, table unchanged), and
-  `alarm.trigger(camera, zone, ts)` is implemented with a 30 s cooldown per camera, so call it on every frame the cat
-  is in a forbidden zone. Set `PAWWATCH_MUTE=1` for bulk runs.
-- Day 1: cameras up, 1-minute test (`uv run python scripts/check_clip.py <clip>`), record overnight, stage a counter jump.
-- Day 2: zones files, visit logic, `run.py` writing real events by the evening. Use the GPU if there is one
-  (`device="cuda"`; `"mps"` on Macs) and 1 frame per second for the overnight footage.
-- Day 3 morning: screen captures of detection and the airplane-mode shot.
-- Check the alarm sound on Fedora once:
-  `uv run python -c "import time; from pawwatch import alarm; alarm.trigger('cam_counter','forbidden',time.time()); time.sleep(1)"`
+**Half A's pipeline is done on `develop`:** `run.py` writes real visits to SQLite, rings the alarm in forbidden zones and,
+with `--show`, draws the detection window (boxes, zones, counts, laptop caption). `scripts/draw_zones.py` makes zones files.
+**From Day 3, @illumeow owns all code**, including half A's files.
+
+Real clips, all tested end to end (footage in the shared Drive, not the repo):
+
+| Clip | Cat | Zones file | Result |
+| --- | --- | --- | --- |
+| `TangerineEat.mp4`, 58 s, portrait | Tangerine | `cam_food.json` | 1 food visit, 31 s |
+| `AmiDrink.mp4`, 90 s, portrait | Ami | `cam_water.json` | 1 water visit, 66 s |
+| `TangerinePee.mp4`, 60 s | Tangerine | `cam_litter_box.json` | 1 litter box visit, 24 s |
+| `AmiPee.mp4`, 117 s | Ami | `cam_litter_box.json` | 2 litter box visits: 48 s, then 9 s after a 9 s gap |
+| `TangerineJumpOntoBed.mov`, 15 s, cropped to leave the person out | Tangerine | `cam_bed.json` (mattress = forbidden) | Alarm rings; 1 forbidden visit, 9 s |
+
+Demo database: Tangerine's three clips on one day at made-up but plausible times, plus 7 simulated days before it.
+Ami's clips stay out because the dashboard is Tangerine's (water shows "not on camera").
+
+```bash
+uv run python scripts/build_demo.py --device mps     # rebuilds data/demo.db in about 10 s; drop --device off a Mac
+PAWWATCH_DB=data/demo.db uv run streamlit run dashboard/app.py
+```
+
+For the detection window shots, write to a throwaway database so demo.db stays clean:
+
+```bash
+uv run python -m pawwatch.run data/videos/TangerineEat.mp4 --zones config/zones/cam_food.json --start 2026-10-10T07:30 --fps 5 --show --db data/scratch.db
+```
+
+**@meander (A):** done; code and recordings are handed over to B. Free to help C.
 
 **@bbwinner (C):** slides live in the repo under `slides/`, on branch `feat/slides` off `develop`.
 - Day 1: research, slide outline, business model page (35% of the score).
@@ -36,9 +55,13 @@ uv run streamlit run dashboard/app.py
   A and B put their screenshots in `slides/images/` on Day 2 evening.
 - Day 3: finish slides, add the demo video link, submit.
 
-**@illumeow (B):** README, dashboard on real events, screenshots to C, then the demo video on Day 3.
+**@illumeow (B):** all code. Images for the slides are in `slides/images/` on `develop`: four detection-window stills
+(`detect_*.jpg`; the drinking one is Ami, our other cat) and two dashboards (`dashboard_real_day.png` from the real
+clips, `dashboard_alert_simulated.png`, which must be captioned as simulated). To get them on `feat/slides`:
+`git merge develop` there, then push (no conflicts: `slides/images/` is new; don't rebase a shared branch). Next for B: merge `develop` into `main`, then the
+demo video (shot list, narration and timings in `docs/DemoVideo.md`).
 
-**Cut for time:** Hailo backend port, Telegram setup, LLM-written daily report, a second day of recording.
+**Cut for time:** Hailo backend port, Telegram setup, LLM-written daily report, overnight recording and bulk runs.
 
 **Open:** who does registration? Check its deadline on the competition page.
 
@@ -86,6 +109,11 @@ CREATE TABLE events (
 
 `store.py` exposes plain functions: `insert_event(...)`, `events_between(start, end)`, `daily_counts(days)`. B reads only through these.
 
+A second table, `recordings (camera, zones, start_ts, end_ts)`, says which zones were on camera and when. `run.py` writes
+one row per video file (`insert_recording`, `extend_recording` per frame), and the anomaly check compares each zone only
+over its filmed hours, so a 2-minute clip isn't read as "didn't drink all day". Days without recordings (simulated
+history) count as watched all day.
+
 ```python
 # pawwatch/alarm.py (owned by B, called by A)
 def trigger(camera: str, zone: str, ts: float) -> None:
@@ -110,8 +138,10 @@ Each file has one owner; nobody edits the other half's files without asking.
 | `pawwatch/events.py` | A | Detections over time to visits, with debounce (pure logic, tested) |
 | `pawwatch/alarm.py` | Shared interface, B implements | `trigger()`: sound and optional Telegram; A calls it |
 | `pawwatch/run.py` | A | CLI: videos + zones to events in SQLite |
+| `pawwatch/overlay.py` | A | Detection window for `run.py --show`: boxes, zones, visit counts, caption |
 | `config/zones/*.json` | A | One zones file per camera |
 | `scripts/check_clip.py` | A | 1-minute test: cat detection rate on a clip |
+| `scripts/draw_zones.py` | A | Click zone polygons on a clip's frame, write the zones file |
 | `scripts/seed_fake.py` | B | 7 days of simulated events |
 | `pawwatch/anomaly.py` | B | Today vs 7-day mean |
 | `pawwatch/report.py` | B | Daily report text |
@@ -124,18 +154,31 @@ Gitignored: `data/videos/`, `*.pt`, `*.hef`, `*.db`. Footage lives in a shared G
 
 ## Data strategy
 
-The demo shows real today plus simulated history: anomaly alerts need 7 days of baseline,
-and we will have about one day of footage.
+The demo shows real clips plus simulated history: anomaly alerts need 7 days of baseline, and footage only has to
+prove the pipeline works on camera. Real days are compared only over their filmed hours (the `recordings` table).
 
 | Data | Written by | Proves or enables | Shown in demo |
 | --- | --- | --- | --- |
-| Real video | Filmed by A | Model and event logic work | Detection window: boxes, zones, count ticking up, counter alarm |
+| Real video | Filmed by A | Model and event logic work | Detection window: boxes, zones, count ticking up, bed alarm |
 | Real events (`simulated=0`) | `run.py` | Today's numbers are genuine | Today's counts, timeline, daily report |
 | Simulated history (`simulated=1`) | `seed_fake.py` | B can build before A is done; anomaly has a baseline | 7-day trend, "2x more litter visits than usual" alert |
 
 - Label simulated history as "simulated" in the dashboard (B) and slides (C).
 - To make the alert fire on camera, seed a baseline that today's real count clearly exceeds (e.g. 3 litter visits a day vs 6 today).
 - Days of real recording replace their simulated days, so the trend becomes partly real.
+
+### Footage we need
+
+| Clip | Shows | Status |
+| --- | --- | --- |
+| Eating (`TangerineEat.mp4`) | Opening shot; food visit count 0 → 1 | Have |
+| Jump onto the bed (`TangerineJumpOntoBed.mov`) | Alarm | Have; cropped, a hand is still visible while petting |
+| Drinking (`AmiDrink.mp4`, Ami, our other cat) | Second health zone working | Have; `cam_water.json`, 1 visit |
+| Litter box visit (`TangerinePee.mp4`) | The zone the video's alert is about | Have; `cam_litter_box.json`, 1 visit |
+| Jump with nobody in frame | Cleaner alarm shot | Nice to have |
+
+Fix the phone near the spot and record until Tangerine goes there, then trim, as with the eat clip. Note each
+recording's start time (filename or `--start`) so visits land at the right time of day.
 
 ## Demo plan
 
@@ -147,13 +190,12 @@ and argues that the UGen300 port is low-risk. Never present laptop footage as ru
 | Recorded footage through the real pipeline: boxes, zones, counts ticking up, alarm, then dashboard and report | A, B | Proves it works |
 | Caption on the detection window: "Running on laptop · YOLOv8n · target: ASUS UGen300" | A | Honest about hardware |
 | Frame-rate limit per camera (`run.py --fps`, about 5 live, 1 for bulk runs) | A | Edge-sized load; makes bulk processing feasible |
-| Airplane mode on camera while the pipeline keeps running | A records, B edits | Shows "no cloud" |
 | Database rows with no images, empty frames folder | B | Shows "events only" |
 | Architecture slide: laptop backend today, Hailo backend after; same `(label, score, box)` contract as ASUS's UGen300 demos | C | Port is a swap, not a rewrite |
 | Stock COCO YOLOv8: Hailo publishes precompiled versions for Hailo-10H, so no training or model conversion | C | No model risk |
 | Load fits the chip: 3 cameras × 5 fps = 15 inferences/s vs Hailo's published YOLOv8 speed on Hailo-10H (look up and cite) | C | Hardware is sufficient |
 
-Video: the 0:50–2:10 live section adds the airplane-mode shot and the caption; the "fits the chip" numbers go in 2:10–2:45.
+Video: shot list and narration in `docs/DemoVideo.md`. The airplane-mode shot is cut; "no cloud" is argued in the architecture part.
 
 ### Compute
 
@@ -167,13 +209,13 @@ YOLOv8n on a 1280×720 frame, measured on an M3 Pro laptop (2026-10-09):
 | Apple GPU (`device="mps"`) | 416 | 5.1 | 195 |
 
 - Live demo needs about 15 fps in total: fine even on CPU.
-- Bulk runs are the cost: 2 days × 3 cameras is 144 camera-hours. At 1 fps that's about 3 h on CPU or under 1 h on the Apple GPU; at 5 fps, about 14 h on CPU.
+- Bulk runs over long recordings were the cost (2 days × 3 cameras = 144 camera-hours, about 3 h on CPU at 1 fps); cut, since we use short clips.
 - Ultralytics picks CUDA automatically but not Apple's GPU; pass `device="mps"` on Macs.
 - Time a clip on the machine that will process the footage first; a laptop without a GPU may be 2–3× slower.
 
 ## Recording guide
 
-Start recording today: every later step needs footage, and lost recording days can't be made up.
+Short clips only (see Footage we need); no overnight recording.
 
 Setup and settings:
 
@@ -189,9 +231,10 @@ Checklist:
 
 - [ ] Record 1 minute per spot with the cat in frame
 - [ ] Run `check_clip.py` on each clip; move the camera if the cat is missed
-- [ ] Long recording, all zones at once, overnight (one night is enough)
-- [ ] Staged clips: cat jumping on counter or table (forbidden zone)
-- [ ] Close-up shots of eating and drinking for the demo video
+- [x] Staged clip: cat jumping onto the bed (forbidden zone)
+- [x] Eating clip
+- [x] Drinking clip
+- [x] Litter box clip
 - [ ] Upload clips to the shared Drive folder as they finish
 
 ## Git workflow
@@ -209,11 +252,11 @@ Keep it light: one feature branch each, small PRs into `develop`, merged at leas
 
 ## Schedule
 
-Three working days; real events reach the dashboard on Day 2 evening, everything on Day 3 is recording and submission.
+Three working days; real clips reach the dashboard on Day 2 evening, everything on Day 3 is recording and submission.
 
 | Day | A: vision (@meander) | B: output (@illumeow) | C: slides (@bbwinner) |
 | --- | --- | --- | --- |
-| Fri 10/9 | Cameras up, 1-minute test, record overnight, stage a counter jump | Half B done and merged (PR #1); README | Research, slide outline, business model page |
-| Sat 10/10 | Zones, visit logic, `run.py`; first real events by evening; send screenshots | Dashboard on real events; send screenshots and repo link | Slide text, architecture diagram, Hailo speed number |
-| Sun 10/11 | Morning: screen captures, airplane-mode shot | Edit demo video, TTS voice-over, upload unlisted to YouTube | Finish slides, add video link, submit |
+| Fri 10/9 | Pipeline, eat clip, film the bed jump | Half B done and merged (PR #1); README | Research, slide outline, business model page |
+| Sat 10/10 | Drinking and litter clips, zones, runs with `--show`; screen recordings by evening | Dashboard on real clips' events; send screenshots and repo link | Slide text, architecture diagram, Hailo speed number |
+| Sun 10/11 | Done | Detection window recordings, edit demo video, TTS voice-over, upload unlisted to YouTube | Finish slides, add video link, submit |
 | 10/12–10/14 | Buffer | Buffer: check every link in slides and README | Buffer |

@@ -51,10 +51,10 @@ def test_high_litter_gets_comparison_and_advice():
 
 
 def test_describe_anomaly_stands_alone():
-    assert report.describe_anomaly(Anomaly("food", 0, 4, "low", False)) == (
+    assert report.describe_anomaly(Anomaly("food", 0, 4, "low", "day")) == (
         "Tangerine didn't eat today; usually about 4 a day. Keep an eye on it, and consider a vet visit if it continues."
     )
-    assert report.describe_anomaly(Anomaly("water", 1, 4.4, "low", True)).startswith(
+    assert report.describe_anomaly(Anomaly("water", 1, 4.4, "low", "so_far")).startswith(
         "Tangerine only drank water once today; usually about 4 by this time."
     )
 
@@ -72,3 +72,21 @@ def test_empty_day_and_no_history():
     assert report.daily_report(conn, TODAY, now=at(TODAY, 8)) == "No visits recorded for Tangerine today yet."
     add(conn, "food", TODAY, 7)
     assert "isn't enough history" in report.daily_report(conn, TODAY, now=at(TODAY, 8))
+
+
+def test_short_clips_name_what_was_on_camera():
+    conn = store.connect(":memory:")
+    usual_week(conn)
+    day_ts = datetime.combine(TODAY, datetime.min.time()).timestamp()
+    store.insert_recording(conn, "cam_food2", ["food"], day_ts + 22 * 3600 + 22, day_ts + 22 * 3600 + 91)
+    store.insert_recording(conn, "cam_bed", ["forbidden"], day_ts + 22 * 3600 + 1340, day_ts + 22 * 3600 + 1409)
+    add(conn, "food", TODAY, 22 + 1 / 60)
+    add(conn, "forbidden", TODAY, 22 + 23 / 60)
+    text = report.daily_report(conn, TODAY, now=at(TODAY + timedelta(days=1), 12))
+    assert text == (
+        "Tangerine ate once on Friday, Oct 9. "
+        "Cameras were recording 22:00–22:02 and 22:22–22:24. "
+        "The water bowl and the litter box weren't on camera. "
+        "Tangerine jumped onto a no-go spot once. "
+        "Nothing unusual compared with the past week."
+    )
