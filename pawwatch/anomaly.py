@@ -60,13 +60,15 @@ def covers(outer, inner):
 def watched(conn, day, now=None):
     """{zone: [(start_s, end_s), ...]}: when each zone was on camera during `day`, in seconds into the day, up to now.
 
-    A day without recordings counts as watched all day (so far) for every zone.
+    A day without recordings counts as watched all day (so far) for every zone if it has visits (simulated history),
+    and as not watched at all if it has none (cameras off, or a live demo before the first clip is fed).
     """
     cutoff = seconds_so_far(day, now)
     start = day_start(day)
     recordings = store.recordings_between(conn, start, start + cutoff)
     if not recordings:
-        return {zone: [(0.0, cutoff)] for zone in store.ZONES}
+        seen = bool(store.events_between(conn, start, start + FULL_DAY))
+        return {zone: [(0.0, cutoff)] if seen else [] for zone in store.ZONES}
     spans = {zone: [] for zone in store.ZONES}
     for r in recordings:
         for zone in r.zones:

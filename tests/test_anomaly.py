@@ -59,6 +59,7 @@ def test_days_without_any_events_are_left_out_of_the_baseline():
     conn = store.connect(":memory:")
     add(conn, "litter", TODAY - timedelta(days=1), 10)
     add(conn, "litter", TODAY - timedelta(days=1), 12)
+    add(conn, "food", TODAY, 9)  # today has visits, so it counts as watched
     expected, used = anomaly.expected_counts(conn, TODAY, now=at(TODAY, 23))
     assert used == 1
     assert expected["litter"] == 2
@@ -111,3 +112,11 @@ def test_merge_and_covers():
     assert anomaly.merge([(5, 8), (0, 2), (1, 3), (8, 9), (4, 4)]) == [(0, 3), (5, 9)]
     assert anomaly.covers([(0, 10)], [(2, 3), (5, 6)])
     assert not anomaly.covers([(0, 4), (5, 10)], [(3, 6)])
+
+
+def test_a_day_with_no_visits_and_no_recordings_is_not_watched():
+    """A live demo opened before the first clip: an empty afternoon is "not on camera", not "didn't drink"."""
+    conn = store.connect(":memory:")
+    week_of(conn, [("water", h) for h in (8, 10, 12, 14)])
+    assert all(spans == [] for spans in anomaly.watched(conn, TODAY, at(TODAY, 18)).values())
+    assert anomaly.find_anomalies(conn, TODAY, now=at(TODAY, 18)) == []

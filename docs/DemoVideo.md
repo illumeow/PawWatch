@@ -78,3 +78,24 @@ PAWWATCH_DB=data/video.db uv run streamlit run dashboard/app.py
 ```
 
 Pick yesterday in the sidebar, collapse the sidebar, and record the browser window.
+
+## Live dashboard (optional shot)
+
+The detection window and the dashboard side by side: feed a clip and watch the dashboard pick up the visit within
+3 s, with no reload. Use `--show`, which plays at real speed; headless runs are faster than real time and would stamp
+visits in the future.
+
+```bash
+# once: a fresh database with a simulated week before today
+rm -f data/live.db && uv run python scripts/seed_fake.py --db data/live.db
+
+# terminal 1: the dashboard (it opens on Today; every zone says "not on camera" until a clip is fed)
+PAWWATCH_DB=data/live.db uv run streamlit run dashboard/app.py
+
+# terminal 2: feed clips, stamped with the current time
+uv run python -m pawwatch.run data/videos/TangerineEat.mp4 --zones config/zones/cam_food.json --start "$(date +%Y-%m-%dT%H:%M:%S)" --fps 5 --device mps --show --db data/live.db
+uv run python -m pawwatch.run data/videos/TangerineJumpOntoBed.mov --zones config/zones/cam_bed.json --start "$(date +%Y-%m-%dT%H:%M:%S)" --fps 5 --device mps --show --db data/live.db
+```
+
+A visit reaches the dashboard when it ends (the cat leaves, or the clip ends); the detection window counts it as soon
+as it qualifies.

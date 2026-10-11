@@ -21,6 +21,7 @@ COLORS = {
     "dark": ["#3987e5", "#d95926", "#199e70", "#c98500"],
 }
 SIM_OPACITY = 0.4
+REFRESH_S = 3  # visits processed while the page is open show up within this
 MIN_BAND = 15 * 60  # seconds
 
 st.set_page_config(page_title="PawWatch", page_icon=":material/pets:", layout="wide")
@@ -130,22 +131,18 @@ with st.sidebar:
     st.header("PawWatch")
     db_path = st.text_input("Database", os.environ.get("PAWWATCH_DB", str(store.DEFAULT_DB)))
     cat = st.text_input("Cat's name", "Tangerine")
-    live = st.toggle("Auto-refresh every 10 s", value=True)
+    live = st.toggle(f"Auto-refresh every {REFRESH_S} s", value=True)
 
-conn = store.connect(db_path)
-events = all_events(conn)
-if not events:
-    st.title("PawWatch")
-    st.info("No events yet. For a demo database run `uv run python scripts/seed_fake.py --with-today`, "
-            "or process footage with `pawwatch.run`.", icon=":material/info:")
-    st.stop()
-
-days = sorted({datetime.fromtimestamp(e.start_ts).date() for e in events}, reverse=True)
+# Today is always offered, so a dashboard opened before the first visit picks up footage processed while it's open.
+events = all_events(store.connect(db_path))
+days = sorted({datetime.fromtimestamp(e.start_ts).date() for e in events} | {date.today()}, reverse=True)
+real_days = [datetime.fromtimestamp(e.start_ts).date() for e in events if not e.simulated]
 with st.sidebar:
-    day = st.selectbox("Day", days, index=0, format_func=lambda d: "Today" if d == date.today() else d.strftime("%a, %b %d"))
+    day = st.selectbox("Day", days, index=days.index(max(real_days, default=date.today())),
+                       format_func=lambda d: "Today" if d == date.today() else d.strftime("%a, %b %d"))
 
 
-@st.fragment(run_every="10s" if live else None)
+@st.fragment(run_every=f"{REFRESH_S}s" if live else None)
 def body():
     conn = store.connect(db_path)
     now = datetime.now()
