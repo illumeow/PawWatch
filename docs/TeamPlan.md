@@ -167,9 +167,9 @@ prove the pipeline works on camera. Real days are compared only over their filme
 | Clip | Shows | Status |
 | --- | --- | --- |
 | Eating (`TangerineEat.mp4`) | Opening shot; food visit count 0 → 1 | Have |
-| Jump onto the bed (`TangerineJumpOntoBed.MOV`) | Alarm | Have; a person is in frame, so get their OK, crop, or re-film |
-| Drinking | Second health zone working | Need, about 1 min once trimmed |
-| Litter box visit | The zone the video's alert is about | Need, about 1 min once trimmed |
+| Jump onto the bed (`TangerineJumpOntoBed.mov`) | Alarm | Have; cropped, a hand is still visible while petting |
+| Drinking (`AmiDrink.mp4`, Ami, our other cat) | Second health zone working | Have; `cam_water.json`, 1 visit |
+| Litter box visit (`TangerinePee.mp4`) | The zone the video's alert is about | Have; `cam_litter_box.json`, 1 visit |
 | Jump with nobody in frame | Cleaner alarm shot | Nice to have |
 
 Fix the phone near the spot and record until Tangerine goes there, then trim, as with the eat clip. Note each
@@ -229,8 +229,8 @@ Checklist:
 - [ ] Run `check_clip.py` on each clip; move the camera if the cat is missed
 - [x] Staged clip: cat jumping onto the bed (forbidden zone)
 - [x] Eating clip
-- [ ] Drinking clip
-- [ ] Litter box clip
+- [x] Drinking clip
+- [x] Litter box clip
 - [ ] Upload clips to the shared Drive folder as they finish
 
 ## Git workflow

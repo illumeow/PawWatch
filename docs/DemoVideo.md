@@ -9,7 +9,7 @@ Narration is TTS; total speech is about 2 minutes, which leaves room for the ala
 | --- | --- | --- | --- |
 | 0:00–0:18 | Tangerine eating, raw footage | `TangerineEat.mp4` (Drive) | 1 |
 | 0:18–0:35 | Problem and existing products | Slides 2–3 (C) | 2 |
-| 0:35–1:00 | Detection window on the eat clip (box, food zone, count goes 0 → 1), then quick cuts of the drinking and litter box clips | Screen recordings, `run.py --show` (A) | 3a |
+| 0:35–1:00 | Detection window: eating (Tangerine, `TangerineEat.mp4`, count goes 0 → 1), then quick cuts of drinking (Ami, `AmiDrink.mp4`) and the litter box (Tangerine, `TangerinePee.mp4`) | Screen recordings, `run.py --show` | 3a |
 | 1:00–1:12 | Detection window on the bed clip, red box, **alarm sound audible** | Screen recording (A) | 3b |
 | 1:12–1:20 | Turning on airplane mode while the pipeline keeps running | Phone or screen recording (A) | 3c |
 | 1:20–1:45 | Dashboard on the simulated alert day: alert, tiles, timeline, past week; open "What PawWatch stores" | Screen recording (B) | 3d |
@@ -20,22 +20,26 @@ Narration is TTS; total speech is about 2 minutes, which leaves room for the ala
 On screen at all times during the live part: the detection window's caption
 ("Running on laptop · YOLOv8n · target: ASUS UGen300"), and "simulated data" on the dashboard shots.
 
+Two cats appear: Tangerine (eating, bed, litter box) and Ami (drinking, the only drinking footage we have).
+PawWatch logs one cat per household, so the narration says "our cats" and never presents Ami's visits as Tangerine's.
+The dashboard is Tangerine's, on simulated data.
+
 ## Narration
 
 Spellings like "U Gen 300" are for the TTS voice; captions use the normal spelling.
 
-**1 (13 s).** This is Tangerine. If she started drinking twice as much water, or visiting the litter box three times as
-often, would you notice? Changes like these are often the first sign that a cat is unwell, and cats are very good at
+**1 (13 s).** These are our cats. If one of them started drinking twice as much water, or visiting the litter box three
+times as often, would you notice? Changes like these are often the first sign that a cat is unwell, and cats are very good at
 hiding them.
 
 **2 (13 s).** Most of us are out all day, so we miss them. Pet cameras could watch, but they stream video of our homes
 to the cloud and charge a monthly fee. Smart litter boxes see only one part of the picture. So we built PawWatch.
 
 **3a (16 s).** Fixed cameras point at the food bowl, the water bowl and the litter box. An off-the-shelf YOLO model finds
-the cat in each frame. When Tangerine stays in the food zone long enough, PawWatch logs one visit: when it started, and
-how long it lasted. The frame itself is thrown away.
+the cat in each frame. When a cat stays in a zone long enough, PawWatch logs one visit: when it started, and how long
+it lasted. The frame itself is thrown away.
 
-**3b (7 s).** Some spots are off-limits. The moment she jumps onto the bed, PawWatch sounds an alarm, and it can text
+**3b (7 s).** Some spots are off-limits. The moment Tangerine jumps onto the bed, PawWatch sounds an alarm, and it can text
 your phone.
 
 **3c (4 s).** Everything runs at home. We switch off the internet, and it keeps working.
