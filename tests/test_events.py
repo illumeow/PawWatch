@@ -61,3 +61,19 @@ def test_short_forbidden_jump_counts_with_its_own_dwell():
     assert visits(stream) == [Visit("forbidden", 0, 1)]
     assert visits(stream, min_dwell=2) == [Visit("forbidden", 0, 1), Visit("food", 11, 13)]
     assert visits(stream, forbidden_dwell=2) == []
+
+
+def test_counting_reports_an_open_visit_once_it_qualifies():
+    t = VisitTracker(min_dwell=5, gap_tolerance=3, forbidden_dwell=1)
+    for ts in range(5):
+        t.update(ts, "food")
+    assert t.counting is None  # 4 s so far
+    t.update(5, "food")
+    assert t.counting == "food"
+    t.update(5.5, None)  # a dropout within tolerance keeps it counted
+    assert t.counting == "food"
+    t.update(10, None)
+    assert t.counting is None
+    t.update(11, "forbidden")
+    t.update(12, "forbidden")
+    assert t.counting == "forbidden"

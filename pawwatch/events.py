@@ -49,6 +49,15 @@ class VisitTracker:
             self.last_seen = ts
         return done
 
+    @property
+    def counting(self):
+        """Zone of the open visit once it has lasted long enough to count, else None. For live displays: a visit
+        that qualifies will be stored when it ends, so a screen can count it now."""
+        if self.zone is None:
+            return None
+        dwell = self.forbidden_dwell if self.zone == FORBIDDEN else self.min_dwell
+        return self.zone if self.last_seen - self.start >= dwell else None
+
     def close(self):
         """End the open visit, if any. Returns it in a list if it lasted long enough."""
         if self.zone is None:

@@ -118,7 +118,8 @@ def process(paths, zones_path, detector, conn, fps=1.0, start=None,
             save(tracker.update(ts, zone))
             if tracker.alarm_zone:
                 alarm.trigger(camera, tracker.alarm_zone, ts)
-            if window and not window.show(overlay.render(frame, detections, zone_list, zone, counts), offset):
+            shown = counts + Counter([tracker.counting] if tracker.counting else [])  # the open visit counts once it qualifies
+            if window and not window.show(overlay.render(frame, detections, zone_list, zone, shown), offset):
                 break
     finally:
         if window:

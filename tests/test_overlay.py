@@ -54,3 +54,9 @@ def test_portrait_frames_get_landscape_text_size():
     assert overlay.scale(np.zeros((720, 1280, 3), np.uint8)) == overlay.scale(np.zeros((1280, 720, 3), np.uint8)) == 1
     img = overlay.render(np.zeros((1280, 720, 3), np.uint8), [], [], None, {})
     assert img.shape == (1280, 720, 3)
+
+
+def test_forbidden_zone_frames_get_a_red_border():
+    corner = (2, 2)
+    assert tuple(overlay.render(blank(), CAT, ZONES, "forbidden", {})[corner]) == overlay.RED
+    assert tuple(overlay.render(blank(), CAT, ZONES, "food", {})[corner]) != overlay.RED

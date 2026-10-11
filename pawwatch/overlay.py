@@ -41,6 +41,10 @@ def render(frame, detections, zone_list, zone, counts):
     width = cv2.getTextSize(CAPTION, FONT, caption, max(1, round(2 * caption)))[0][0]
     caption *= min(1.0, (img.shape[1] - 32 * s) / width)  # portrait frames: shrink the caption to fit
     _text(img, CAPTION, (round(16 * s), img.shape[0] - round(18 * s)), caption, (220, 220, 220))
+    if zone == "forbidden":  # the alarm is ringing: make it visible in the recording too
+        cv2.rectangle(img, (0, 0), (img.shape[1] - 1, img.shape[0] - 1), RED, max(4, round(8 * s)))
+        width = cv2.getTextSize("ALARM", FONT, s, thick)[0][0]
+        _text(img, "ALARM", (img.shape[1] - width - round(24 * s), round(38 * s)), s, RED)
     return img
 
 
