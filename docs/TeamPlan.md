@@ -21,30 +21,34 @@ uv run streamlit run dashboard/app.py
 
 **Half A's pipeline is done on `develop`:** `run.py` writes real visits to SQLite, rings the alarm in forbidden zones and,
 with `--show`, draws the detection window (boxes, zones, counts, laptop caption). `scripts/draw_zones.py` makes zones files.
-Two real clips of our cat (Tangerine) are tested end to end; the footage itself is in the shared Drive, not the repo:
+**From Day 3, @illumeow owns all code**, including half A's files.
 
-| Clip | Zones file | Result |
-| --- | --- | --- |
-| `TangerineEatCut.mp4`, 69 s, starts 2026-10-09 22:00:22 (last 69 s of the 13-min `TangerineEat.mp4`) | `config/zones/cam_food2.json` | 1 food visit, 22:00:41, 31 s |
-| `TangerineJumpOntoBed.mov`, 15 s, starts 22:22:20 (cropped to 838×720 to leave the person out) | `config/zones/cam_bed.json` (mattress = forbidden) | Alarm rings; 1 forbidden visit, 22:22:26, 9 s |
+Real clips, all tested end to end (footage in the shared Drive, not the repo):
 
-The bed clip replaces the staged counter jump.
+| Clip | Cat | Zones file | Result |
+| --- | --- | --- | --- |
+| `TangerineEat.mp4`, 58 s, portrait | Tangerine | `cam_food.json` | 1 food visit, 31 s |
+| `AmiDrink.mp4`, 90 s, portrait | Ami | `cam_water.json` | 1 water visit, 66 s |
+| `TangerinePee.mp4`, 60 s | Tangerine | `cam_litter_box.json` | 1 litter box visit, 24 s |
+| `AmiPee.mp4`, 117 s | Ami | `cam_litter_box.json` | 2 litter box visits (one stay split by a 4 s dropout) |
+| `TangerineJumpOntoBed.mov`, 15 s, cropped to leave the person out | Tangerine | `cam_bed.json` (mattress = forbidden) | Alarm rings; 1 forbidden visit, 9 s |
 
-To run them (the database flag keeps demo rows out of the default database):
+Demo database: Tangerine's three clips on one day at made-up but plausible times, plus 7 simulated days before it.
+Ami's clips stay out because the dashboard is Tangerine's (water shows "not on camera").
 
 ```bash
-uv run python -m pawwatch.run data/videos/TangerineEatCut.mp4 --zones config/zones/cam_food2.json --start 2026-10-09T22:00:22 --fps 5 --show --db data/demo.db
-uv run python -m pawwatch.run data/videos/TangerineJumpOntoBed.mov --zones config/zones/cam_bed.json --start 2026-10-09T22:22:20 --fps 5 --show --db data/demo.db
+uv run python scripts/build_demo.py --device mps     # rebuilds data/demo.db in about 10 s; drop --device off a Mac
+PAWWATCH_DB=data/demo.db uv run streamlit run dashboard/app.py
 ```
 
-**@meander (A):**
-- Heads-up: `run.py` now also writes a `recordings` row per file (see Interface contract), added by B in the
-  coverage PR. No change to how you call it. Rerun old clips into a fresh database to get their rows.
-- **No overnight recording.** The 7-day history is simulated anyway, and footage only has to show the pipeline
-  working on camera. Two more short clips are enough (see Footage we need below): drinking and a litter box visit.
-- Day 2: film those two clips, zones file for each, run them with `--show` into `data/demo.db`.
-- Day 2 evening: screen recordings of the detection window on the eat, bed, water and litter clips to B.
-- Day 3 morning: the airplane-mode shot (a screen recording of the pipeline running on a clip while Wi-Fi goes off).
+For the detection window shots, write to a throwaway database so demo.db stays clean:
+
+```bash
+uv run python -m pawwatch.run data/videos/TangerineEat.mp4 --zones config/zones/cam_food.json --start 2026-10-10T07:30 --fps 5 --show --db data/scratch.db
+```
+
+**@meander (A):** code is handed over. Remaining: the airplane-mode shot (a screen recording of the pipeline running
+on a clip while Wi-Fi goes off), and screen recordings of the detection window if you are doing them.
 
 **@bbwinner (C):** slides live in the repo under `slides/`, on branch `feat/slides` off `develop`.
 - Day 1: research, slide outline, business model page (35% of the score).
@@ -52,9 +56,9 @@ uv run python -m pawwatch.run data/videos/TangerineJumpOntoBed.mov --zones confi
   A and B put their screenshots in `slides/images/` on Day 2 evening.
 - Day 3: finish slides, add the demo video link, submit.
 
-**@illumeow (B):** merged into `develop`: anomaly check compares only filmed hours (touches `store.py` and `run.py`),
-full README, readable detection window on portrait clips (touches `overlay.py`). Next: dashboard on the real clips'
-events, screenshots to C, then the demo video on Day 3 (shot list, narration and timings in `docs/DemoVideo.md`).
+**@illumeow (B):** all code. Next: dashboard screenshots (real day from `build_demo.py`, simulated alert day) into
+`slides/images/` for C, merge `develop` into `main`, then the demo video (shot list, narration and timings in
+`docs/DemoVideo.md`).
 
 **Cut for time:** Hailo backend port, Telegram setup, LLM-written daily report, overnight recording and bulk runs.
 

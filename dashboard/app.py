@@ -21,6 +21,7 @@ COLORS = {
     "dark": ["#3987e5", "#d95926", "#199e70", "#c98500"],
 }
 SIM_OPACITY = 0.4
+MIN_BAND = 15 * 60  # seconds
 
 st.set_page_config(page_title="PawWatch", page_icon=":material/pets:", layout="wide")
 
@@ -52,10 +53,18 @@ def frame(events):
 
 
 def watched_frame(spans, day):
-    """Rows for the shaded "on camera" bands: one per zone and watched span."""
+    """Rows for the shaded "on camera" bands: one per zone and watched span.
+
+    Bands are drawn at least MIN_BAND wide so a 1-minute clip is visible on a 24 h axis; tooltips keep the real times.
+    """
     day0 = datetime.combine(day, datetime.min.time())
-    return pd.DataFrame([{"Zone": LABELS[z], "from": day0 + timedelta(seconds=s), "to": day0 + timedelta(seconds=e)}
-                         for z in ZONES for s, e in spans[z]], columns=["Zone", "from", "to"])
+    rows = []
+    for z in ZONES:
+        for s, e in spans[z]:
+            mid, half = (s + e) / 2, max(e - s, MIN_BAND) / 2
+            rows.append({"Zone": LABELS[z], "from": day0 + timedelta(seconds=s), "to": day0 + timedelta(seconds=e),
+                         "x": day0 + timedelta(seconds=mid - half), "x2": day0 + timedelta(seconds=mid + half)})
+    return pd.DataFrame(rows, columns=["Zone", "from", "to", "x", "x2"])
 
 
 def timeline_chart(df, day, spans=None):
@@ -81,8 +90,8 @@ def timeline_chart(df, day, spans=None):
     )
     layers = [ticks]
     if spans is not None:
-        bands = alt.Chart(watched_frame(spans, day)).mark_rect(opacity=0.12, color="gray").encode(
-            x="from:T", x2="to:T", y=alt.Y("Zone:N", sort=[LABELS[z] for z in ZONES]),
+        bands = alt.Chart(watched_frame(spans, day)).mark_rect(opacity=0.18, color="gray").encode(
+            x="x:T", x2="x2:T", y=alt.Y("Zone:N", sort=[LABELS[z] for z in ZONES]),
             tooltip=[alt.Tooltip("Zone:N"), alt.Tooltip("from:T", title="On camera from", format="%H:%M"),
                      alt.Tooltip("to:T", title="until", format="%H:%M")])
         layers.insert(0, bands)

@@ -86,6 +86,16 @@ uv run streamlit run dashboard/app.py
 
 Simulated days are labeled as such everywhere: faded and starred in charts, "[Simulated data]" in the report.
 
+### Rebuild our demo from the real clips
+
+With our clips in `data/videos/` (not in the repo), one command runs them through the pipeline and adds a simulated
+week before them:
+
+```bash
+uv run python scripts/build_demo.py --device mps     # leave --device off on Linux
+PAWWATCH_DB=data/demo.db uv run streamlit run dashboard/app.py
+```
+
 ### Process your own footage
 
 1. Record each spot from a fixed camera, about 1 to 2 m away. Name files with their start time:
