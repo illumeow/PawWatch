@@ -22,7 +22,6 @@ COLORS = {
     "light": ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"],
     "dark": ["#3987e5", "#d95926", "#199e70", "#c98500"],
 }
-SIM_OPACITY = 0.4
 HIT_PX = 24  # width of the hover box around each visit
 AXIS_PX = 80  # zone-label column of the timeline, the same in its detail and overview charts
 REFRESH_S = 3  # visits processed while the page is open show up within this
@@ -59,7 +58,6 @@ def frame(events):
     )
     df["end"] = df["start"] + pd.to_timedelta(df["duration_s"], unit="s")
     df["Zone"] = df["zone"].map(LABELS)
-    df["Data"] = df["simulated"].map({True: "simulated", False: "real"})
     df["visit"] = range(len(df))  # identity for the hover selection
     return df
 
@@ -80,22 +78,15 @@ def timeline_chart(df, day, spans=None):
     chart to that time range, drag the selection to pan, double-click to go back to the whole day.
 
     Detail: one row per zone; a visit is a rounded bar from its start to its end (a short one still shows on the full
-    day), with a hover area HIT_PX / 2 wider on every side. Simulated visits are faded only when mixed with real ones.
+    day), with a hover area HIT_PX / 2 wider on every side.
     spans: watched hours per zone, drawn as a thin line under each row (full on a day watched around the clock).
     """
-    mixed = df["simulated"].nunique() > 1
     day0 = datetime.combine(day, datetime.min.time())
     full_day = [day0, day0 + timedelta(days=1)]
     rows = [LABELS[z] for z in ZONES]
     zoom = alt.selection_interval(name="zoom", encodings=["x"])
     hover = alt.selection_point(on="pointerover", fields=["visit"], empty=False, clear="pointerout")
     color = alt.Color("Zone:N", scale=zone_scale(), legend=None)
-    opacity = alt.Opacity(
-        "Data:N",
-        sort=["real", "simulated"],
-        scale=alt.Scale(domain=["real", "simulated"], range=[1.0, SIM_OPACITY if mixed else 1.0]),
-        legend=None,
-    )
     y_axis = alt.Axis(minExtent=AXIS_PX, maxExtent=AXIS_PX)  # same width in both charts, so their times line up
 
     # Detail: the whole day, or the zoom selection once there is one (domainRaw overrides domain when set).
@@ -111,7 +102,6 @@ def timeline_chart(df, day, spans=None):
         x2="end:T",
         color=color,
         stroke=alt.Stroke("Zone:N", scale=zone_scale(), legend=None),
-        opacity=opacity,
         size=alt.condition(hover, alt.value(22), alt.value(12)),
     )
     hits = (  # invisible, the bar plus HIT_PX / 2 on every side, so a short visit is easy to hover
@@ -170,7 +160,6 @@ def timeline_chart(df, day, spans=None):
                 axis=alt.Axis(labels=False, ticks=False, domain=False, minExtent=AXIS_PX, maxExtent=AXIS_PX),
             ),
             color=color,
-            opacity=opacity,
         )
         .add_params(zoom)
         .properties(height=44, width="container")
@@ -183,7 +172,7 @@ def timeline_chart(df, day, spans=None):
 
 
 def trend_chart(rows, zone, color, ymax):
-    """Daily visits for one zone; simulated days faded."""
+    """Daily visits for one zone."""
     df = pd.DataFrame(rows)
     bars = (
         alt.Chart(df)
@@ -191,25 +180,18 @@ def trend_chart(rows, zone, color, ymax):
         .encode(
             x=alt.X("label:N", title=None, sort=None, axis=alt.Axis(labelAngle=0)),
             y=alt.Y("count:Q", title=None, scale=alt.Scale(domain=[0, ymax]), axis=alt.Axis(tickMinStep=1, grid=True)),
-            opacity=alt.Opacity(
-                "Data:N",
-                sort=["real", "simulated"],
-                scale=alt.Scale(domain=["real", "simulated"], range=[1.0, SIM_OPACITY]),
-                legend=None,
-            ),
-            tooltip=[alt.Tooltip("day:N", title="Day"), alt.Tooltip("count:Q", title="Visits"), alt.Tooltip("Data:N")],
+            tooltip=[alt.Tooltip("day:N", title="Day"), alt.Tooltip("count:Q", title="Visits")],
         )
     )
     return bars.properties(title=LABELS[zone], height=180)
 
 
 def week_rows(conn, day):
-    """Per zone: [{day, label, count, Data}] for the 7 days before `day` plus `day` itself."""
+    """Per zone: [{day, label, count}] for the 7 days before `day` plus `day` itself."""
     rows = {z: [] for z in ZONES}
     for i in range(7, -1, -1):
         d = day - timedelta(days=i)
         evs = events_on(conn, d)
-        simulated = bool(evs) and all(e.simulated for e in evs)
         label = "today" if d == date.today() else f"{d:%a} {d.day}"  # 8 days: weekdays repeat, so add the date
         for z in ZONES:
             rows[z].append(
@@ -217,7 +199,6 @@ def week_rows(conn, day):
                     "day": d.isoformat(),
                     "label": label,
                     "count": sum(e.zone == z for e in evs),
-                    "Data": "simulated" if simulated else "real",
                 }
             )
     return rows
@@ -248,13 +229,17 @@ def body():
     conn = store.connect(db_path)
     now = datetime.now()
     day_events = events_on(conn, day)
-    simulated_day = bool(day_events) and all(e.simulated for e in day_events)
     when = "Today" if day == now.date() else day.strftime("%A, %B %d")
 
-    st.caption(
-        "Laptop prototype · events only, no video stored"
-        + (" · **this day uses simulated data**" if simulated_day else "")
-    )
+    # The one place simulated data is labeled. A real deployment has none, so it never shows this.
+    sim_days = sorted({datetime.fromtimestamp(e.start_ts).date() for e in all_events(conn) if e.simulated})
+    demo = ""
+    if sim_days:
+        span = f"{sim_days[0]:%b} {sim_days[0].day}" + (
+            f" to {sim_days[-1]:%b} {sim_days[-1].day}" if len(sim_days) > 1 else ""
+        )
+        demo = f" · **Demo data:** {len(sim_days)} simulated day{'s' if len(sim_days) > 1 else ''} ({span})"
+    st.caption("Laptop prototype · events only, no video stored" + demo)
 
     with st.container(border=True):
         st.markdown(f"**Daily report**  \n{report.daily_report(conn, day, cat_name=cat, now=now)}")
@@ -302,13 +287,11 @@ def body():
     cols = st.columns(2) + st.columns(2)  # 2x2, so every day label fits
     for col, z, color in zip(cols, ZONES, colors(), strict=True):
         col.altair_chart(trend_chart(rows[z], z, color, ymax), width="stretch")
-    if any(r["Data"] == "simulated" for r in rows[ZONES[0]]):
-        st.caption("Faded bars are **simulated** days, to give the anomaly check a baseline.")
 
     with st.expander("What PawWatch stores"):
         total = len(all_events(conn))
         st.markdown(f"**{total} events** in the database · **0 images** · **0 video**. One row per visit:")
-        table = frame(day_events)[["camera", "Zone", "start", "duration_s", "Data"]] if day_events else pd.DataFrame()
+        table = frame(day_events)[["camera", "Zone", "start", "duration_s"]] if day_events else pd.DataFrame()
         st.dataframe(
             table.rename(columns={"camera": "Camera", "start": "Started", "duration_s": "Seconds"}),
             hide_index=True,

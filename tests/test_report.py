@@ -60,11 +60,11 @@ def test_describe_anomaly_stands_alone():
     )
 
 
-def test_past_day_wording_and_simulated_label():
+def test_past_day_wording():
     conn = store.connect(":memory:")
     usual_week(conn)
     text = report.daily_report(conn, TODAY - timedelta(days=1), now=at(TODAY, 12))
-    assert text.startswith("[Simulated data] Tangerine ate twice")
+    assert text.startswith("Tangerine ate twice")  # simulated or not: the dashboard labels demo data, not the report
     assert "on Thursday, Oct 8." in text
 
 

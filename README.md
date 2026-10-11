@@ -86,7 +86,8 @@ uv run python scripts/seed_fake.py --with-today   # 7 simulated days, plus a day
 uv run streamlit run dashboard/app.py
 ```
 
-Simulated days are labeled as such everywhere: faded in charts, "[Simulated data]" in the report.
+The dashboard labels simulated data once, at the top ("Demo data: 7 simulated days"); a real deployment has none,
+so it never shows the note.
 
 ### Rebuild our demo from the real clips
 
