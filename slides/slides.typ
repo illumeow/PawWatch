@@ -9,7 +9,7 @@
 #show: slides.with(
   title: "PawWatch",
   subtitle: "Edge-AI Cat Health Monitor",
-  date: datetime.today().display("[year].[month].[day]"),
+  date: [#link("https://github.com/illumeow/PawWatch")[Link to GitHub Repository]],
   authors: ("Jin-Yu Yang", "Zan-Yun Lee", "Wen-Hsiu Lin"),
   institution: [Department of Computer Science and Information Engineering, National Taiwan University],
   layout: "medium",
@@ -38,7 +38,7 @@ thirst and litter box use as warning signs @R2, and each common disease changes 
   [*Disease*], [*How common*], [*Eating*], [*Drinking*], [*Litter*],
   [Kidney disease], [Up to 30–40% of older cats may have it; only 3.6% are diagnosed @R4 @R5], [], [↑], [↑],
   [Hyperthyroidism], [8.7% of cats over 10 @R6 @R7], [↑], [↑], [↑],
-  [Diabetes], [About 1 in 200 cats @R8 @R9], [↑], [↑], [↑],
+  [Diabetes], [About 1 in 200 cats @R8], [↑], [↑], [↑],
   [Urinary tract disease], [A leading reason cats visit vets @R10], [], [], [↑],
 )
 
@@ -57,23 +57,23 @@ even in early stages @R11. A blocked urinary tract may kill within 24–48 hours
 #let yes = text(font: "DejaVu Sans", fill: green.darken(30%))[✓]
 #let no = text(font: "DejaVu Sans", fill: warn)[✗]
 
-Watching food, water and litter today takes several devices, brands and apps. 
+Each smart device on the market watches one spot, so watching food, water and litter takes several devices and apps.
 
 #table(
-  columns: (3.2fr, 0.6fr, 0.6fr, 0.6fr, 1fr),
+  columns: (3fr, 0.7fr, 0.7fr, 0.7fr),
   inset: 4pt,
-  align: (left, center, center, center, center, center),
-  [], [*Food*], [*Water*], [*Litter*], [*Video home*], 
-  [Pet cameras (Furbo, Petcube) @C1 @C2 @C3], no, no, no, no,
-  [Smart litter boxes (Petivity, Litter-Robot, PETKIT) @C4 @C5 @C6], no, no, yes, [–], 
-  [Smart fountains (Felaqua Connect) @C7], no, yes, no, [–], 
-  [Smart feeders (Petlibro Granary 2) @C11], yes, no, no, no, 
-  [*PawWatch*], yes, yes, yes, yes, 
+  align: (left, center, center, center),
+  [], [*Food*], [*Water*], [*Litter*],
+  [Smart feeders], yes, no, no,
+  [Smart water fountains], no, yes, no,
+  [Smart litter boxes], no, no, yes,
+  [Pet cameras (video only, no visit log)], no, no, no,
+  [*PawWatch*], yes, yes, yes,
 )
-#text(0.8em)["Video home" = video stays at home]
 
 However, illness shows up as a *combination*. For example, kidney disease raises both drinking and litter box use @R4,
-so a water-only or litter-only device sees half the pattern.
+so a water-only or litter-only device sees half the pattern. Once set up, PawWatch watches all three spots with
+one box, and the video never leaves home.
 ]
 
 == Solution: PawWatch
@@ -119,14 +119,14 @@ recognizes the cat and logs every visit. Video never leaves home.
   inset: 6pt,
   [], [*Cloud pet camera*], [*PawWatch*],
   [*Who sees your home video?*],
-    [It's uploaded to the company's servers. At one home-camera maker, staff watched customers' private videos. @C8 @P3],
+    [It's uploaded to the company's servers. At one home-camera maker, staff watched customers' private videos @P3],
     [No one. Video never leaves home; only events like
      "14:32, drank for 25 s" are stored],
   [*Monthly fee*],
-    [Smart features need a plan, typically US\$60–120/yr @C2 @C11],
+    [Smart features usually need a paid subscription],
     [None. No servers to pay for],
   [*Internet goes down*],
-    [Some apps stop updating @C6],
+    [Cloud features stop until it's back],
     [Keeps logging; alerts are sent once it's back],
   [*Cat jumps on the counter?*],
     [Frames go to the server and back first],
@@ -137,72 +137,169 @@ Running 24/7 is cheap: the AI accelerator draws 2.5 W, less than an LED bulb @C1
 
 = PawWatch System
 
-== Architecture
+// Architecture (required: hardware/software architecture; feasibility 35%)
+== Architecture: video in, events out
 
-#todo[system architecture diagram and technology overview]
+#align(center)[
+  #set text(0.85em)
+  #diagram(
+    node-stroke: .1em,
+    spacing: (3.4em, 1.1em),
+    node((0, 0), [Fixed \ cameras], name: <cam>),
+    edge("-|>", [frames]),
+    node((1, 0), [YOLO cat detector \ on UGen300], name: <det>),
+    edge("-|>", [cat box]),
+    node((1.9, 0), [Zone + dwell \ logic], name: <logic>),
+    edge("-|>", [visits]),
+    node((3, 0), [SQLite \ events only], name: <db>),
+    node((1.9, 1), [Alarm sound], name: <alarm>),
+    edge(<logic>, <alarm>, "-|>", [no-go zone], label-side: left),
+    node((3, 1), [Dashboard, \ report, alerts], name: <out>),
+    edge(<db>, <out>, "-|>"),
+    node((1, -0.75), text(fill: luma(90))[Home host + ASUS UGen300], stroke: none, name: <hostlabel>),
+    node(enclose: (<det>, <logic>, <db>, <out>, <alarm>, <hostlabel>), stroke: (paint: luma(120), dash: "dashed"), inset: 5pt),
+    node((4.3, 1), [Phone], name: <phone>),
+    edge(<out>, <phone>, "-|>", [events \ only]),
+  )
+]
 
-// 8. Hardware architecture (required: hardware/software architecture)
+#[
+#set text(0.85em)
+- *Detect:* the host decodes each camera's video and the UGen300 runs a stock YOLO model that finds the cat.
+  Frames live only in memory and are dropped after inference; nothing saves or uploads them.
+- *Turn boxes into visits:* the cat's box is matched to the zones drawn for that camera (food, water, litter, no-go),
+  and a visit is logged once the cat stays long enough. A no-go zone rings the alarm right away.
+- *Store and report:* each visit is one row in a local SQLite database. The dashboard, anomaly alert and daily report
+  read only these rows, so the only thing that can leave the home is an event like "07:30, ate for 31 s".
+]
+
 == Hardware: one host, many fixed cameras
-#todo[目前是 AI 生的]
 
-#align(center)[
-  #diagram(
-    node-stroke: .1em,
-    spacing: (2.5em, 1.2em),
-    node((0, 0), "Camera: food"),
-    node((0, 1), "Camera: water"),
-    node((0, 2), "Camera: litter"),
-    node((0, 3), "Camera: no-go"),
-    node((2, 1.5), [Host + ASUS UGen300 \ (Hailo-10H)], name: <host>),
-    node((4, 1.5), "Phone"),
-    edge((0, 0), <host>, "-|>", [RTSP / LAN]),
-    edge((0, 1), <host>, "-|>"),
-    edge((0, 2), <host>, "-|>"),
-    edge((0, 3), <host>, "-|>"),
-    edge(<host>, (4, 1.5), "-|>", [events only]),
+#cols(ratio: (1fr, 1.15fr), gutter: 1em)[
+  #v(0.5em)
+  #align(center)[
+    #set text(0.8em)
+    #diagram(
+      node-stroke: .1em,
+      spacing: (2.2em, 0.9em),
+      node((0, 0), "Camera: food"),
+      node((0, 1), "Camera: water"),
+      node((0, 2), "Camera: litter"),
+      node((0, 3), "Camera: no-go"),
+      node((1.6, 1.5), [Host \ + UGen300], name: <host>),
+      node((1.6, 3.2), "Phone", name: <phone>),
+      edge((0, 0), <host>, "-|>"),
+      edge((0, 1), <host>, "-|>"),
+      edge((0, 2), <host>, "-|>"),
+      edge((0, 3), <host>, "-|>"),
+      edge(<host>, <phone>, "-|>", [events only], label-side: left),
+    )
+  ]
+][
+  #set text(0.85em)
+  We mount *fixed cameras*, one at each spot we watch: the food bowl, the water bowl, the litter box and any no-go spot
+  such as the kitchen counter. Each camera streams its video over the home network to *one small host computer*
+  (a mini PC or Raspberry Pi).
+
+  The *ASUS UGen300* is plugged into the host over USB or M.2. The host decodes the video and hands frames to the
+  UGen300, whose Hailo-10H chip (40 TOPS at 2.5 W @C13) runs the cat detector. The host then turns detections into
+  visits, stores them and serves the dashboard. Only these events reach the owner's phone.
+]
+
+#[
+#set text(0.85em)
+*Why fixed cameras:* zones are drawn in pixels, so a camera that never moves needs them drawn only once, at setup.
+One camera per spot also keeps the cat large in the frame, which makes detection reliable.
+]
+
+// Detection-window screenshot without its bottom caption band (`band` = share of the image height)
+#let window-shot(path, height, band) = box(height: height * (1 - band), clip: true, align(top, image(path, height: height)))
+
+== Detection: from pixels to "the cat is at the bowl"
+
+#cols(ratio: (1.5fr, 1fr), gutter: 1em)[
+  #set text(0.85em)
+  *A stock YOLO model, no training.* We use YOLOv8n pretrained on the public COCO dataset, which already has a
+  "cat" class. We keep only that class (score $>=$ 0.4). No cat photos were collected and no model was trained or
+  fine-tuned, so any home can use it out of the box.
+
+  *Zones are drawn once.* At setup, the owner clicks a polygon around each spot on a still frame
+  (`draw_zones.py`); it is saved as one small JSON file per camera.
+
+  *Which zone is the cat in?* We take the highest-scoring cat box and measure how much of it overlaps each zone,
+  as a share of the *smaller* of box and zone. The zone with the most overlap wins, if it reaches 20%.
+  Measuring against the smaller shape lets a zone hug a small bowl, and a box that only grazes a zone's edge doesn't count.
+][
+  #figure(
+    window-shot("images/detect_eat.jpg", 6.4cm, 0.045),
+    caption: text(0.7em)[Detection window: cat box, food zone and visit count],
+    supplement: none,
+    numbering: none,
   )
 ]
 
-- Fixed cameras: zones are drawn once; the cat is large in frame
-- UGen300 is an M.2 / USB card in the host, not a standalone computer
+// Small sketch of the visit rules: one square per sampled frame
+#let sample-strip(pattern) = {
+  let cell(c) = box(
+    width: 0.42em,
+    height: 0.9em,
+    fill: if c == "#" { rgb("#eb6834") } else { luma(225) },
+  )
+  stack(dir: ltr, spacing: 1pt, ..pattern.clusters().map(cell))
+}
 
-// 9. Software pipeline (required: hardware/software architecture; feasibility 35%)
-== Software: video in, events out
-#todo[目前是 AI 生的]
+== Event logic: from detections to visits
+
+#[
+#set text(0.85em)
+The event logic is pure code: it takes $"(video time, zone)"$ pairs and returns visits, so it is tested without a model
+or video. Timestamps are *video time* (recording start + frame offset), so recorded footage replays exactly.
 
 #align(center)[
-  #diagram(
-    node-stroke: .1em,
-    spacing: 2em,
-    node((0, 0), "Frames"),
-    edge("-|>"),
-    node((1, 0), [YOLO cat detector \ (UGen300)]),
-    edge("-|>"),
-    node((2, 0), [Zones + dwell \ event logic]),
-    edge("-|>"),
-    node((3, 0), [SQLite \ events only]),
-    edge("-|>"),
-    node((4, 0), [Dashboard, report, \ alerts]),
+  #grid(
+    columns: (auto, auto),
+    column-gutter: 0.8em,
+    row-gutter: 0.4em,
+    align: (right + horizon, left + horizon),
+    text(0.85em)[Frames (cat in zone)],
+    sample-strip("....##############.....############################......"),
+    text(0.85em)[Logged visit],
+    stack(dir: ltr, h(4 * (0.42em + 1pt)), box(width: 46 * (0.42em + 1pt) - 1pt, height: 0.9em, fill: rgb("#eb6834"), radius: 2pt, align(center + horizon, text(0.75em, fill: white)[one visit: the 5-frame gap is bridged]))),
   )
 ]
-
-- Detector contract `(label, score, box)`: laptop backend today, Hailo backend is a swap
-- Stock COCO YOLOv8, precompiled for Hailo-10H: no training, no conversion
-- Frames are discarded after inference
-
-// 10. Fits the chip (feasibility 35%, hardware integration award)
-== The load fits the chip
-#todo[目前是 AI 生的]
 
 #table(
-  columns: (1fr, 1fr),
-  inset: 8pt,
-  [Needed], [3 cameras × 5 fps = *15 inferences/s*],
-  [Laptop (M3 Pro CPU, YOLOv8n 640)], [49 fps measured],
-  [Hailo-10H (YOLOv8n)], [#todo[published fps, cite source]],
+  columns: (auto, 1fr),
+  inset: 4pt,
+  [*Minimum dwell*], [A visit counts after 5 s in one zone, so walking past a bowl isn't a meal. No-go zones need only 1 s: a quick jump still counts.],
+  [*Gap tolerance*], [The cat may vanish for up to 5 s (turning, hidden by the litter box rim) without splitting one visit into two.],
+  [*Live writes*], [A visit is stored as soon as it qualifies and its end moves forward while the cat stays, so the dashboard follows a live camera.],
+  [*Alarm*], [Every frame in a no-go zone calls the alarm at once; a 30 s cooldown gives one sound per jump, not per frame.],
 )
+]
 
-#todo[Stage II plan: port to UGen300, measure fps and power]
+== Storage and outputs: what the owner sees
+
+#cols(ratio: (1.35fr, 1fr), gutter: 1em)[
+  #set text(0.8em)
+  *One table is the whole record.* Each visit is one row in local SQLite:
+  `camera, zone, start, end, duration, simulated`. A second table logs when each camera was recording, so hours
+  with the camera off are never read as "didn't drink".
+
+  *Anomaly alert.* For each of food, water and litter, today's count is compared with the cat's own average over the
+  previous 7 days, *over the same hours*, so a normal morning isn't flagged for a missing dinner. An alert needs both
+  $>=$ 2× or $<=$ ½ the average *and* a difference of at least 3 visits, so 1 vs. 0 is not an alert.
+
+  *Daily report and alarm.* Template sentences turn the counts into plain language. Wording suggests watching the cat
+  or seeing a vet, never a diagnosis. No-go jumps play a sound on the host and can send a text message (never a frame).
+][
+  #figure(
+    image("images/dashboard_real_day.png", height: 6.6cm),
+    caption: text(0.7em)[Dashboard: today's counts, timeline, 7-day trend],
+    supplement: none,
+    numbering: none,
+  )
+]
 
 = Impact and Business
 
@@ -224,32 +321,17 @@ Running 24/7 is cheap: the AI accelerator draws 2.5 W, less than an LED bulb @C1
     the cat or seeing a vet, with the daily report in hand.
   ]
 ]
+// 
 
-*Outcomes:* 
-- Stage I, a working prototype on recorded video and open-source code on GitHub\;
-- Stage II, the detector on the *UGen300* with measured fps and power.
+// *Outcomes:* 
+// - Stage I, a working prototype on recorded video and open-source code on GitHub\;
+// - Stage II, the detector on the *UGen300* with measured fps and power.
 
-== Market: more cats, older cats, growing pet tech
+== Market: more cats in Taiwan, in a growing pet tech market
 
-#todo[目前是 AI 生的, 感覺留下 more cats?]
+- *More cats:* Taiwan now has 1.74 M pet cats, up 33% in two years, and more cats than dogs @K-a
+- *Growing pet tech:* the global market may grow from US\$15.6 B (2025) to US\$52.9 B (2035) @K-f
 
-#cols(ratio: (1fr, 1.25fr))[
-  - *Taiwan:* 1.74 M cats, +33% in two years, now more than dogs @K-a
-  - *Older cats:* Japan's average cat lifespan hit 15.79 years @K-d
-  - *Pet tech:* US\$15.6 B (2025) → US\$52.9 B (2035), 12% a year; health is the largest segment @K-f
-][
-  #table(
-    columns: (auto, 1fr, auto),
-    inset: 5pt,
-    [], [*Who*], [*Value / yr*],
-    [TAM], [Global pet tech, health segment @K-f], [US\$4.4 B],
-    [SAM], [Taiwan cat homes with a cat 7+: ≈ 460 k], [NT\$4.6 B],
-    [SOM], [1% of SAM in 3 years: ≈ 4,600], [NT\$46 M],
-  )
-  #text(0.65em)[Assumptions: 1.5 cats per home → 1.16 M homes @K-a\; 40% have a cat 7+ (Japan proxy, 44%) @K-e\; NT\$10k per home (assumed); US\$1 ≈ NT\$32.]
-]
-
-Next: Taiwan → Japan (9 M cats) @K-d → US (53 M cat households) @K-c
 
 == Business model: ride on hardware people already buy
 #todo[目前是 AI 生的, 完全不知道這啥]
@@ -264,48 +346,46 @@ Next: Taiwan → Japan (9 M cats) @K-d → US (53 M cat households) @K-c
 )
 
 - Licensing spreads the UGen300 cost: it doesn't land on one product
-- Today's kit: UGen300 US\$299 + host + 3 × \~US\$20 cameras ≈ US\$430–500 @C12 @C13 @C14 @C15
-
-// 15. Roadmap + future work (business 35%: feasibility of the plan; innovation 30%)
-== What's next: from prototype to product
-
-#todo[目前是 AI 生的]
-
-#cols(ratio: (1fr, 1fr, 1fr), gutter: 1em)[
-  #callout(title: "Stage I (now)")[
-    - Laptop prototype on recorded video
-    - Visit log, anomaly alert, daily report, dashboard, no-go alarm
-  ]
-][
-  #callout(title: "Stage II (11/6–12/4)")[
-    - Port the detector to the UGen300
-    - Measure fps and power
-    - On-device LLM daily report
-  ]
-][
-  #callout(title: "After the contest")[
-    - Pilot with real cats at home
-    - Multi-cat identification
-    - Pan-tilt cameras; auto-detect bowls and litter box
-    - Street-cat TNR tracking (ear tips)
-  ]
-]
-
-== Code and references
-
-#todo[其實應該可以全部丟 Appendix 吧]
-
-*Code:* #link("https://github.com/illumeow/PawWatch")[github.com/illumeow/PawWatch]
-
-*References:* numbered markers such as [1] on each slide refer to the full list in the appendix:
-veterinary research and guidelines, product and price pages, and market data.
+- One UGen300 serves every camera in the home, so each extra spot is only a camera
 
 = Appendix
 
 
-== Other
+== Detection screenshots
 
-感覺能放一些截圖？或是前面放不下的圖表 blah blah blah
+#let shot(path, band, caption) = figure(
+  window-shot(path, 4.4cm, band),
+  caption: text(0.7em, caption),
+  supplement: none,
+  numbering: none,
+)
+
+#align(center + horizon)[
+  #grid(
+    columns: 3,
+    column-gutter: 0.8em,
+    align: bottom,
+    shot("images/detect_litter.jpg", 0.078)[Tangerine in the litter zone],
+    shot("images/detect_drink_ami.jpg", 0.045)[Ami at the water bowl],
+    shot("images/detect_bed_alarm.jpg", 0.052)[No-go zone: box turns red, alarm rings],
+  )
+]
+
+Each window shows the cat box with its score, the camera's zones and the visits counted so far. The windows
+are only displayed; frames are never written to disk.
+
+== Dashboard with an anomaly alert (simulated data)
+
+#cols(ratio: (1fr, 1.1fr))[
+  #set text(0.85em)
+  This dashboard runs on *simulated* data only, to show what an alert looks like: a day where the litter box
+  count reaches at least twice the cat's 7-day average.
+
+  The alert names the change and the usual count, and suggests keeping an eye on the cat or seeing a vet.
+  It never names a disease.
+][
+  #align(center, image("images/dashboard_alert_simulated.png", height: 7cm))
+]
 
 == References
 
