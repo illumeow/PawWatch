@@ -60,9 +60,19 @@ def render(
     _text(img, CAPTION, (round(16 * s), img.shape[0] - round(18 * s)), caption, (220, 220, 220))
     if zone == "forbidden":  # the alarm is ringing: make it visible in the recording too
         cv2.rectangle(img, (0, 0), (img.shape[1] - 1, img.shape[0] - 1), RED, max(4, round(8 * s)))
-        width = cv2.getTextSize("ALARM", FONT, s, thick)[0][0]
-        _text(img, "ALARM", (img.shape[1] - width - round(24 * s), round(38 * s)), s, RED)
+        alarm_badge(img, s)
     return img
+
+
+def alarm_badge(img: np.ndarray, s: float) -> None:
+    """Solid red badge with bold white "ALARM" at the top right, in place: readable even scaled down on a slide."""
+    size, bold = 1.3 * s, max(2, round(4 * s))
+    (w, h), base = cv2.getTextSize("ALARM", FONT, size, bold)
+    pad, margin = round(12 * s), round(14 * s)
+    x2, y1 = img.shape[1] - margin, margin
+    x1, y2 = x2 - w - 2 * pad, y1 + h + base + 2 * pad
+    cv2.rectangle(img, (x1, y1), (x2, y2), RED, -1)
+    cv2.putText(img, "ALARM", (x1 + pad, y2 - pad - base), FONT, size, (255, 255, 255), bold, cv2.LINE_AA)
 
 
 def scale(img: np.ndarray) -> float:
