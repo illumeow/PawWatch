@@ -9,7 +9,7 @@
 #show: slides.with(
   title: "PawWatch",
   subtitle: "Edge-AI Cat Health Monitor",
-  date: [#link("https://github.com/illumeow/PawWatch")[Link to GitHub Repository]],
+  date: [#link("https://github.com/illumeow/PawWatch")[#box(baseline: 0.15em, image("images/github.svg", height: 1em))#h(0.3em)GitHub Repo]],
   authors: ("Jin-Yu Yang", "Zan-Yun Lee", "Wen-Hsiu Lin"),
   institution: [Department of Computer Science and Information Engineering, National Taiwan University],
   layout: "medium",
@@ -34,7 +34,7 @@ thirst and litter box use as warning signs @R2, and each common disease changes 
 #table(
   columns: (1.35fr, 2.7fr, 0.55fr, 0.6fr, 0.5fr),
   inset: 4pt,
-  align: (left, left, center, center, center),
+  align: (left, left, center + horizon, center + horizon, center + horizon),
   [*Disease*], [*How common*], [*Eating*], [*Drinking*], [*Litter*],
   [Kidney disease], [Up to 30–40% of older cats may have it; only 3.6% are diagnosed @R4 @R5], [], [↑], [↑],
   [Hyperthyroidism], [8.7% of cats over 10 @R6 @R7], [↑], [↑], [↑],
@@ -145,21 +145,21 @@ Running 24/7 is cheap: the AI accelerator draws 2.5 W, less than an LED bulb @C1
   #diagram(
     node-stroke: .1em,
     spacing: (3.4em, 1.1em),
-    node((0, 0), [Fixed \ cameras], name: <cam>),
+    node((-0.3, 0), [Fixed \ cameras], name: <cam>),
     edge("-|>", [frames]),
     node((1, 0), [YOLO cat detector \ on UGen300], name: <det>),
     edge("-|>", [cat box]),
     node((1.9, 0), [Zone + dwell \ logic], name: <logic>),
     edge("-|>", [visits]),
-    node((3, 0), [SQLite \ events only], name: <db>),
+    node((2.8, 0), [SQLite \ events only], name: <db>),
     node((1.9, 1), [Alarm sound], name: <alarm>),
     edge(<logic>, <alarm>, "-|>", [no-go zone], label-side: left),
-    node((3, 1), [Dashboard, \ report, alerts], name: <out>),
+    node((2.8, 1), [Dashboard, \ report, alerts], name: <out>),
     edge(<db>, <out>, "-|>"),
-    node((1, -0.75), text(fill: luma(90))[Home host + ASUS UGen300], stroke: none, name: <hostlabel>),
+    node((1.8, -0.75), text(fill: luma(90))[Home host + ASUS UGen300], stroke: none, name: <hostlabel>),
     node(enclose: (<det>, <logic>, <db>, <out>, <alarm>, <hostlabel>), stroke: (paint: luma(120), dash: "dashed"), inset: 5pt),
-    node((4.3, 1), [Phone], name: <phone>),
-    edge(<out>, <phone>, "-|>", [events \ only]),
+    node((4, 1), [Phone], name: <phone>),
+    edge(<out>, <phone>, "-|>", [#set par(leading: 0.4em); events \ only]),
   )
 ]
 
@@ -182,10 +182,10 @@ Running 24/7 is cheap: the AI accelerator draws 2.5 W, less than an LED bulb @C1
     #diagram(
       node-stroke: .1em,
       spacing: (2.2em, 0.9em),
-      node((0, 0), "Camera: food"),
-      node((0, 1), "Camera: water"),
-      node((0, 2), "Camera: litter"),
-      node((0, 3), "Camera: no-go"),
+      node((0, 0), "Camera: food", width: 7.5em),
+      node((0, 1), "Camera: water", width: 7.5em),
+      node((0, 2), "Camera: litter", width: 7.5em),
+      node((0, 3), "Camera: no-go", width: 7.5em),
       node((1.6, 1.5), [Host \ + UGen300], name: <host>),
       node((1.6, 3.2), "Phone", name: <phone>),
       edge((0, 0), <host>, "-|>"),
@@ -214,6 +214,8 @@ One camera per spot also keeps the cat large in the frame, which makes detection
 
 // Detection-window screenshot without its bottom caption band (`band` = share of the image height)
 #let window-shot(path, height, band) = box(height: height * (1 - band), clip: true, align(top, image(path, height: height)))
+// Dashboard screenshot without its blank top margin (`top` = share of the image height)
+#let crop-top(path, height, top) = box(height: height * (1 - top), clip: true, move(dy: -height * top, image(path, height: height)))
 
 == Detection: from pixels to "the cat is at the bowl"
 
@@ -227,7 +229,7 @@ One camera per spot also keeps the cat large in the frame, which makes detection
   (`draw_zones.py`); it is saved as one small JSON file per camera.
 
   *Which zone is the cat in?* We take the highest-scoring cat box and measure how much of it overlaps each zone,
-  as a share of the *smaller* of box and zone. The zone with the most overlap wins, if it reaches 20%.
+  as a share of the #underline[smaller] of box and zone. The zone with the most overlap wins, if it reaches 20%.
   Measuring against the smaller shape lets a zone hug a small bowl, and a box that only grazes a zone's edge doesn't count.
 ][
   #figure(
@@ -271,7 +273,8 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 #table(
   columns: (auto, 1fr),
   inset: 4pt,
-  [*Minimum dwell*], [A visit counts after 5 s in one zone, so walking past a bowl isn't a meal. No-go zones need only 1 s: a quick jump still counts.],
+  align: (horizon, ),
+  [*Minimum dwell*], [A visit counts after 5 s in one zone, so walking past a bowl isn't a meal.\ No-go zones need only 1 s: a quick jump still counts.],
   [*Gap tolerance*], [The cat may vanish for up to 5 s (turning, hidden by the litter box rim) without splitting one visit into two.],
   [*Live writes*], [A visit is stored as soon as it qualifies and its end moves forward while the cat stays, so the dashboard follows a live camera.],
   [*Alarm*], [Every frame in a no-go zone calls the alarm at once; a 30 s cooldown gives one sound per jump, not per frame.],
@@ -287,14 +290,13 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
   with the camera off are never read as "didn't drink".
 
   *Anomaly alert.* For each of food, water and litter, today's count is compared with the cat's own average over the
-  previous 7 days, *over the same hours*, so a normal morning isn't flagged for a missing dinner. An alert needs both
-  $>=$ 2× or $<=$ ½ the average *and* a difference of at least 3 visits, so 1 vs. 0 is not an alert.
+  previous 7 days, #underline[over the same hours], so a normal morning isn't flagged for a missing dinner. An alert needs both $>= 2$  or $<= 0.5$ times the average #underline[and] a difference of at least 3 visits, so 1 vs. 0 is not an alert.
 
   *Daily report and alarm.* Template sentences turn the counts into plain language. Wording suggests watching the cat
   or seeing a vet, never a diagnosis. No-go jumps play a sound on the host and can send a text message (never a frame).
 ][
   #figure(
-    image("images/dashboard_real_day.png", height: 6.6cm),
+    crop-top("images/dashboard_real_day.png", 6.6cm, 0.085),
     caption: text(0.7em)[Dashboard: today's counts, timeline, 7-day trend],
     supplement: none,
     numbering: none,
@@ -384,7 +386,9 @@ are only displayed; frames are never written to disk.
   The alert names the change and the usual count, and suggests keeping an eye on the cat or seeing a vet.
   It never names a disease.
 ][
-  #align(center, image("images/dashboard_alert_simulated.png", height: 7cm))
+  #figure(
+    crop-top("images/dashboard_real_day.png", 6.6cm, 0.085),
+  )
 ]
 
 == References

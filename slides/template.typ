@@ -168,7 +168,7 @@
       #v(1.4em, weak: true)
       #if subtitle != none { text(1.1em, weight: "bold", subtitle) }
       #if subtitle != none and date != none { text(1.1em)[ \ ] }
-      #if date != none { underline(text(0.8em, fill: red, date)) }
+      #if date != none { underline(text(0.8em, date)) }
       #v(1em, weak: true)
       #let byline = {
         authors.join(", ", last: " and ")
