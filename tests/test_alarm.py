@@ -15,14 +15,14 @@ class SyncThread:
 
 @pytest.fixture(autouse=True)
 def fake_outputs(monkeypatch):
-    calls = {"sound": 0, "telegram": []}
+    calls = {"sound": 0, "texts": []}
     monkeypatch.setattr(alarm, "_play_sound", lambda: calls.__setitem__("sound", calls["sound"] + 1))
-    monkeypatch.setattr(alarm, "_send_telegram", lambda token, chat, text: calls["telegram"].append(text))
+    monkeypatch.setattr(alarm.notify, "send", lambda text: calls["texts"].append(text))
     monkeypatch.setattr(alarm, "_last_video", {})
     monkeypatch.setattr(alarm, "_last_wall", float("-inf"))
     monkeypatch.setattr(alarm, "MIN_WALL_GAP_S", 0.0)
     monkeypatch.setattr(alarm.threading, "Thread", SyncThread)
-    for var in ("PAWWATCH_MUTE", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"):
+    for var in ("PAWWATCH_MUTE", "LINE_CHANNEL_TOKEN", "LINE_USER_ID", "DISCORD_WEBHOOK_URL"):
         monkeypatch.delenv(var, raising=False)
     return calls
 
@@ -40,10 +40,9 @@ def test_mute(fake_outputs, monkeypatch):
     assert fake_outputs["sound"] == 0
 
 
-def test_telegram_only_when_configured(fake_outputs, monkeypatch):
+def test_text_only_when_configured(fake_outputs, monkeypatch):
     alarm.trigger("cam_counter", "forbidden", 1000)
-    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "t")
-    monkeypatch.setenv("TELEGRAM_CHAT_ID", "c")
+    monkeypatch.setenv("DISCORD_WEBHOOK_URL", "https://discord.test/hook")
     alarm.trigger("cam_counter", "forbidden", 2000)
-    assert len(fake_outputs["telegram"]) == 1
-    assert "no-go spot (cam_counter)" in fake_outputs["telegram"][0]
+    assert len(fake_outputs["texts"]) == 1
+    assert "no-go spot (cam_counter)" in fake_outputs["texts"][0]

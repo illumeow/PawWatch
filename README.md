@@ -26,8 +26,8 @@ PawWatch does the watching on a box at home and keeps only a log of visits.
   "Litter box visits are well above usual (about 3 by this time)." Only the hours a camera actually filmed are compared.
   Alerts suggest keeping an eye on the cat or seeing a vet; they never diagnose.
 - **No-go alarm:** the moment the cat enters a forbidden zone (counter, table, bed), the host plays a sound,
-  and optionally sends a text-only Telegram message.
-- **Daily report:** a few sentences anyone can read, e.g. "Tangerine ate 4 times, drank water 6 times (2 more than usual)
+  and optionally texts the owner on LINE or Discord.
+- **Daily report:** a few sentences anyone can read, optionally sent to LINE or Discord each night, e.g. "Tangerine ate 4 times, drank water 6 times (2 more than usual)
   and used the litter box 3 times today."
 - **Dashboard:** today's counts against the usual, a timeline of visits, and the past week per zone.
 
@@ -36,7 +36,7 @@ PawWatch does the watching on a box at home and keeps only a log of visits.
 - Frames are read, analyzed and dropped. The pipeline never writes an image or video anywhere.
 - The database holds one row per visit (camera, zone, start, end) and one row per processed recording (which zones
   were on camera, and when). The dashboard's "What PawWatch stores" panel shows the raw rows.
-- No cloud service is needed. The optional Telegram alert sends a sentence of text, never a picture.
+- No cloud service is needed. The optional LINE or Discord messages are a sentence of text, never a picture.
 - `scripts/check_clip.py` is a camera-setup aid: it saves a few annotated frames locally (`data/check/`) so you can
   check the camera angle. Delete them after setup.
 
@@ -49,7 +49,7 @@ PawWatch does the watching on a box at home and keeps only a log of visits.
                                                                    │                         │
                                                                    │ cat in no-go zone       ├──▶ change alerts
                                                                    ▼                         ├──▶ daily report
-                                                            alarm: sound, Telegram           └──▶ dashboard
+                                                            alarm: sound, LINE, Discord      └──▶ dashboard
 ```
 
 | Module | Role |
@@ -59,11 +59,12 @@ PawWatch does the watching on a box at home and keeps only a log of visits.
 | `pawwatch/events.py` | Detections over time to visits: minimum dwell, short dropouts tolerated. Pure logic, no model or video. |
 | `pawwatch/run.py` | CLI: video files and a zones file in, visits in SQLite out. `--show` opens the detection window. |
 | `pawwatch/store.py` | The events and recordings tables; everything downstream reads through it. |
-| `pawwatch/alarm.py` | No-go alarm: sound, optional Telegram, one alarm per jump. |
+| `pawwatch/alarm.py` | No-go alarm: sound, optional text message, one alarm per jump. |
+| `pawwatch/notify.py` | Text messages to the owner: LINE and Discord. |
 | `pawwatch/anomaly.py` | Today vs the past week, over the hours that were filmed. |
 | `pawwatch/report.py` | Daily report sentences. |
 | `dashboard/app.py` | Streamlit dashboard. |
-| `scripts/` | Setup and demo tools: camera check, zone drawing, simulated history. |
+| `scripts/` | Setup and demo tools: camera check, zone drawing, simulated history, sending the daily report. |
 
 Timestamps come from the video (recording start plus frame offset), not the processing clock, so recorded footage
 replays exactly as it happened.
@@ -132,7 +133,23 @@ PAWWATCH_DB=data/demo.db uv run streamlit run dashboard/app.py
 | --- | --- |
 | `PAWWATCH_MUTE=1` | No sound, e.g. for bulk runs |
 | `PAWWATCH_ALARM_SOUND=path` | Custom sound file |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Also send a text message; nothing is sent unless both are set |
+
+### Messages to your phone
+
+The no-go alarm and the daily report can also go to LINE, Discord or both. Each is used only when its variables are
+set; with none set, nothing leaves the box.
+
+| Variables | Setup |
+| --- | --- |
+| `LINE_CHANNEL_TOKEN`, `LINE_USER_ID` | Create a LINE Official Account, enable its Messaging API and add it as a friend. In the [LINE Developers console](https://developers.line.biz/console/), the channel's Messaging API tab issues the channel access token and its Basic settings tab shows "Your user ID". The free plan covers a few hundred messages a month. (LINE Notify closed in 2025.) |
+| `DISCORD_WEBHOOK_URL` | In a Discord channel: Edit Channel, Integrations, Webhooks, New Webhook, Copy Webhook URL. |
+
+Send the daily report, e.g. nightly from cron on the host:
+
+```bash
+uv run python scripts/send_report.py              # today so far; --day 2026-10-10 for a past day
+uv run python scripts/send_report.py --dry-run    # print it, send nothing
+```
 
 ## Hardware: laptop today, UGen300 next
 
