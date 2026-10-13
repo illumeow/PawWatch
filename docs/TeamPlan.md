@@ -61,7 +61,7 @@ clips, `dashboard_alert_simulated.png`, which must be captioned as simulated). T
 `git merge develop` there, then push (no conflicts: `slides/images/` is new; don't rebase a shared branch). Next for B: the demo video (shot list and narration
 in `docs/DemoVideo.md`, every command in `docs/Commands.md`).
 
-**Cut for time:** Hailo backend port, Telegram setup, LLM-written daily report, overnight recording and bulk runs.
+**Cut for time:** Hailo backend port, LLM-written daily report, overnight recording and bulk runs.
 
 **Open:** who does registration? Check its deadline on the competition page.
 
@@ -74,7 +74,7 @@ C needs no code and can start research today.
 | Role | Owner | Builds | Works from |
 | --- | --- | --- | --- |
 | A: vision | @meander | Detection, zones, visit events, SQLite writes, red box on forbidden zone, `run.py` CLI | Real video footage |
-| B: output | @illumeow | Seed script, alarm (sound, optional Telegram), anomaly alert, daily report, Streamlit dashboard, README, demo video edit | Simulated events, then A's real events |
+| B: output | @illumeow | Seed script, alarm (sound, optional LINE / Discord message), anomaly alert, daily report, Streamlit dashboard, README, demo video edit | Simulated events, then A's real events |
 | C: slides | @bbwinner | English slides (~12 pages), market and vet research, architecture diagram, references | Product docs, then screenshots and clips from A and B |
 
 The forbidden-zone alarm is split: A draws the red box in the detection window and calls `alarm.trigger(...)` when the cat enters a forbidden zone; B implements what the trigger does.
@@ -119,7 +119,7 @@ history) count as watched all day.
 ```python
 # pawwatch/alarm.py (owned by B, called by A)
 def trigger(camera: str, zone: str, ts: float) -> None:
-    """Cat just entered a forbidden zone. Plays a sound; optionally sends a Telegram message. Must return fast."""
+    """Cat just entered a forbidden zone. Plays a sound; optionally texts the owner (LINE, Discord). Returns fast."""
 ```
 
 Two contracts stay inside half A but are written down so the UGen300 port is a drop-in:
@@ -138,7 +138,7 @@ Each file has one owner; nobody edits the other half's files without asking.
 | `pawwatch/detector.py` | A | YOLO cat detection, Ultralytics now, Hailo later |
 | `pawwatch/zones.py` | A | Load zones file, point-in-polygon |
 | `pawwatch/events.py` | A | Detections over time to visits, with debounce (pure logic, tested) |
-| `pawwatch/alarm.py` | Shared interface, B implements | `trigger()`: sound and optional Telegram; A calls it |
+| `pawwatch/alarm.py` | Shared interface, B implements | `trigger()`: sound and optional LINE / Discord message; A calls it |
 | `pawwatch/run.py` | A | CLI: videos + zones to events in SQLite |
 | `pawwatch/overlay.py` | A | Detection window for `run.py --show`: boxes, zones, visit counts, caption |
 | `config/zones/*.json` | A | One zones file per camera |
