@@ -92,6 +92,63 @@ R11:
   page-range: "1319"
   url: https://www.mdpi.com/2076-2615/16/9/1319
 
+R12:
+  type: article
+  title: Clinical evaluation of dietary modification for treatment of spontaneous chronic kidney disease in cats
+  author: "Ross et al., S. J."
+  date: 2006
+  parent:
+    type: periodical
+    title: Journal of the American Veterinary Medical Association
+    volume: 229
+    issue: 6
+  page-range: 949-957
+  url: https://doi.org/10.2460/javma.229.6.949
+
+R13:
+  type: web
+  title: "Lovely Lilies and Curious Cats: A Dangerous Combination"
+  author: U.S. Food and Drug Administration
+  url: https://www.fda.gov/animal-veterinary/animal-health-literacy/lovely-lilies-and-curious-cats-dangerous-combination
+
+R14:
+  type: article
+  title: ISFM Consensus Guidelines on the Diagnosis and Management of Hypertension in Cats
+  author: "Taylor et al., S. S."
+  date: 2017
+  parent:
+    type: periodical
+    title: Journal of Feline Medicine and Surgery
+    volume: 19
+    issue: 3
+  page-range: 288-303
+  url: https://doi.org/10.1177/1098612X17693500
+
+R15:
+  type: article
+  title: ISFM Consensus Guidelines on the Practical Management of Diabetes Mellitus in Cats
+  author: "Sparkes et al., A. H."
+  date: 2015
+  parent:
+    type: periodical
+    title: Journal of Feline Medicine and Surgery
+    volume: 17
+    issue: 3
+  page-range: 235-250
+  url: https://pmc.ncbi.nlm.nih.gov/articles/PMC11148891/
+
+R16:
+  type: web
+  title: "Hepatic Lipidosis: A Serious Problem When Cats Stop Eating"
+  author: University of Illinois College of Veterinary Medicine
+  url: https://vetmed.illinois.edu/pet-health-columns/hepatic-lipidosis-when-cats-dont-eat/
+
+R17:
+  type: web
+  title: "Pet owners survey: how much water is your cat drinking? (12,776 owners; manufacturer survey)"
+  author: Sure Petcare
+  url: https://www.surepetcare.com/en-us/advice-news/cat-care/general-cat-care/sure-petcare-pet-owners-survey-how-much-water-is-your-cat-drinking
+
 # Products, prices, privacy
 
 C13:
@@ -99,6 +156,52 @@ C13:
   title: ASUS UGen300 press release (NT$6,380, 2.5 W, 40 TOPS)
   author: iThome
   url: https://www.ithome.com.tw/pr/175676
+
+C14:
+  type: report
+  title: Taoyuan veterinary fee caps (male cat catheterization NT$10,000, cat ward NT$600/day, urethrostomy NT$50,000, +50% outside clinic hours)
+  author: Taoyuan City Veterinary Medical Association
+  date: 2021-01-01
+  url: https://www.tcvma.org.tw/storage/app/media/uploaded-files/2021%E5%B9%B4%E6%A1%83%E5%9C%92%E5%B8%82%E7%8D%B8%E9%86%AB%E5%B8%AB%E5%85%AC%E6%9C%83%E6%94%B6%E8%B2%BB%E5%83%B9%E6%A0%BC%E8%A1%A8r00.pdf
+
+C15:
+  type: web
+  title: "Owner report: cat catheterization and tests NT$30,000 at a 24-hour animal hospital, NT$11,000 per day in hospital"
+  author: PTT WomenTalk
+  date: 2023-08-29
+  url: https://www.ptt.cc/bbs/WomenTalk/M.1693274189.A.D21.html
+
+C16:
+  type: web
+  title: Cat health check costs in Taiwan, 2026 (exam NT$300-800, blood tests NT$2,400-3,400, senior package NT$3,000-8,000)
+  author: PetHealthMap
+  date: 2026-04-16
+  url: https://pethealthmap.com/zh-TW/blog/cat-exam-cost-guide
+
+C17:
+  type: web
+  title: PETKIT smart feeder listings (NT$6,894-8,397)
+  author: Yahoo Taiwan Shopping
+  url: https://tw.buy.yahoo.com/brands/41193330
+
+C18:
+  type: web
+  title: PETKIT smart water fountain prices (NT$1,688-5,880)
+  author: FindPrice
+  url: https://www.findprice.com.tw/g/petkit
+
+C19:
+  type: web
+  title: PETKIT ULTRA smart litter box (NT$38,800)
+  author: China Times
+  date: 2026-02-23
+  url: https://www.chinatimes.com/newspapers/20260223000566-260113
+
+C20:
+  type: web
+  title: Furbo Nanny subscription plans (from US$9.99/month)
+  author: Furbo Help Center
+  url: https://help.furbo.com/hc/en/articles/17462739016089
 
 P1:
   type: report

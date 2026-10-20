@@ -4,6 +4,8 @@
 // Citations: @R4 etc., keys from refs.yml; numbered [1], [2]... in order of first use
 #show cite: set text(0.75em, fill: luma(100))
 #let warn = red.darken(20%)
+// Cross-reference to another slide: #see(<problem>)[Problem] -> "see Problem, p. 3", linked
+#let see(target, name) = link(target)[see #name, p. #context counter(page).at(target).first()]
 #show table: set par(leading: 0.5em)
 
 #show: slides.with(
@@ -21,7 +23,7 @@
 
 = Problem
 
-== Cat hides illness
+== Cat hides illness <problem>
 
 // Dense slide: 90% text size so the whole argument fits on one page
 #[
@@ -112,7 +114,7 @@ recognizes the cat and logs every visit. Video never leaves home.
   - *Dashboard:* today's counts, timeline and 7-day trends
 ]
 
-== Why run AI at home, not in the cloud
+== Why run AI at home, not in the cloud <why-edge>
 
 #table(
   columns: (1.1fr, 1.6fr, 1.6fr),
@@ -305,25 +307,78 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 
 = Impact and Business
 
-== Expected benefits
+// Expected benefits (required by the rules): one page each for the cat, the owner, and vets + broader
+== Benefits for the cat: problems caught early, a safer home
 
-#todo[目前是 AI 生的]
-
-- *Owners:* catch changes early instead of when symptoms are obvious
-- *Vets:* objective at-home records after surgery or before a follow-up
+// Dense slide: 85% text size so both columns fit on one page
+#[
+#set text(0.85em)
 
 #cols[
-  #callout(title: "Without PawWatch", color: warn)[
-    The cat uses the litter box twice as often while the owner is at work. Nobody notices
-    until symptoms are obvious.
-  ]
+  *Catch problems early*
+  - *Early signs of many diseases* \
+    _Benefit:_ appetite, thirst and litter use change before obvious symptoms (#see(<problem>)[Problem]),
+    and PawWatch tracks all three every day \
+    _Example:_ kidney disease doubles litter use even at early stages @R11, yet most cases go undiagnosed
+    @R4 @R5. Found early, it is treatable: a kidney diet cut uremic crises from 26% to 0% in a 45-cat trial @R12
+  - *Emergencies in hours, not days* \
+    _Benefit:_ an urgent change shows up in that evening's report, not after days of guessing \
+    _Example:_ a blocked urethra can kill within 24–48 hours @R10; a cat that stops eating for a few days
+    can develop fatty liver disease, which can be fatal @R16
 ][
-  #callout(title: "With PawWatch", color: green.darken(30%))[
-    Litter box visits reach 2× the 7-day average: an alert the same day suggests watching
-    the cat or seeing a vet, with the daily report in hand.
+  *A safer, calmer home*
+  - *No-go zones* \
+    _Benefit:_ an alarm scares the cat off, and the owner gets a LINE or Discord text right away \
+    _Example:_ a cat that eats a lily needs treatment within 18 hours, or its kidney failure is
+    generally irreversible @R13
+  - *Less stress* \
+    _Benefit:_ the cat is observed at home, unhandled, so the record shows its normal behavior \
+    _Example:_ a simulated clinic visit changed healthy cats' blood pressure by up to 80 mmHg @R14
+]
+]
+
+== Benefits for the owner: rest assured, wherever you are
+
+// Dense slide: 85% text size so both columns fit on one page
+#[
+#set text(0.85em)
+
+#cols(ratio: (1.15fr, 1fr))[
+  - *Peace of mind:* at work, on a business trip or in hospital, the cat is watched all day,
+    not once a day like a pet sitter visit. Alerts reach the phone over LINE or Discord
+  - *Facts instead of guesses:* vet guidelines value accurate daily water records over the owner's
+    impression @R15; 55.5% of owners did not recognize more thirst as a sign of dehydration
+    (manufacturer survey) @R17. PawWatch counts every visit
+  - *One box, no subscription:* single-spot smart devices cost NT\$1,688–38,800 each @C17 @C18 @C19;
+    cloud pet cameras charge monthly, e.g. Furbo from US\$9.99 @C20 (#see(<business-model>)[Business model])
+  - *Privacy:* video never leaves home (#see(<why-edge>)[Why run AI at home])
+][
+  *Earlier is cheaper*
+  #callout(title: "Caught early", color: green.darken(30%))[
+    A senior cat check-up: NT\$3,000–8,000 @C16
+  ]
+  #callout(title: "Caught late", color: warn)[
+    Emergency catheterization of a blocked cat: up to NT\$10,000, +50% at night, plus each day in hospital;
+    surgery (urethrostomy): up to NT\$50,000 @C14. One owner paid NT\$30,000 at a 24-hour hospital @C15
   ]
 ]
-// 
+]
+
+== Benefits for vets and beyond
+
+#cols[
+  *Vets*
+  - *A better history:* a 7-day trend of visits instead of "I think he drinks more" @R2
+  - *Chronic care at home:* for diabetic cats, guidelines call less drinking "a useful clinical marker
+    of response to insulin therapy" and ask owners to keep a diary @R15. PawWatch keeps it automatically
+  - *After surgery:* track eating, drinking and litter use at home for any abnormal sign
+][
+  *Beyond the home*
+  - *Low power:* the AI accelerator draws 2.5 W @C13, and no video is streamed to a data center
+  - *Shelters and street cats:* once PawWatch tells cats apart (future work), the same system can watch
+    shelter rooms and TNR feeding stations
+]
+//
 
 // *Outcomes:* 
 // - Stage I, a working prototype on recorded video and open-source code on GitHub\;
@@ -335,7 +390,7 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 - *Growing pet tech:* the global market may grow from US\$15.6 B (2025) to US\$52.9 B (2035) @K-f
 
 
-== Business model: ride on hardware people already buy
+== Business model: ride on hardware people already buy <business-model>
 #todo[目前是 AI 生的, 完全不知道這啥]
 
 #table(
