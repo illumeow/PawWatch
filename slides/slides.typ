@@ -316,23 +316,18 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 
 #cols[
   *Catch problems early*
-  - *Early signs of many diseases* \
-    _Benefit:_ appetite, thirst and litter use change before obvious symptoms (#see(<problem>)[Problem]),
-    and PawWatch tracks all three every day \
+  - *Early signs of many diseases*: appetite, thirst and litter use change before obvious symptoms (#see(<problem>)[Problem]), and PawWatch tracks all three every day \
     _Example:_ kidney disease doubles litter use even at early stages @R11, yet most cases go undiagnosed
     @R4 @R5. Found early, it is treatable: a kidney diet cut uremic crises from 26% to 0% in a 45-cat trial @R12
-  - *Emergencies in hours, not days* \
-    _Benefit:_ an urgent change shows up in that evening's report, not after days of guessing \
+  - *Emergencies in hours, not days*: an urgent change shows up in that evening's report, not after days of guessing \
     _Example:_ a blocked urethra can kill within 24–48 hours @R10; a cat that stops eating for a few days
     can develop fatty liver disease, which can be fatal @R16
 ][
   *A safer, calmer home*
-  - *No-go zones* \
-    _Benefit:_ an alarm scares the cat off, and the owner gets a LINE or Discord text right away \
+  - *No-go zones*: an alarm scares the cat off, and the owner gets a LINE or Discord text right away \
     _Example:_ a cat that eats a lily needs treatment within 18 hours, or its kidney failure is
     generally irreversible @R13
-  - *Less stress* \
-    _Benefit:_ the cat is observed at home, unhandled, so the record shows its normal behavior \
+  - *Less stress*: the cat is observed at home, unhandled, so the record shows its normal behavior \
     _Example:_ a simulated clinic visit changed healthy cats' blood pressure by up to 80 mmHg @R14
 ]
 ]
@@ -366,17 +361,27 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 
 == Benefits for vets and beyond
 
+// Dense slide: 85% text size so both columns fit on one page
+#[
+#set text(0.85em)
+
 #cols[
   *Vets*
-  - *A better history:* a 7-day trend of visits instead of "I think he drinks more" @R2
-  - *Chronic care at home:* for diabetic cats, guidelines call less drinking "a useful clinical marker
-    of response to insulin therapy" and ask owners to keep a diary @R15. PawWatch keeps it automatically
-  - *After surgery:* track eating, drinking and litter use at home for any abnormal sign
+  - *A complete history*: a dated record shows when a change began and how large it is, so diagnosis does not rely on the owner's memory \
+    _Example:_ "water visits rose from 5 to 9 a day since Tuesday", not "I think he drinks more"
+  - *Chronic care between visits*: chronic diseases are managed by adjusting treatment over months; daily home data between visits shows whether it is working \
+    _Example:_ in diabetic cats, less drinking marks a response to insulin, and guidelines ask
+    owners to keep a diary @R15; PawWatch keeps it for them
 ][
+  - *Recovery after treatment*: home data shows whether recovery is on track, so a relapse is caught early \
+    _Example:_ after a urethral blockage, 16% of male cats blocked again within 6 months @R18
+
   *Beyond the home*
-  - *Low power:* the AI accelerator draws 2.5 W @C13, and no video is streamed to a data center
-  - *Shelters and street cats:* once PawWatch tells cats apart (future work), the same system can watch
-    shelter rooms and TNR feeding stations
+  - *Low power*: all-day watching costs little energy, with no video streamed to a data center \
+    _Example:_ the accelerator draws 2.5 W, less than an LED bulb @C13
+  - *Shelters and street cats*: once PawWatch tells cats apart (future work), it scales to many cats \
+    _Example:_ shelter rooms and TNR feeding stations
+]
 ]
 //
 
@@ -384,10 +389,36 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 // - Stage I, a working prototype on recorded video and open-source code on GitHub\;
 // - Stage II, the detector on the *UGen300* with measured fps and power.
 
-== Market: more cats in Taiwan, in a growing pet tech market
+// Bottom-up TAM / SAM / SOM in Taiwan: households × kit price, arithmetic shown beside each tier
+== Market: 266k Taiwan homes with an older cat <market>
 
-- *More cats:* Taiwan now has 1.74 M pet cats, up 33% in two years, and more cats than dogs @K-a
-- *Growing pet tech:* the global market may grow from US\$15.6 B (2025) to US\$52.9 B (2035) @K-f
+#let tier(width, shade, name, homes, value) = context align(center, block(
+  width: width,
+  inset: (y: 0.6em),
+  radius: 3pt,
+  fill: accent.get().lighten(shade),
+  text(0.9em, fill: white)[*#name* · #homes homes · *#value*],
+))
+
+#grid(
+  columns: (1.1fr, 1fr),
+  column-gutter: 1.2em,
+  row-gutter: 1em,
+  align: horizon,
+  tier(100%, 0%, "TAM", [1.02~M], [NT\$10.2~B]),
+  [9.85 M households @K-c × 10.4% keep cats @K-b],
+  tier(80%, 20%, "SAM", [266~k], [NT\$2.7~B]),
+  [× 26% of dogs and cats are 7 or older @K-d: the age when chronic disease becomes common],
+  tier(60%, 40%, "SOM", [5.3~k], [NT\$53~M]),
+  [× 2% of SAM reached in years 1–3 (our assumption)],
+)
+
+#v(1em)
+
+- *Price:* NT\$10,000 per kit, a working assumption (#see(<business-model>)[Business model])
+- *Sanity check:* the SOM is about one kit per animal hospital per year (about 1,800 hospitals @K-e)
+- *Tailwind:* 1.74 M pet cats, up 33% in two years @K-a; global pet tech may grow from US\$15.6 B (2025)
+  to US\$52.9 B (2035) @K-f
 
 
 == Business model: ride on hardware people already buy <business-model>

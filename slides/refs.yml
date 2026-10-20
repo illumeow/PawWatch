@@ -149,6 +149,19 @@ R17:
   author: Sure Petcare
   url: https://www.surepetcare.com/en-us/advice-news/cat-care/general-cat-care/sure-petcare-pet-owners-survey-how-much-water-is-your-cat-drinking
 
+R18:
+  type: article
+  title: A prospective randomized study of efficacy of 2 treatment protocols in preventing recurrence of clinical signs in 51 male cats with obstructive idiopathic cystitis
+  author: "Nivy et al., R."
+  date: 2019
+  parent:
+    type: periodical
+    title: Journal of Veterinary Internal Medicine
+    volume: 33
+    issue: 5
+  page-range: 2117-2123
+  url: https://doi.org/10.1111/jvim.15594
+
 # Products, prices, privacy
 
 C13:
@@ -221,10 +234,38 @@ P3:
 
 K-a:
   type: web
-  title: Ministry of Agriculture 2025 household dog and cat survey
-  author: PTS News
+  title: 2025 national household dog and cat survey (1,742,033 cats, 1,462,528 dogs)
+  author: Ministry of Agriculture
   date: 2026-04-20
-  url: https://news.pts.org.tw/article/804498
+  url: https://animal.moa.gov.tw/Frontend/News/Detail/N0000000002294
+
+K-b:
+  type: web
+  title: "Ministry of Agriculture 2023 dog and cat survey: 10.4% of households keep cats (10,348 phone interviews)"
+  author: Central News Agency
+  date: 2024-05-31
+  url: https://www.cna.com.tw/news/ahel/202405310157.aspx
+
+K-c:
+  type: web
+  title: Household registration statistics, December 2025 (9,851,532 households)
+  author: Department of Household Registration, Ministry of the Interior
+  date: 2026-01-09
+  url: https://www.ris.gov.tw/info-liferay/app/channel/newsDetail/26007114
+
+K-d:
+  type: web
+  title: "Over 26% of Taiwan's dogs and cats are 7 or older (TIER and FIRDI survey, 2024)"
+  author: Business Weekly
+  date: 2025-09-10
+  url: https://www.businessweekly.com.tw/focus/indep/6020425
+
+K-e:
+  type: web
+  title: "Pet dogs and cats have outnumbered newborns (about 1,800 animal hospitals nationwide)"
+  author: Taipei Times
+  date: 2024-04-15
+  url: https://news.ltn.com.tw/news/focus/breakingnews/4641328
 
 K-f:
   type: report
