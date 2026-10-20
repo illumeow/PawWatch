@@ -314,21 +314,31 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 #[
 #set text(0.85em)
 
+// Side note: plain gray rule, quieter than a callout
+#let note(title, body) = block(
+  inset: (left: 0.8em, y: 0.3em),
+  stroke: (left: 1.5pt + luma(180)),
+  text(fill: luma(70))[#text(weight: "bold", title) \ #body],
+)
+
 #cols[
   *Catch problems early*
-  - *Early signs of many diseases*: appetite, thirst and litter use change before obvious symptoms (#see(<problem>)[Problem]), and PawWatch tracks all three every day \
-    _Example:_ kidney disease doubles litter use even at early stages @R11, yet most cases go undiagnosed
-    @R4 @R5. Found early, it is treatable: a kidney diet cut uremic crises from 26% to 0% in a 45-cat trial @R12
-  - *Emergencies in hours, not days*: an urgent change shows up in that evening's report, not after days of guessing \
-    _Example:_ a blocked urethra can kill within 24–48 hours @R10; a cat that stops eating for a few days
-    can develop fatty liver disease, which can be fatal @R16
+  - *Early signs of many diseases*: appetite, thirst and litter use change before obvious symptoms
+
+  - *Emergencies in hours, not days*: an urgent change shows up in that evening's report, not after days of guessing
 ][
   *A safer, calmer home*
-  - *No-go zones*: an alarm scares the cat off, and the owner gets a LINE or Discord text right away \
-    _Example:_ a cat that eats a lily needs treatment within 18 hours, or its kidney failure is
-    generally irreversible @R13
-  - *Less stress*: the cat is observed at home, unhandled, so the record shows its normal behavior \
-    _Example:_ a simulated clinic visit changed healthy cats' blood pressure by up to 80 mmHg @R14
+  - *No-go zones*: an alarm scares the cat off, and the owner gets a LINE or Discord text right away
+
+  - *Less stress*: the cat is observed at home, unhandled, so the record shows its normal behavior
+]
+
+#v(5em)
+
+#note[Example: the litter box][
+  Kidney disease doubles litter use even at early stages @R11, yet most cases go undiagnosed @R4 @R5.
+  Found early, it is treatable: a kidney diet cut uremic crises from 26% to 0% in a 45-cat trial @R12.
+  A blocked urethra also shows as many litter box trips, and can kill within 24–48 hours @R10
 ]
 ]
 
@@ -339,22 +349,20 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 #set text(0.85em)
 
 #cols(ratio: (1.15fr, 1fr))[
-  - *Peace of mind:* at work, on a business trip or in hospital, the cat is watched all day,
-    not once a day like a pet sitter visit. Alerts reach the phone over LINE or Discord
-  - *Facts instead of guesses:* vet guidelines value accurate daily water records over the owner's
-    impression @R15; 55.5% of owners did not recognize more thirst as a sign of dehydration
-    (manufacturer survey) @R17. PawWatch counts every visit
-  - *One box, no subscription:* single-spot smart devices cost NT\$1,688–38,800 each @C17 @C18 @C19;
-    cloud pet cameras charge monthly, e.g. Furbo from US\$9.99 @C20 (#see(<business-model>)[Business model])
-  - *Privacy:* video never leaves home (#see(<why-edge>)[Why run AI at home])
+  - *Peace of mind:* at work, on a business trip or in hospital, the cat is watched all day. Alerts reach the phone over LINE or Discord.
+
+  - *Facts instead of guesses:* 55.5% of owners did not recognize more thirst as a sign of dehydration @R17. PawWatch counts every visit for them.
+
+  - *One box, no subscription:* costs less than most products on the market. Pay once rather than subscribe monthly.
+
+  - *Privacy:* video never leaves home.
 ][
   *Earlier is cheaper*
   #callout(title: "Caught early", color: green.darken(30%))[
     A senior cat check-up: NT\$3,000–8,000 @C16
   ]
   #callout(title: "Caught late", color: warn)[
-    Emergency catheterization of a blocked cat: up to NT\$10,000, +50% at night, plus each day in hospital;
-    surgery (urethrostomy): up to NT\$50,000 @C14. One owner paid NT\$30,000 at a 24-hour hospital @C15
+    Emergency treatment can cost NT\$30,000 or more at a 24-hour hospital @C15
   ]
 ]
 ]
@@ -367,20 +375,14 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 
 #cols[
   *Vets*
-  - *A complete history*: a dated record shows when a change began and how large it is, so diagnosis does not rely on the owner's memory \
-    _Example:_ "water visits rose from 5 to 9 a day since Tuesday", not "I think he drinks more"
-  - *Chronic care between visits*: chronic diseases are managed by adjusting treatment over months; daily home data between visits shows whether it is working \
-    _Example:_ in diabetic cats, less drinking marks a response to insulin, and guidelines ask
-    owners to keep a diary @R15; PawWatch keeps it for them
-][
-  - *Recovery after treatment*: home data shows whether recovery is on track, so a relapse is caught early \
-    _Example:_ after a urethral blockage, 16% of male cats blocked again within 6 months @R18
+  - *A complete history*: a dated, detailed record can facilitate diagnosis
 
-  *Beyond the home*
-  - *Low power*: all-day watching costs little energy, with no video streamed to a data center \
-    _Example:_ the accelerator draws 2.5 W, less than an LED bulb @C13
-  - *Shelters and street cats*: once PawWatch tells cats apart (future work), it scales to many cats \
-    _Example:_ shelter rooms and TNR feeding stations
+  - *Recovery after treatment*: home data tracks recovery status
+][
+  *Resources*
+  - *Low power*: all-day watching costs little energy
+
+  - *No internet demand*: Everything runs locally (except Discord / Line alerts and records)
 ]
 ]
 //
