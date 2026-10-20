@@ -407,20 +407,27 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
   column-gutter: 1.2em,
   row-gutter: 1em,
   align: horizon,
-  tier(100%, 0%, "TAM", [1.02~M], [NT\$10.2~B]),
-  [9.85 M households @K-c × 10.4% keep cats @K-b],
-  tier(80%, 20%, "SAM", [266~k], [NT\$2.7~B]),
-  [× 26% of dogs and cats are 7 or older @K-d: the age when chronic disease becomes common],
-  tier(60%, 40%, "SOM", [5.3~k], [NT\$53~M]),
-  [× 2% of SAM reached in years 1–3 (our assumption)],
+  // The total the funnel starts from: outlined, not filled, since it is not a market tier
+  context align(center, block(
+    width: 100%,
+    inset: (y: 0.6em),
+    radius: 3pt,
+    stroke: 1pt + accent.get(),
+    text(0.9em, fill: accent.get())[*Taiwan* · 9.85~M households],
+  )),
+  [All households @K-c],
+  tier(100%, 0%, "TAM", [1.02~M], [NT\$15.2~B]),
+  [× 10.4% keep cats @K-b],
+  tier(85%, 15%, "SAM", [266~k], [NT\$4.0~B]),
+  [× 26% of dogs and cats are 7 or older \* @K-d],
+  tier(70%, 30%, "SOM", [5.3~k], [NT\$79~M]),
+  [× 2% of SAM reached in years 1–3],
 )
 
-#v(1em)
-
-- *Price:* NT\$10,000 per kit, a working assumption (#see(<business-model>)[Business model])
-- *Sanity check:* the SOM is about one kit per animal hospital per year (about 1,800 hospitals @K-e)
-- *Tailwind:* 1.74 M pet cats, up 33% in two years @K-a; global pet tech may grow from US\$15.6 B (2025)
-  to US\$52.9 B (2035) @K-f
+#v(1fr)
+#align(right)[
+#text(fill: luma(130), size: 10pt)[
+\* the age when chronic disease becomes common]]
 
 
 == Business model: ride on hardware people already buy <business-model>
