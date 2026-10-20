@@ -430,20 +430,30 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 \* the age when chronic disease becomes common]]
 
 
-== Business model: ride on hardware people already buy <business-model>
-#todo[目前是 AI 生的, 完全不知道這啥]
+// One-time purchase for cat owners; price anchored below one night-time emergency (C14)
+== Business model: buy once, no monthly fee <business-model>
 
-#table(
-  columns: (1.2fr, 1.6fr, 0.9fr),
-  inset: 6pt,
-  [*Customer*], [*Offer*], [*Revenue*],
-  [Device makers (pet cameras, home hubs, PCs with edge AI)], [PawWatch edge software on their hardware: no cloud cost for them], [Per-unit license],
-  [Vet clinics], [At-home monitoring kits after surgery and for chronic cases (e.g. kidney disease)], [Monthly rental per kit],
-  [Cat owners], [Box + cameras, no subscription], [One-time purchase],
-)
+// Dense slide: 85% text size so both columns fit on one page
+#[
+#set text(0.85em)
 
-- Licensing spreads the UGen300 cost: it doesn't land on one product
-- One UGen300 serves every camera in the home, so each extra spot is only a camera
+#cols(ratio: (1fr, 1fr))[
+  *Choose one*
+  - *PawWatch Full Kit, NT\$14,900:* Raspberry Pi 5 + UGen300, preinstalled, with three night-vision cameras
+
+  - *PawWatch Minimal Pack, NT\$7,900:* UGen300 + a USB stick that boots PawWatch on a spare PC;
+    cameras not included
+][
+  *Add-on*
+  - *Extra camera, NT\$900:* additional night-vision camera to extend the coverage
+]
+
+#callout(title: "Scalibility", color: green.darken(30%))[
+    - *Extensive:* a new spot costs only a camera
+
+    - *Sustainable:* No subscription fee, no extra cost for long-term usage
+  ]
+]
 
 = Appendix
 
