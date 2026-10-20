@@ -455,6 +455,73 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
   ]
 ]
 
+// Hamilton Helmer's 7 Powers: only the powers a hackathon team can credibly claim
+// == Competitive advantage: why PawWatch wins <advantage>
+
+// Dense slide: 90% text size so the table fits on one page
+// #[
+// #set text(0.9em)
+// #let power(name) = text(0.85em, fill: luma(90), name)
+
+// PawWatch wins on two fronts that subscription-based competitors cannot follow:
+
+// #table(
+//   columns: (1fr, 3.6fr),
+//   inset: 7pt,
+//   [*Advantage*], [*How PawWatch wins*],
+//   [*Free health alerts*],
+//     [Competitors charge monthly for the alerts that matter: Whisker US\$7.99 for routine-change alerts @C21,
+//      Petcube US\$9.99 for smart alerts @C22, Furbo from US\$9.99 @C20. PawWatch gives them free, with no
+//      servers to pay for. To match it, competitors would have to give up their own subscription revenue],
+//   [*Worth more every month*],
+//     [Leaving PawWatch costs twice: a new set of devices, and the cat's history. Alerts start from zero
+//      until a new baseline builds up, and the months of trends the vet reads at each visit are gone.
+//      Every month PawWatch runs makes it harder to replace],
+// )
+// ]
+
+// Beachhead first, then the channel, then licensing; ages match the SOM horizon on the Market slide
+== Targeted audience roadmap <roadmap>
+
+#let phase(shade, name, when) = context block(
+  width: 100%,
+  inset: (y: 0.6em),
+  radius: 3pt,
+  fill: accent.get().lighten(shade),
+  align(center, text(0.9em, fill: white)[#text(size: 11pt)[*#name* · #when]]),
+)
+
+#[
+#set text(0.85em)
+
+#grid(
+  columns: (1fr, auto, 1fr, auto, 1fr),
+  column-gutter: 0.6em,
+  row-gutter: 0.8em,
+  phase(0%, "1. Cat owners", "Year 1"), align(horizon)[→],
+  phase(20%, "2. Vet clinics", "Years 1–3"), align(horizon)[→],
+  phase(40%, "3. Device makers", "Year 3+"),
+  [
+    - *Who:* owners of cats aged 7+, 266k homes
+
+    - *Reach:* demo video shared in cat owner communities
+    - *Goal:* show in real homes that the alerts catch changes
+  ], [],
+  [
+    - *Who:* about 1,800 animal hospitals @K-e
+
+    - *Reach:* partner clinics recommend the kit for kidney disease, diabetes and after a urinary blockage
+    - *Goal:* a joint study with a vet school confirms the alerts
+  ], [],
+  [
+    - *Who:* makers of pet cameras, feeders and litter boxes
+
+    - *Reach:* the vet-validated alerts from phase 2 make the licensing pitch
+    - *Goal:* PawWatch runs inside the devices owners already buy
+  ],
+)
+]
+
 = Appendix
 
 
