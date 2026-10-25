@@ -109,7 +109,7 @@ recognizes the cat and logs every visit. Video never leaves home.
   - *No-go zone alarm:* plays a sound when the cat jumps onto the counter
 ][
   *What it tells you*
-  - *Anomaly alert:* $>=$ 2 or $<= 1/2$ times of the cat's 7-day average
+  - *Anomaly alert:* $>=$ 2 or $<= 0.5$ times of the cat's 7-day average
   - *Daily report:* a plain-language summary
   - *Dashboard:* today's counts, timeline and 7-day trends
 ]
@@ -539,8 +539,8 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
     columns: 3,
     column-gutter: 0.8em,
     align: bottom,
-    shot("images/detect_litter.jpg", 0.078)[Tangerine in the litter zone],
-    shot("images/detect_drink_ami.jpg", 0.045)[Ami at the water bowl],
+    shot("images/detect_litter.jpg", 0.078)[Cat in the litter zone],
+    shot("images/detect_drink_ami.jpg", 0.045)[Cat at the water bowl],
     shot("images/detect_bed_alarm.jpg", 0.052)[No-go zone: box turns red, alarm rings],
   )
 ]
@@ -550,7 +550,7 @@ are only displayed; frames are never written to disk.
 
 == Dashboard with an anomaly alert (simulated data)
 
-#cols(ratio: (1fr, 1.1fr))[
+#cols(ratio: (1fr, 1.5fr))[
   #set text(0.85em)
   This dashboard runs on *simulated* data only, to show what an alert looks like: a day where the litter box
   count reaches at least twice the cat's 7-day average.
