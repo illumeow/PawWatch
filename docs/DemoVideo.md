@@ -1,7 +1,7 @@
 # Demo video
 
 One take, no editing: record the whole screen with the MacBook mic, read the script, switch apps as it says.
-About 2:50. Must be under 3:00. Upload to YouTube as unlisted.
+About 2:30, with time to show the dashboard. Must be under 3:00. Upload to YouTube as unlisted.
 
 **Bold** is what you do. Plain text is what you say. Slow down; pauses are fine.
 
@@ -39,87 +39,82 @@ About 2:50. Must be under 3:00. Upload to YouTube as unlisted.
 
 **⌘⇧5 → Record. Wait 2 seconds. Press Space in QuickTime.**
 
-This is Ami, one of our two cats. If she started drinking twice as much water, or using the litter box twice as
-often, would you notice? Changes like these are often the first sign of illness, and cats hide them well.
+This is Ami, one of our cats. Would you notice if she drank twice as much water?
 
 **Space (pause). ⌘Tab to Preview: p. 3 "Cat hides illness".**
 
-Most of us are out all day, so we miss them.
+Cats hide illness. A change in daily habits is often the first sign.
 
 **→ → p. 5 "Today's smart devices each watch one spot".**
 
-Smart feeders and litter boxes each watch one spot. Pet cameras see more, but they stream our homes to the cloud,
-for a monthly fee.
+Today's devices each watch one spot, and pet cameras stream your home to the cloud.
 
 **→ p. 6 "Solution: PawWatch".**
 
-So we built PawWatch. Cameras watch the food bowl, the water bowl and the litter box. An AI accelerator at home
-recognizes the cat and logs every visit.
+So we built PawWatch. Cameras watch the food, the water and the litter box, and AI at home logs every visit.
 
 **→ p. 7 "Why run AI at home, not in the cloud".**
 
-Video never leaves the house, and there's no monthly fee.
+Video never leaves the house.
 
 **⌘Tab to Terminal. Enter.** The food bowl window opens in a few seconds.
 
-Here it is on real footage of Tangerine, our other cat. When she stays in a zone for five seconds, PawWatch logs one
-visit: when it started, and how long it lasted. The frame itself is thrown away.
+Here's Tangerine at the food bowl. After five seconds in the zone, PawWatch logs a visit, and throws the frame away.
 
-**Wait for the food count to go from 0 to 1 (about 20 s into the clip).**
+**Wait for the food count to go from 0 to 1 (about 20 s into the clip). q.**
+**Terminal shows "Enter: bed camera". Enter.**
 
-Drinking and the litter box work the same way.
-
-**q.** Terminal shows "Enter: bed camera". **Enter.**
-
-Some spots are off-limits. Watch the bed.
+Some spots are off-limits.
 
 **The alarm sounds (about 6 s in) and the Discord banner pops up, top right.**
 
-PawWatch sounds an alarm right away, and texts the owner on LINE or Discord.
+An alarm, and a text to the owner.
 
-**Let the clip end (15 s), or q.** ⌘Tab to the browser, tab 1 (live). The meal and the no-go visit are on Today.
+**Let the clip end (15 s), or q. ⌘Tab to the browser, tab 1 (live).**
 
-Both visits are already on the dashboard, seconds after they happened. Each visit becomes one row in a local database.
+Both visits are already on the dashboard.
 
-**Scroll down to "What PawWatch stores" and click it open.**
+**Scroll down to "What PawWatch stores" and click it open. Hold 2 s.**
 
-No images, no video: just when, where, and how long.
+It stores only events. No images, no video.
 
-**⌃Tab to tab 2 (alert day).**
+**⌃Tab to tab 2 (alert day). Scroll to the top.**
 
-To show an alert, here is a simulated day. Tangerine used the litter box eight times; her usual is about three.
-PawWatch suggests watching her, and considering a vet visit. It never diagnoses.
+Here's a simulated day with an alert.
 
-**Point at the daily report box.**
+**Point at the yellow warning, then the four counts with "vs usual". Hold 3 s.**
+**Scroll to "Visits through the day". Hover a litter box bar for its time and length. Drag across the strip under
+the chart to zoom into a few hours; double-click it to zoom back out.**
 
-Every evening, a plain-English report like this one
+Every visit through the day,
 
-**⌘Tab to Terminal ("Enter: send the daily report"). Enter.** It prints "sent to Discord"; the banner pops up.
-**⌘Tab to Discord.**
+**Scroll to "Past week". Hover the litter box chart's last bar.**
 
-reaches the owner's phone, ready to show the vet. This one is from the simulated day, too.
+against her usual week.
+
+**Scroll back up to the daily report box.**
+
+Each evening, a short report
+
+**⌘Tab to Terminal ("Enter: send the daily report"). Enter. ⌘Tab to Discord when the banner pops up.**
+
+goes to the owner's phone.
 
 **⌘Tab to Preview. → → p. 9 "Architecture: video in, events out".**
 
-Today, the prototype runs on a laptop.
+Today it runs on a laptop.
 
 **→ p. 10 "Hardware: one host, many fixed cameras".**
 
-The target is the ASUS U Gen 300, whose Hailo 10 H chip draws two and a half watts. Our detector matches ASUS's
-own U Gen 300 demos, so moving over means swapping one module.
+The target is the ASUS U Gen 300; moving over means swapping one module.
 
-**⌥⌘G 18: p. 18 "Market: 266k Taiwan homes with an older cat".**
+**⌥⌘G 19: p. 19 "Business model: buy once, no monthly fee".**
 
-We start with owners of cats aged seven or older: two hundred sixty-six thousand homes in Taiwan.
-
-**→ p. 19 "Business model: buy once, no monthly fee".**
-
-The full kit is fourteen thousand nine hundred N T dollars, paid once, with no subscription: less than half of one
-emergency visit.
+One box, bought once. No subscription.
 
 **→ p. 20 "Targeted audience roadmap".**
 
-Next, vet clinics recommend it for cats with kidney disease. Later, device makers build PawWatch into their own products.
+First cat owners, then vet clinics, then device makers.
 
 **⌥⌘G 1: p. 1, the title slide.**
 
@@ -130,7 +125,7 @@ PawWatch: know your cat's routine, without sending your home to the cloud.
 ## If something goes wrong
 
 Stop (⌃⌘Esc), reset (setup step 8), start over. A take is under 3 minutes.
-If a take runs over 2:55, read faster through the slides, or drop "Drinking and the litter box work the same way."
+If a take runs over 2:55, spend less time zooming the timeline.
 
 ## After the take
 
@@ -138,6 +133,4 @@ If a take runs over 2:55, read faster through the slides, or drop "Drinking and 
    the alarm audible, under 3:00. Edit → Trim (⌘T) only if the first or last seconds are dead air.
 2. Upload to YouTube as unlisted. Send the link to @bbwinner for the slides, and add it to the README.
 
-Numbers to keep in step with the slides and data: 8 litter box visits against about 3 (`data/alert.db`), 2.5 W,
-266k homes, NT$14,900, NT$30,000+ for an emergency visit (more than twice the kit). If a slide changes, change the line here,
-and check the page numbers in the take.
+If a slide is added or moved, check the page numbers in the take.
