@@ -12,7 +12,7 @@ About 2:30, with time to show the dashboard. Must be under 3:00. Upload to YouTu
 2. **Discord.** Your webhook's server, notifications on "All messages". Leave Discord running in the background
    (not in front), so the alarm text pops up as a banner.
 3. **Slides.** Open `slides/slides.pdf` in **Preview**: View → Single Page, hide the sidebar and toolbar, Window → Fill,
-   ⌘9 (zoom to fit). Go to p. 3 ("Cat hides illness"). → is the next page; ⌥⌘G, the number, Enter jumps to a page.
+   ⌘9 (zoom to fit). Go to p. 1, the title slide. → is the next page; ⌥⌘G, the number, Enter jumps to a page.
 4. **Dashboards.** In a terminal window you won't show. On the recording day, make the live database: a simulated week
    before today, nothing today yet. Then run both dashboards, one tab each:
    ```bash
@@ -29,19 +29,24 @@ About 2:30, with time to show the dashboard. Must be under 3:00. Upload to YouTu
    ```
    It clears today's visits from the last take, then waits on "Enter: food bowl camera". The clips write to
    `data/live.db` at the current time, so tab 1 shows them within 3 s.
-6. **QuickTime**: open `data/videos/AmiDrink.mp4`, mute it, Window → Fill, drag the playhead to 0:15. Leave it in front.
+6. **QuickTime**: open `data/videos/AmiDrink.mp4`, mute it, Window → Fill, drag the playhead to 0:15. Then ⌘Tab back to Preview and leave it in front.
 7. **Mic check.** ⌘⇧5 → Record Entire Screen, Options → Microphone: MacBook Pro Microphone, Show Mouse Clicks off.
    Record 10 s of talking plus one alarm, stop, listen on headphones. Delete it.
-8. Move the mouse to a corner. Do one full dry run without recording, then reset steps 3–6 (Preview on p. 3,
+8. Move the mouse to a corner. Do one full dry run without recording, then reset steps 3–6 (Preview on p. 1 in front,
    browser tabs at the top, `scripts/demo_take.sh` waiting, QuickTime at 0:15).
 
 ## The take
 
-**⌘⇧5 → Record. Wait 2 seconds. Press Space in QuickTime.**
+**⌘⇧5 → Record. Wait 2 seconds.** Preview shows p. 1, the title slide.
+
+Hi! We're the PawWatch team, from National Taiwan University. PawWatch is an edge AI cat health monitor.
+Let us show you why we built it.
+
+**⌘Tab to QuickTime. Space.**
 
 This is Ami, one of our cats. Would you notice if she drank twice as much water?
 
-**Space (pause). ⌘Tab to Preview: p. 3 "Cat hides illness".**
+**Space (pause). ⌘Tab to Preview. ⌥⌘G 3: p. 3 "Cat hides illness".**
 
 Cats hide illness. A change in daily habits is often the first sign.
 
@@ -118,7 +123,7 @@ First cat owners, then vet clinics, then device makers.
 
 **⌥⌘G 1: p. 1, the title slide.**
 
-PawWatch: know your cat's routine, without sending your home to the cloud.
+PawWatch: know your cat's routine, without sending your home to the cloud. Thanks for watching!
 
 **Hold 3 seconds. ⌃⌘Esc stops the recording.**
 
