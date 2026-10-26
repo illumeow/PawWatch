@@ -1,4 +1,4 @@
-# Sources for the slides. Keys match the IDs in docs/PawWatchResearch.md.
+# Sources for the slides.
 # Cite with @R4 (or #cite(<K-a>)); only cited entries appear in the reference list,
 # numbered in order of first use. "Surname et al." stands in for author lists we didn't record.
 
@@ -166,53 +166,53 @@ R18:
 
 C13:
   type: web
-  title: ASUS UGen300 press release (NT$6,380, 2.5 W, 40 TOPS)
+  title: ASUS UGen300 press release (NT\$6,380, 2.5 W, 40 TOPS)
   author: iThome
   url: https://www.ithome.com.tw/pr/175676
 
 C14:
   type: report
-  title: Taoyuan veterinary fee caps (male cat catheterization NT$10,000, cat ward NT$600/day, urethrostomy NT$50,000, +50% outside clinic hours)
+  title: Taoyuan veterinary fee caps (male cat catheterization NT\$10,000, cat ward NT\$600/day, urethrostomy NT\$50,000, +50% outside clinic hours)
   author: Taoyuan City Veterinary Medical Association
   date: 2021-01-01
   url: https://www.tcvma.org.tw/storage/app/media/uploaded-files/2021%E5%B9%B4%E6%A1%83%E5%9C%92%E5%B8%82%E7%8D%B8%E9%86%AB%E5%B8%AB%E5%85%AC%E6%9C%83%E6%94%B6%E8%B2%BB%E5%83%B9%E6%A0%BC%E8%A1%A8r00.pdf
 
 C15:
   type: web
-  title: "Owner report: cat catheterization and tests NT$30,000 at a 24-hour animal hospital, NT$11,000 per day in hospital"
+  title: "Owner report: cat catheterization and tests NT\\$30,000 at a 24-hour animal hospital, NT\\$11,000 per day in hospital"
   author: PTT WomenTalk
   date: 2023-08-29
   url: https://www.ptt.cc/bbs/WomenTalk/M.1693274189.A.D21.html
 
 C16:
   type: web
-  title: Cat health check costs in Taiwan, 2026 (exam NT$300-800, blood tests NT$2,400-3,400, senior package NT$3,000-8,000)
+  title: Cat health check costs in Taiwan, 2026 (exam NT\$300-800, blood tests NT\$2,400-3,400, senior package NT\$3,000-8,000)
   author: PetHealthMap
   date: 2026-04-16
   url: https://pethealthmap.com/zh-TW/blog/cat-exam-cost-guide
 
 C17:
   type: web
-  title: PETKIT smart feeder listings (NT$6,894-8,397)
+  title: PETKIT smart feeder listings (NT\$6,894-8,397)
   author: Yahoo Taiwan Shopping
   url: https://tw.buy.yahoo.com/brands/41193330
 
 C18:
   type: web
-  title: PETKIT smart water fountain prices (NT$1,688-5,880)
+  title: PETKIT smart water fountain prices (NT\$1,688-5,880)
   author: FindPrice
   url: https://www.findprice.com.tw/g/petkit
 
 C19:
   type: web
-  title: PETKIT ULTRA smart litter box (NT$38,800)
+  title: PETKIT ULTRA smart litter box (NT\$38,800)
   author: China Times
   date: 2026-02-23
   url: https://www.chinatimes.com/newspapers/20260223000566-260113
 
 C20:
   type: web
-  title: Furbo Nanny subscription plans (from US$9.99/month)
+  title: Furbo Nanny subscription plans (from US\$9.99/month)
   author: Furbo Help Center
   url: https://help.furbo.com/hc/en/articles/17462739016089
 
@@ -276,30 +276,30 @@ K-f:
 
 C21:
   type: web
-  title: Whisker+ membership (US$7.99/month; routine-change alerts are premium-only)
+  title: Whisker+ membership (US\$7.99/month; routine-change alerts are premium-only)
   author: Whisker
   url: https://www.whisker.com/whisker-plus
 
 C22:
   type: web
-  title: Petcube Care plans (Optimal US$9.99/month; smart alerts need a paid plan)
+  title: Petcube Care plans (Optimal US\$9.99/month; smart alerts need a paid plan)
   author: Petcube
   url: https://petcube.com/care/
 
 C23:
   type: web
-  title: Raspberry Pi 5 Model B 4GB (NT$3,850 before tax)
+  title: Raspberry Pi 5 Model B 4GB (NT\$3,850 before tax)
   author: PIEPIE
   url: https://piepie.com.tw/product/raspberry-pi-5-model-b-4gb
 
 C24:
   type: web
-  title: TP-Link Tapo C200 1080p Wi-Fi camera (NT$699)
+  title: TP-Link Tapo C200 1080p Wi-Fi camera (NT\$699)
   author: momo
   url: https://www.momoshop.com.tw/product/7114098
 
 C25:
   type: web
-  title: Furbo Mini camera (NT$899) and Furbo Nanny standard plan (NT$219/month list price)
+  title: Furbo Mini camera (NT\$899) and Furbo Nanny standard plan (NT\$219/month list price)
   author: Furbo Taiwan
   url: https://furbo.com/tw/products/furbo-mini

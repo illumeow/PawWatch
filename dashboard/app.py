@@ -1,4 +1,4 @@
-"""Streamlit dashboard. Owner: B.
+"""Streamlit dashboard.
 
 Run: uv run streamlit run dashboard/app.py
 Setup by environment: PAWWATCH_DB (default data/pawwatch.db), PAWWATCH_CAT (default Tangerine).

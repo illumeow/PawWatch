@@ -43,13 +43,13 @@ PawWatch does the watching on a box at home and keeps only a log of visits.
 ## How it works
 
 ```
- cameras, one per spot          detector                   visit logic                    SQLite
- (food, water, litter, ──frame──▶ YOLOv8n, cats only ──box──▶ zone the box overlaps,  ──visit──▶ events
-  no-go)                         (label, score, box)        dwell and dropout rules        recordings
-                                                                   │                         │
-                                                                   │ cat in no-go zone       ├──▶ change alerts
-                                                                   ▼                         ├──▶ daily report
-                                                            alarm: sound, LINE, Discord      └──▶ dashboard
+    cameras, one per spot                      detector                   visit logic                    SQLite
+ (food, water, litter, no-go)  ──frame──▶ YOLOv8n, cats only ──box──▶ zone the box overlaps,  ──visit──▶ events
+                                          (label, score, box)         dwell and dropout rules          recordings
+                                                                        │                                │
+                                                                        │ cat in no-go zone              ├──▶ change alerts
+                                                                        ▼                                ├──▶ daily report
+                                                              alarm: sound, LINE, Discord                └──▶ dashboard
 ```
 
 | Module | Role |
@@ -87,18 +87,8 @@ uv run python scripts/seed_fake.py --with-today   # 7 simulated days, plus a day
 uv run streamlit run dashboard/app.py
 ```
 
-The dashboard labels simulated data once, at the top ("Demo data: 7 simulated days"); a real deployment has none,
+The dashboard labels simulated data once, at the top ("Demo data: 8 simulated days"); a real deployment has none,
 so it never shows the note.
-
-### Rebuild our demo from the real clips
-
-With our clips in `data/videos/` (not in the repo), one command runs them through the pipeline and adds a simulated
-week before them:
-
-```bash
-uv run python scripts/build_demo.py --device mps     # leave --device off on Linux
-PAWWATCH_DB=data/demo.db uv run streamlit run dashboard/app.py
-```
 
 ### Process your own footage
 
@@ -176,4 +166,4 @@ See [docs/UGen300Notes.md](docs/UGen300Notes.md) for the Python version, files t
 - [@illumeow](https://github.com/illumeow): output (alerts, report, alarm, dashboard)
 - [@bbwinner](https://github.com/bbwinner): slides and research
 
-Product description, plan and hardware notes: [docs/](docs/).
+Product description and hardware notes: [docs/](docs/).

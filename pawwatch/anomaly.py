@@ -1,4 +1,4 @@
-"""Today vs the cat's usual pattern. Owner: B. Reads only through store.
+"""Today vs the cat's usual pattern. Reads only through store.
 
 "Usual" = the average over the previous 7 days, counted over the same hours of the day, so a normal morning
 isn't flagged for missing the evening meal. Days with no events at all (cameras off) are left out of the baseline.

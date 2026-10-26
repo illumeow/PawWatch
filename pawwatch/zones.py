@@ -1,4 +1,4 @@
-"""Zones per camera. Owner: A.
+"""Zones per camera.
 
 File format (config/zones/<camera>.json):
     {"camera": "cam_food", "zones": [{"name": "food", "polygon": [[x, y], ...]}]}

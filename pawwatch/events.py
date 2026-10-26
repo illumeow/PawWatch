@@ -1,7 +1,7 @@
-"""Detections over time to visits. Owner: A. Pure logic: no model, no video, no database.
+"""Detections over time to visits. Pure logic: no model, no video, no database.
 
 Input is one sample per processed frame: (video_ts, zone or None), in time order.
-Rules (docs/Worklist.md):
+Rules:
 - a visit counts only after the cat stays in one zone at least a minimum dwell time;
 - debounce: dropouts up to a gap tolerance don't close a visit, so a flickering box isn't counted twice;
 - a visit still open at the end of the stream is closed and counted.

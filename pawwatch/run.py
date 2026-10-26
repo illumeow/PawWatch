@@ -1,4 +1,4 @@
-"""CLI: one camera's video files + its zones file -> visits in SQLite. Owner: A.
+"""CLI: one camera's video files + its zones file -> visits in SQLite.
 
 Usage:
     uv run python -m pawwatch.run data/videos/food_2026-10-09T1830.mp4 --zones config/zones/cam_food.json

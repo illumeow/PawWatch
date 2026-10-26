@@ -1,4 +1,4 @@
-"""Detection window for the demo: boxes, zones, live visit counts. Owner: A.
+"""Detection window for the demo: boxes, zones, live visit counts.
 
 render() draws on a copy of a frame and is pure; Window only displays. Nothing here saves a frame:
 the demo video is a screen capture taken outside the program.

@@ -21,9 +21,9 @@
 
 #set par(leading: 0.7em, spacing: 1.1em)
 
-= Problem
+// = Problem and Solution
 
-== Cat hides illness <problem>
+== Problem: Cats hide illness <problem>
 
 // Dense slide: 90% text size so the whole argument fits on one page
 #[
@@ -48,7 +48,6 @@ A 2026 study of 136 cats found those with kidney disease used the litter box abo
 even in early stages @R11. A blocked urinary tract may kill within 24–48 hours; its first sign is many litter box trips @R10.
 ]
 
-= Solution
 
 // Existing solutions (innovation 30%): why PawWatch when smart devices exist
 == Today's smart devices each watch one spot
@@ -109,7 +108,7 @@ recognizes the cat and logs every visit. Video never leaves home.
   - *No-go zone alarm:* plays a sound when the cat jumps onto the counter
 ][
   *What it tells you*
-  - *Anomaly alert:* $>=$ 2 or $<= 0.5$ times of the cat's 7-day average
+  - *Anomaly alert:* $>=$ 2 or $<= 0.5$ times the cat's 7-day average
   - *Daily report:* a plain-language summary
   - *Dashboard:* today's counts, timeline and 7-day trends
 ]
@@ -137,7 +136,7 @@ recognizes the cat and logs every visit. Video never leaves home.
 
 Running 24/7 is cheap: the AI accelerator draws 2.5 W, less than an LED bulb @C13.
 
-= PawWatch System
+// = PawWatch System
 
 // Architecture (required: hardware/software architecture; feasibility 35%)
 == Architecture: video in, events out
@@ -268,7 +267,7 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
     text(0.85em)[Frames (cat in zone)],
     sample-strip("....##############.....############################......"),
     text(0.85em)[Logged visit],
-    stack(dir: ltr, h(4 * (0.42em + 1pt)), box(width: 46 * (0.42em + 1pt) - 1pt, height: 0.9em, fill: rgb("#eb6834"), radius: 2pt, align(center + horizon, text(0.75em, fill: white)[one visit: the 5-frame gap is bridged]))),
+    stack(dir: ltr, h(4 * (0.42em + 1pt)), box(width: 47 * (0.42em + 1pt) - 1pt, height: 0.9em, fill: rgb("#eb6834"), radius: 2pt, align(center + horizon, text(0.75em, fill: white)[one visit: the 5-frame gap is bridged]))),
   )
 ]
 
@@ -305,7 +304,31 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
   )
 ]
 
-= Impact and Business
+== Notifications: a text to your phone
+
+#[
+#set text(0.85em)
+
+*Two moments, one message each.*
+#v(0.1em)
+- *No-go alarm:* the moment the alarm sounds, the host sends
+  "your cat jumped onto a no-go spot at 14:32". The 30 s cooldown keeps it to one text per jump.
+- *Daily report:* each evening the host sends that day's report, anomaly alerts included.
+
+#v(1em)
+
+#align(center)[
+  #figure(
+    // Full content width (image is 1400 × 302 px), without Discord's date divider at the top
+    layout(size => crop-top("images/discord_anomaly_notification.png", size.width * 295 / 1400, 0.14)),
+    caption: text(0.75em)[Daily report on Discord, with a litter box alert (simulated data)],
+    supplement: none,
+    numbering: none,
+  )
+]
+]
+
+// = Impact and Business
 
 // Expected benefits (required by the rules): one page each for the cat, the owner, and vets + broader
 == Benefits for the cat: problems caught early, a safer home
@@ -333,12 +356,14 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
   - *Less stress*: the cat is observed at home, unhandled, so the record shows its normal behavior
 ]
 
-#v(5em)
+#v(3em)
 
 #note[Example: the litter box][
+  #v(0.5em)
   Kidney disease doubles litter use even at early stages @R11, yet most cases go undiagnosed @R4 @R5.
   Found early, it is treatable: a kidney diet cut uremic crises from 26% to 0% in a 45-cat trial @R12.
   A blocked urethra also shows as many litter box trips, and can kill within 24–48 hours @R10
+  #v(0.5em)
 ]
 ]
 
@@ -382,7 +407,7 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
   *Resources*
   - *Low power*: all-day watching costs little energy
 
-  - *No internet demand*: Everything runs locally (except Discord / Line alerts and records)
+  - *No internet demand*: everything runs locally (except LINE / Discord alerts and daily reports)
 ]
 ]
 //
@@ -391,43 +416,34 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 // - Stage I, a working prototype on recorded video and open-source code on GitHub\;
 // - Stage II, the detector on the *UGen300* with measured fps and power.
 
-// Bottom-up TAM / SAM / SOM in Taiwan: households × kit price, arithmetic shown beside each tier
+// Bottom-up market in Taiwan, read top to bottom: each row narrows the one above; value = homes × kit price
 == Market: 266k Taiwan homes with an older cat <market>
 
-#let tier(width, shade, name, homes, value) = context align(center, block(
-  width: width,
-  inset: (y: 0.6em),
-  radius: 3pt,
-  fill: accent.get().lighten(shade),
-  text(0.9em, fill: white)[*#name* · #homes homes · *#value*],
-))
+*Our goal:* sell *5.3~k kits* in Taiwan in the first three years, *NT\$79~M* in revenue.
 
-#grid(
-  columns: (1.1fr, 1fr),
-  column-gutter: 1.2em,
-  row-gutter: 1em,
-  align: horizon,
-  // The total the funnel starts from: outlined, not filled, since it is not a market tier
-  context align(center, block(
-    width: 100%,
-    inset: (y: 0.6em),
-    radius: 3pt,
-    stroke: 1pt + accent.get(),
-    text(0.9em, fill: accent.get())[*Taiwan* · 9.85~M households],
-  )),
-  [All households @K-c],
-  tier(100%, 0%, "TAM", [1.02~M], [NT\$15.2~B]),
-  [× 10.4% keep cats @K-b],
-  tier(85%, 15%, "SAM", [266~k], [NT\$4.0~B]),
-  [× 26% of dogs and cats are 7 or older \* @K-d],
-  tier(70%, 30%, "SOM", [5.3~k], [NT\$79~M]),
-  [× 2% of SAM reached in years 1–3],
-)
+#let tag(t) = text(0.75em, fill: luma(110))[#t]
+#context {
+  let goal = accent.get().lighten(85%)
+  table(
+    columns: (3.4fr, 0.8fr, 1.1fr),
+    inset: 6pt,
+    align: (left + horizon, right + horizon, right + horizon),
+    [*Who*], [*Homes*], [*Market value*],
+    [All households in Taiwan @K-c], [9.85~M], [],
+    [... that keep a cat ($10.4%$) @K-b #h(0.3em) #tag[TAM]], [1.02~M], [NT\$15.2~B],
+    [... whose cat is 7 or older ($26%$)\* @K-d #h(0.3em) #tag[SAM]], [266~k], [NT\$4.0~B],
+    table.cell(fill: goal)[*... that we reach in years 1–3 ($2%$)* #h(0.3em) #tag[SOM]],
+    table.cell(fill: goal)[*5.3~k*],
+    table.cell(fill: goal)[*NT\$79~M*],
+  )
+}
+
+#text(0.85em)[Value = homes × NT\$14,900 for one PawWatch Full Kit, bought once (#see(<business-model>)[Business model]).]
 
 #v(1fr)
-#align(right)[
+#align()[
 #text(fill: luma(130), size: 10pt)[
-\* the age when chronic disease becomes common]]
+\* 7 or older is when chronic disease becomes common; the survey covers dogs and cats together]]
 
 
 // One-time purchase for cat owners; price anchored below one night-time emergency (C14)
@@ -448,10 +464,11 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
   - *Extra camera, NT\$900:* additional night-vision camera to extend the coverage
 ]
 
-#callout(title: "Scalibility", color: green.darken(30%))[
-    - *Extensive:* a new spot costs only a camera
+#callout(title: "Scalability", color: green.darken(30%))[
+    - *Extensible:* a new spot costs only a camera
 
-    - *Sustainable:* No subscription fee, no extra cost for long-term usage
+    - *Sustainable:* no subscription fee, no extra cost for long-term usage
+    #v(0.3em)
   ]
 ]
 
@@ -522,6 +539,15 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 )
 ]
 
+== References
+
+#[
+  #set text(0.68em)
+  #set par(leading: 0.55em, spacing: 0.8em)
+  #columns(2, gutter: 1.2em, bibliography("refs.yml", style: "ieee"))
+]
+
+
 = Appendix
 
 
@@ -559,12 +585,6 @@ are only displayed; frames are never written to disk.
   It never names a disease.
 ][
   #figure(
-    crop-top("images/dashboard_real_day.png", 6.6cm, 0.085),
+    crop-top("images/dashboard_alert_simulated.png", 6.6cm, 0.085),
   )
 ]
-
-== References
-
-#set text(0.7em)
-#set par(leading: 0.55em, spacing: 0.8em)
-#columns(2, gutter: 1.2em, bibliography("refs.yml", style: "ieee"))

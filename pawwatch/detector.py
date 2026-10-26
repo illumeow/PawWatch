@@ -1,4 +1,4 @@
-"""Cat detection. Owner: A.
+"""Cat detection.
 
 Every backend returns [(label, score, (x1, y1, x2, y2))] in original-image pixels, the same contract as
 ObjectDetector in ugen300-demos, so the UGen300 backend drops in (see docs/UGen300Notes.md).

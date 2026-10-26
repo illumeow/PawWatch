@@ -1,4 +1,4 @@
-"""Daily report text. Owner: B. Template sentences; an on-device LLM rewrite is optional later.
+"""Daily report text. Template sentences; an on-device LLM rewrite is optional later.
 
 Wording suggests watching or seeing a vet, never a diagnosis. Simulated data is labeled by the dashboard, not here.
 """

@@ -1,4 +1,4 @@
-"""1-minute camera test: how often is the cat detected in this clip? Owner: A.
+"""1-minute camera test: how often is the cat detected in this clip?
 
 Run: uv run python scripts/check_clip.py data/videos/test_food.mp4
 Prints the detection rate and saves a few annotated frames to data/check/ (gitignored) to eyeball.

@@ -1,4 +1,4 @@
-"""Event storage. SHARED CONTRACT between A (writes) and B (reads): change only with a heads-up.
+"""Event storage. The seam between detection (writes) and the dashboard, alerts and report (read only through here).
 
 Only visits are stored: no frames, ever. A visit is written as soon as it qualifies (the cat stayed the minimum
 dwell time) and its end is moved forward while the cat stays, so the dashboard follows a live stream; a visit that

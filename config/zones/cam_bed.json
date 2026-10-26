@@ -1,6 +1,0 @@
-{
-  "camera": "cam_bed",
-  "zones": [
-    {"name": "forbidden", "polygon": [[531, 94], [761, 383], [837, 369], [837, 48]]}
-  ]
-}
