@@ -13,19 +13,22 @@ About 2:45. Must be under 3:00. Upload to YouTube as unlisted.
    (not in front), so the alarm text pops up as a banner.
 3. **Slides.** Open `slides/slides.pdf` in **Preview**: View → Single Page, hide the sidebar and toolbar, Window → Fill,
    ⌘9 (zoom to fit). Go to p. 3 ("Cat hides illness"). → is the next page; ⌥⌘G, the number, Enter jumps to a page.
-4. **Dashboards.** In a terminal window you won't show, run both (one tab each):
+4. **Dashboards.** In a terminal window you won't show. On the recording day, make the live database: a simulated week
+   before today, nothing today yet. Then run both dashboards, one tab each:
    ```bash
-   PAWWATCH_DB=data/demo.db uv run streamlit run dashboard/app.py --client.toolbarMode minimal --server.port 8501 --server.headless true
+   rm -f data/live.db && uv run python scripts/seed_fake.py --db data/live.db
+   PAWWATCH_DB=data/live.db uv run streamlit run dashboard/app.py --client.toolbarMode minimal --server.port 8501 --server.headless true
    PAWWATCH_DB=data/alert.db uv run streamlit run dashboard/app.py --client.toolbarMode minimal --server.port 8502 --server.headless true
    ```
-   **Browser**, one window, Window → Fill: tab 1 `localhost:8501` (real day, opens on Sat, Oct 10),
+   **Browser**, one window, Window → Fill: tab 1 `localhost:8501` (live, opens on Today, every zone "not on camera"),
    tab 2 `localhost:8502`, pick **Sat, Oct 10** in the Day picker. Scroll both to the top. Leave tab 1 showing.
 5. **Terminal** for the take: a fresh window, big font (⌘+ a few times), Window → Fill. Then:
    ```bash
    read -rs DISCORD_WEBHOOK_URL && export DISCORD_WEBHOOK_URL   # paste the URL, Enter; it doesn't show
    scripts/demo_take.sh
    ```
-   It clears the screen and waits on "Enter: food bowl camera".
+   It clears today's visits from the last take, then waits on "Enter: food bowl camera". The clips write to
+   `data/live.db` at the current time, so tab 1 shows them within 3 s.
 6. **QuickTime**: open `data/videos/AmiDrink.mp4`, mute it, Window → Fill, drag the playhead to 0:15. Leave it in front.
 7. **Mic check.** ⌘⇧5 → Record Entire Screen, Options → Microphone: MacBook Pro Microphone, Show Mouse Clicks off.
    Record 10 s of talking plus one alarm, stop, listen on headphones. Delete it.
@@ -74,9 +77,9 @@ Some spots are off-limits. Watch the bed.
 
 PawWatch sounds an alarm right away, and texts the owner on LINE or Discord.
 
-**Let the clip end (15 s), or q.** ⌘Tab to the browser, tab 1 (real day).
+**Let the clip end (15 s), or q.** ⌘Tab to the browser, tab 1 (live). The meal and the no-go visit are on Today.
 
-Each visit becomes one row in a local database.
+Both visits are already on the dashboard, seconds after they happened. Each visit becomes one row in a local database.
 
 **Scroll down to "What PawWatch stores" and click it open.**
 
