@@ -21,9 +21,9 @@
 
 #set par(leading: 0.7em, spacing: 1.1em)
 
-= Problem
+= Problem and Solution
 
-== Cat hides illness <problem>
+== Problem: Cat hides illness <problem>
 
 // Dense slide: 90% text size so the whole argument fits on one page
 #[
@@ -48,7 +48,6 @@ A 2026 study of 136 cats found those with kidney disease used the litter box abo
 even in early stages @R11. A blocked urinary tract may kill within 24–48 hours; its first sign is many litter box trips @R10.
 ]
 
-= Solution
 
 // Existing solutions (innovation 30%): why PawWatch when smart devices exist
 == Today's smart devices each watch one spot
@@ -305,6 +304,30 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
   )
 ]
 
+== Notifications: a text to your phone
+
+#[
+#set text(0.85em)
+
+*Two moments, one message each.*
+#v(0.1em)
+- *No-go alarm:* the moment the alarm sounds, the host sends
+  "your cat jumped onto a no-go spot at 14:32". The 30 s cooldown keeps it to one text per jump.
+- *Daily report:* each evening the host sends that day's report, anomaly alerts included.
+
+#v(1em)
+
+#align(center)[
+  #figure(
+    // Full content width (image is 1400 × 302 px), without Discord's date divider at the top
+    layout(size => crop-top("images/discord_anomaly_notification.png", size.width * 295 / 1400, 0.14)),
+    caption: text(0.75em)[Daily report on Discord, with a litter box alert (simulated data)],
+    supplement: none,
+    numbering: none,
+  )
+]
+]
+
 = Impact and Business
 
 // Expected benefits (required by the rules): one page each for the cat, the owner, and vets + broader
@@ -333,12 +356,14 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
   - *Less stress*: the cat is observed at home, unhandled, so the record shows its normal behavior
 ]
 
-#v(5em)
+#v(3em)
 
 #note[Example: the litter box][
+  #v(0.5em)
   Kidney disease doubles litter use even at early stages @R11, yet most cases go undiagnosed @R4 @R5.
   Found early, it is treatable: a kidney diet cut uremic crises from 26% to 0% in a 45-cat trial @R12.
   A blocked urethra also shows as many litter box trips, and can kill within 24–48 hours @R10
+  #v(0.5em)
 ]
 ]
 
@@ -452,6 +477,7 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
     - *Extensive:* a new spot costs only a camera
 
     - *Sustainable:* No subscription fee, no extra cost for long-term usage
+    #v(0.3em)
   ]
 ]
 
@@ -559,7 +585,7 @@ are only displayed; frames are never written to disk.
   It never names a disease.
 ][
   #figure(
-    crop-top("images/dashboard_real_day.png", 6.6cm, 0.085),
+    crop-top("images/dashboard_alert_simulated.png", 6.6cm, 0.085),
   )
 ]
 
