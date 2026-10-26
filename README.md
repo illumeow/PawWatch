@@ -64,7 +64,7 @@ PawWatch does the watching on a box at home and keeps only a log of visits.
 | `pawwatch/anomaly.py` | Today vs the past week, over the hours that were filmed. |
 | `pawwatch/report.py` | Daily report sentences. |
 | `dashboard/app.py` | Streamlit dashboard. |
-| `scripts/` | Setup and demo tools: camera check, zone drawing, simulated history, sending the daily report, the demo video helper. |
+| `scripts/` | Setup and demo tools: camera check, zone drawing, simulated history, sending the daily report. |
 
 Timestamps come from the video (recording start plus frame offset), not the processing clock, so recorded footage
 replays exactly as it happened.
@@ -176,4 +176,4 @@ See [docs/UGen300Notes.md](docs/UGen300Notes.md) for the Python version, files t
 - [@illumeow](https://github.com/illumeow): output (alerts, report, alarm, dashboard)
 - [@bbwinner](https://github.com/bbwinner): slides and research
 
-Product description, plan and hardware notes: [docs/](docs/).
+Product description and hardware notes: [docs/](docs/).

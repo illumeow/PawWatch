@@ -1,4 +1,4 @@
-"""Send the daily report to the owner's phone over LINE and/or Discord (see pawwatch.notify). Owner: B.
+"""Send the daily report to the owner's phone over LINE and/or Discord (see pawwatch.notify).
 
 Run: uv run python scripts/send_report.py                       # today so far
      uv run python scripts/send_report.py --day 2026-10-10      # a past day, in full

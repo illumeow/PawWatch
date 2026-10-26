@@ -1,4 +1,4 @@
-"""Seed simulated history (simulated=1) so the dashboard and anomaly alert have a 7-day baseline. Owner: B.
+"""Seed simulated history (simulated=1) so the dashboard and anomaly alert have a 7-day baseline.
 
 Run: uv run python scripts/seed_fake.py                 # 7 days before today
      uv run python scripts/seed_fake.py --end 2026-10-10   # 7 days before the day the footage was recorded

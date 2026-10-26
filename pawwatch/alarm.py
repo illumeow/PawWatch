@@ -1,6 +1,6 @@
-"""Forbidden-zone alarm. SHARED CONTRACT: A calls trigger(), B implements it.
+"""Forbidden-zone alarm: the run loop calls trigger() for every frame with the cat in a no-go zone.
 
-A also draws the red box in its own detection window; this module only handles sound and notifications.
+The detection window draws the red box itself; this module only handles sound and notifications.
 
 Environment (all optional):
     PAWWATCH_MUTE=1                    no sound (e.g. bulk runs over long recordings)

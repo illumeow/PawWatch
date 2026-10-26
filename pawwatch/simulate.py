@@ -1,4 +1,4 @@
-"""Simulated visit history, so the dashboard and anomaly alert have a 7-day baseline. Owner: B.
+"""Simulated visit history, so the dashboard and anomaly alert have a 7-day baseline.
 
 Every event written from here is stored with simulated=1 and labeled "simulated" wherever it's shown.
 Each simulated day also gets simulated camera recordings: around the clock, except on some days one camera is offline

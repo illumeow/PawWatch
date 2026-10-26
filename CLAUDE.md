@@ -5,8 +5,7 @@ Fixed cameras watch the cat's food, water, litter and no-go zones; YOLO detects 
 flags changes from the cat's normal pattern, alarms on no-go zones and writes a daily report.
 Video never leaves the box: only events are stored.
 
-Product, plan, work split and hardware notes live in `docs/`. Read the relevant doc before starting a task.
-Current status and each person's next steps: the top section of `docs/TeamPlan.md`.
+Product and hardware notes live in `docs/`. Read the relevant doc before starting a task.
 
 ## Constraints
 
@@ -14,8 +13,8 @@ Current status and each person's next steps: the top section of `docs/TeamPlan.m
 - Runs on a laptop now; the ASUS UGen300 (Hailo-10H) accelerator is the deployment target. Keep the detector swappable.
 - Supported platforms: Linux (deployment host) and macOS (development laptops). Windows is not supported.
 - Demo runs on pre-recorded video, not a live camera.
-- Three people work in parallel: two code halves and the slides. Respect file ownership and shared contracts described
-  in `docs/`; changing a shared contract needs a heads-up to the others.
+- Three people work in parallel: two code halves and the slides. The shared contracts are the events
+  table (`pawwatch/store.py`) and the alarm call (`pawwatch/alarm.py`); changing one needs a heads-up to the others.
 
 ## Architecture principles
 

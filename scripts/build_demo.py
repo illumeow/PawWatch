@@ -1,4 +1,4 @@
-"""Rebuild the demo database: our real clips on one day, plus 7 simulated days before it. Owner: B.
+"""Rebuild the demo database: our real clips on one day, plus 7 simulated days before it.
 
 Run: uv run python scripts/build_demo.py --device mps        # Macs; leave --device off elsewhere
      PAWWATCH_DB=data/demo.db uv run streamlit run dashboard/app.py

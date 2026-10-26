@@ -1,4 +1,4 @@
-"""Draw a camera's zones on a frame of its clip and write its zones file. Owner: A.
+"""Draw a camera's zones on a frame of its clip and write its zones file.
 
 Run: uv run python scripts/draw_zones.py data/videos/food_2026-10-09T1830.mp4 config/zones/cam_food.json
      add --at 12.5 to draw on the frame 12.5 s in (default: the first frame)

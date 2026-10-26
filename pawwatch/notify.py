@@ -1,4 +1,4 @@
-"""Text messages to the owner's phone: LINE and/or Discord. Text only, never frames. Owner: B.
+"""Text messages to the owner's phone: LINE and/or Discord. Text only, never frames.
 
 Environment (each channel is used only when its variables are set; with none set, nothing is sent):
     LINE_CHANNEL_TOKEN, LINE_USER_ID   LINE Messaging API push to one user (LINE Notify closed in 2025)
