@@ -23,7 +23,7 @@
 
 // = Problem and Solution
 
-== Problem: Cat hides illness <problem>
+== Problem: Cats hide illness <problem>
 
 // Dense slide: 90% text size so the whole argument fits on one page
 #[
@@ -108,7 +108,7 @@ recognizes the cat and logs every visit. Video never leaves home.
   - *No-go zone alarm:* plays a sound when the cat jumps onto the counter
 ][
   *What it tells you*
-  - *Anomaly alert:* $>=$ 2 or $<= 0.5$ times of the cat's 7-day average
+  - *Anomaly alert:* $>=$ 2 or $<= 0.5$ times the cat's 7-day average
   - *Daily report:* a plain-language summary
   - *Dashboard:* today's counts, timeline and 7-day trends
 ]
@@ -267,7 +267,7 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
     text(0.85em)[Frames (cat in zone)],
     sample-strip("....##############.....############################......"),
     text(0.85em)[Logged visit],
-    stack(dir: ltr, h(4 * (0.42em + 1pt)), box(width: 46 * (0.42em + 1pt) - 1pt, height: 0.9em, fill: rgb("#eb6834"), radius: 2pt, align(center + horizon, text(0.75em, fill: white)[one visit: the 5-frame gap is bridged]))),
+    stack(dir: ltr, h(4 * (0.42em + 1pt)), box(width: 47 * (0.42em + 1pt) - 1pt, height: 0.9em, fill: rgb("#eb6834"), radius: 2pt, align(center + horizon, text(0.75em, fill: white)[one visit: the 5-frame gap is bridged]))),
   )
 ]
 
@@ -407,7 +407,7 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
   *Resources*
   - *Low power*: all-day watching costs little energy
 
-  - *No internet demand*: Everything runs locally (except Discord / Line alerts and records)
+  - *No internet demand*: everything runs locally (except LINE / Discord alerts and daily reports)
 ]
 ]
 //
@@ -464,10 +464,10 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
   - *Extra camera, NT\$900:* additional night-vision camera to extend the coverage
 ]
 
-#callout(title: "Scalibility", color: green.darken(30%))[
-    - *Extensive:* a new spot costs only a camera
+#callout(title: "Scalability", color: green.darken(30%))[
+    - *Extensible:* a new spot costs only a camera
 
-    - *Sustainable:* No subscription fee, no extra cost for long-term usage
+    - *Sustainable:* no subscription fee, no extra cost for long-term usage
     #v(0.3em)
   ]
 ]
