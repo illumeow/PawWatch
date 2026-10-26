@@ -64,7 +64,7 @@ PawWatch does the watching on a box at home and keeps only a log of visits.
 | `pawwatch/anomaly.py` | Today vs the past week, over the hours that were filmed. |
 | `pawwatch/report.py` | Daily report sentences. |
 | `dashboard/app.py` | Streamlit dashboard. |
-| `scripts/` | Setup and demo tools: camera check, zone drawing, simulated history, sending the daily report. |
+| `scripts/` | Setup and demo tools: camera check, zone drawing, simulated history, sending the daily report, the demo video helper. |
 
 Timestamps come from the video (recording start plus frame offset), not the processing clock, so recorded footage
 replays exactly as it happened.
