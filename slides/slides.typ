@@ -4,6 +4,8 @@
 // Citations: @R4 etc., keys from refs.yml; numbered [1], [2]... in order of first use
 #show cite: set text(0.75em, fill: luma(100))
 #let warn = red.darken(20%)
+// Cross-reference to another slide: #see(<problem>)[Problem] -> "see Problem, p. 3", linked
+#let see(target, name) = link(target)[see #name, p. #context counter(page).at(target).first()]
 #show table: set par(leading: 0.5em)
 
 #show: slides.with(
@@ -21,7 +23,7 @@
 
 = Problem
 
-== Cat hides illness
+== Cat hides illness <problem>
 
 // Dense slide: 90% text size so the whole argument fits on one page
 #[
@@ -107,12 +109,12 @@ recognizes the cat and logs every visit. Video never leaves home.
   - *No-go zone alarm:* plays a sound when the cat jumps onto the counter
 ][
   *What it tells you*
-  - *Anomaly alert:* $>=$ 2 or $<= 1/2$ times of the cat's 7-day average
+  - *Anomaly alert:* $>=$ 2 or $<= 0.5$ times of the cat's 7-day average
   - *Daily report:* a plain-language summary
   - *Dashboard:* today's counts, timeline and 7-day trends
 ]
 
-== Why run AI at home, not in the cloud
+== Why run AI at home, not in the cloud <why-edge>
 
 #table(
   columns: (1.1fr, 1.6fr, 1.6fr),
@@ -305,50 +307,220 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
 
 = Impact and Business
 
-== Expected benefits
+// Expected benefits (required by the rules): one page each for the cat, the owner, and vets + broader
+== Benefits for the cat: problems caught early, a safer home
 
-#todo[目前是 AI 生的]
+// Dense slide: 85% text size so both columns fit on one page
+#[
+#set text(0.85em)
 
-- *Owners:* catch changes early instead of when symptoms are obvious
-- *Vets:* objective at-home records after surgery or before a follow-up
+// Side note: plain gray rule, quieter than a callout
+#let note(title, body) = block(
+  inset: (left: 0.8em, y: 0.3em),
+  stroke: (left: 1.5pt + luma(180)),
+  text(fill: luma(70))[#text(weight: "bold", title) \ #body],
+)
 
 #cols[
-  #callout(title: "Without PawWatch", color: warn)[
-    The cat uses the litter box twice as often while the owner is at work. Nobody notices
-    until symptoms are obvious.
-  ]
+  *Catch problems early*
+  - *Early signs of many diseases*: appetite, thirst and litter use change before obvious symptoms
+
+  - *Emergencies in hours, not days*: an urgent change shows up in that evening's report, not after days of guessing
 ][
-  #callout(title: "With PawWatch", color: green.darken(30%))[
-    Litter box visits reach 2× the 7-day average: an alert the same day suggests watching
-    the cat or seeing a vet, with the daily report in hand.
+  *A safer, calmer home*
+  - *No-go zones*: an alarm scares the cat off, and the owner gets a LINE or Discord text right away
+
+  - *Less stress*: the cat is observed at home, unhandled, so the record shows its normal behavior
+]
+
+#v(5em)
+
+#note[Example: the litter box][
+  Kidney disease doubles litter use even at early stages @R11, yet most cases go undiagnosed @R4 @R5.
+  Found early, it is treatable: a kidney diet cut uremic crises from 26% to 0% in a 45-cat trial @R12.
+  A blocked urethra also shows as many litter box trips, and can kill within 24–48 hours @R10
+]
+]
+
+== Benefits for the owner: rest assured, wherever you are
+
+// Dense slide: 85% text size so both columns fit on one page
+#[
+#set text(0.85em)
+
+#cols(ratio: (1.15fr, 1fr))[
+  - *Peace of mind:* at work, on a business trip or in hospital, the cat is watched all day. Alerts reach the phone over LINE or Discord.
+
+  - *Facts instead of guesses:* 55.5% of owners did not recognize more thirst as a sign of dehydration @R17. PawWatch counts every visit for them.
+
+  - *One box, no subscription:* costs less than most products on the market. Pay once rather than subscribe monthly.
+
+  - *Privacy:* video never leaves home.
+][
+  *Earlier is cheaper*
+  #callout(title: "Caught early", color: green.darken(30%))[
+    A senior cat check-up: NT\$3,000–8,000 @C16
+  ]
+  #callout(title: "Caught late", color: warn)[
+    Emergency treatment can cost NT\$30,000 or more at a 24-hour hospital @C15
   ]
 ]
-// 
+]
+
+== Benefits for vets and beyond
+
+// Dense slide: 85% text size so both columns fit on one page
+#[
+#set text(0.85em)
+
+#cols[
+  *Vets*
+  - *A complete history*: a dated, detailed record can facilitate diagnosis
+
+  - *Recovery after treatment*: home data tracks recovery status
+][
+  *Resources*
+  - *Low power*: all-day watching costs little energy
+
+  - *No internet demand*: Everything runs locally (except Discord / Line alerts and records)
+]
+]
+//
 
 // *Outcomes:* 
 // - Stage I, a working prototype on recorded video and open-source code on GitHub\;
 // - Stage II, the detector on the *UGen300* with measured fps and power.
 
-== Market: more cats in Taiwan, in a growing pet tech market
+// Bottom-up TAM / SAM / SOM in Taiwan: households × kit price, arithmetic shown beside each tier
+== Market: 266k Taiwan homes with an older cat <market>
 
-- *More cats:* Taiwan now has 1.74 M pet cats, up 33% in two years, and more cats than dogs @K-a
-- *Growing pet tech:* the global market may grow from US\$15.6 B (2025) to US\$52.9 B (2035) @K-f
+#let tier(width, shade, name, homes, value) = context align(center, block(
+  width: width,
+  inset: (y: 0.6em),
+  radius: 3pt,
+  fill: accent.get().lighten(shade),
+  text(0.9em, fill: white)[*#name* · #homes homes · *#value*],
+))
 
-
-== Business model: ride on hardware people already buy
-#todo[目前是 AI 生的, 完全不知道這啥]
-
-#table(
-  columns: (1.2fr, 1.6fr, 0.9fr),
-  inset: 6pt,
-  [*Customer*], [*Offer*], [*Revenue*],
-  [Device makers (pet cameras, home hubs, PCs with edge AI)], [PawWatch edge software on their hardware: no cloud cost for them], [Per-unit license],
-  [Vet clinics], [At-home monitoring kits after surgery and for chronic cases (e.g. kidney disease)], [Monthly rental per kit],
-  [Cat owners], [Box + cameras, no subscription], [One-time purchase],
+#grid(
+  columns: (1.1fr, 1fr),
+  column-gutter: 1.2em,
+  row-gutter: 1em,
+  align: horizon,
+  // The total the funnel starts from: outlined, not filled, since it is not a market tier
+  context align(center, block(
+    width: 100%,
+    inset: (y: 0.6em),
+    radius: 3pt,
+    stroke: 1pt + accent.get(),
+    text(0.9em, fill: accent.get())[*Taiwan* · 9.85~M households],
+  )),
+  [All households @K-c],
+  tier(100%, 0%, "TAM", [1.02~M], [NT\$15.2~B]),
+  [× 10.4% keep cats @K-b],
+  tier(85%, 15%, "SAM", [266~k], [NT\$4.0~B]),
+  [× 26% of dogs and cats are 7 or older \* @K-d],
+  tier(70%, 30%, "SOM", [5.3~k], [NT\$79~M]),
+  [× 2% of SAM reached in years 1–3],
 )
 
-- Licensing spreads the UGen300 cost: it doesn't land on one product
-- One UGen300 serves every camera in the home, so each extra spot is only a camera
+#v(1fr)
+#align(right)[
+#text(fill: luma(130), size: 10pt)[
+\* the age when chronic disease becomes common]]
+
+
+// One-time purchase for cat owners; price anchored below one night-time emergency (C14)
+== Business model: buy once, no monthly fee <business-model>
+
+// Dense slide: 85% text size so both columns fit on one page
+#[
+#set text(0.85em)
+
+#cols(ratio: (1fr, 1fr))[
+  *Choose one*
+  - *PawWatch Full Kit, NT\$14,900:* Raspberry Pi 5 + UGen300, preinstalled, with three night-vision cameras
+
+  - *PawWatch Minimal Pack, NT\$7,900:* UGen300 + a USB stick that boots PawWatch on a spare PC;
+    cameras not included
+][
+  *Add-on*
+  - *Extra camera, NT\$900:* additional night-vision camera to extend the coverage
+]
+
+#callout(title: "Scalibility", color: green.darken(30%))[
+    - *Extensive:* a new spot costs only a camera
+
+    - *Sustainable:* No subscription fee, no extra cost for long-term usage
+  ]
+]
+
+// Hamilton Helmer's 7 Powers: only the powers a hackathon team can credibly claim
+// == Competitive advantage: why PawWatch wins <advantage>
+
+// Dense slide: 90% text size so the table fits on one page
+// #[
+// #set text(0.9em)
+// #let power(name) = text(0.85em, fill: luma(90), name)
+
+// PawWatch wins on two fronts that subscription-based competitors cannot follow:
+
+// #table(
+//   columns: (1fr, 3.6fr),
+//   inset: 7pt,
+//   [*Advantage*], [*How PawWatch wins*],
+//   [*Free health alerts*],
+//     [Competitors charge monthly for the alerts that matter: Whisker US\$7.99 for routine-change alerts @C21,
+//      Petcube US\$9.99 for smart alerts @C22, Furbo from US\$9.99 @C20. PawWatch gives them free, with no
+//      servers to pay for. To match it, competitors would have to give up their own subscription revenue],
+//   [*Worth more every month*],
+//     [Leaving PawWatch costs twice: a new set of devices, and the cat's history. Alerts start from zero
+//      until a new baseline builds up, and the months of trends the vet reads at each visit are gone.
+//      Every month PawWatch runs makes it harder to replace],
+// )
+// ]
+
+// Beachhead first, then the channel, then licensing; ages match the SOM horizon on the Market slide
+== Targeted audience roadmap <roadmap>
+
+#let phase(shade, name, when) = context block(
+  width: 100%,
+  inset: (y: 0.6em),
+  radius: 3pt,
+  fill: accent.get().lighten(shade),
+  align(center, text(0.9em, fill: white)[#text(size: 11pt)[*#name* · #when]]),
+)
+
+#[
+#set text(0.85em)
+
+#grid(
+  columns: (1fr, auto, 1fr, auto, 1fr),
+  column-gutter: 0.6em,
+  row-gutter: 0.8em,
+  phase(0%, "1. Cat owners", "Year 1"), align(horizon)[→],
+  phase(20%, "2. Vet clinics", "Years 1–3"), align(horizon)[→],
+  phase(40%, "3. Device makers", "Year 3+"),
+  [
+    - *Who:* owners of cats aged 7+, 266k homes
+
+    - *Reach:* demo video shared in cat owner communities
+    - *Goal:* show in real homes that the alerts catch changes
+  ], [],
+  [
+    - *Who:* about 1,800 animal hospitals @K-e
+
+    - *Reach:* partner clinics recommend the kit for kidney disease, diabetes and after a urinary blockage
+    - *Goal:* a joint study with a vet school confirms the alerts
+  ], [],
+  [
+    - *Who:* makers of pet cameras, feeders and litter boxes
+
+    - *Reach:* the vet-validated alerts from phase 2 make the licensing pitch
+    - *Goal:* PawWatch runs inside the devices owners already buy
+  ],
+)
+]
 
 = Appendix
 
@@ -367,8 +539,8 @@ or video. Timestamps are *video time* (recording start + frame offset), so recor
     columns: 3,
     column-gutter: 0.8em,
     align: bottom,
-    shot("images/detect_litter.jpg", 0.078)[Tangerine in the litter zone],
-    shot("images/detect_drink_ami.jpg", 0.045)[Ami at the water bowl],
+    shot("images/detect_litter.jpg", 0.078)[Cat in the litter zone],
+    shot("images/detect_drink_ami.jpg", 0.045)[Cat at the water bowl],
     shot("images/detect_bed_alarm.jpg", 0.052)[No-go zone: box turns red, alarm rings],
   )
 ]
@@ -378,7 +550,7 @@ are only displayed; frames are never written to disk.
 
 == Dashboard with an anomaly alert (simulated data)
 
-#cols(ratio: (1fr, 1.1fr))[
+#cols(ratio: (1fr, 1.5fr))[
   #set text(0.85em)
   This dashboard runs on *simulated* data only, to show what an alert looks like: a day where the litter box
   count reaches at least twice the cat's 7-day average.
