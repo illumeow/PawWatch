@@ -11,12 +11,8 @@ About 2:45. Must be under 3:00. Upload to YouTube as unlisted.
    (System Settings → Desktop & Dock → Automatically hide). Mac volume about 50%: the mic picks up the alarm from the speakers.
 2. **Discord.** Your webhook's server, notifications on "All messages". Leave Discord running in the background
    (not in front), so the alarm text pops up as a banner.
-3. **Video slides.** Only the slides the video uses, in its order. Rebuild if the deck changed:
-   ```bash
-   uv run --with pypdf python -c "from pypdf import PdfReader, PdfWriter; r = PdfReader('slides/slides.pdf'); w = PdfWriter(); [w.add_page(r.pages[i - 1]) for i in (3, 5, 6, 7, 9, 10, 18, 19, 20, 1)]; w.write('data/video-slides.pdf')"
-   ```
-   Open `data/video-slides.pdf` in **Preview**: View → Single Page, hide the sidebar and toolbar, Window → Fill,
-   ⌘9 (zoom to fit). Stay on page 1 ("Cat hides illness"). → goes to the next slide.
+3. **Slides.** Open `slides/slides.pdf` in **Preview**: View → Single Page, hide the sidebar and toolbar, Window → Fill,
+   ⌘9 (zoom to fit). Go to p. 3 ("Cat hides illness"). → is the next page; ⌥⌘G, the number, Enter jumps to a page.
 4. **Dashboards.** In a terminal window you won't show, run both (one tab each):
    ```bash
    PAWWATCH_DB=data/demo.db uv run streamlit run dashboard/app.py --client.toolbarMode minimal --server.port 8501 --server.headless true
@@ -33,7 +29,7 @@ About 2:45. Must be under 3:00. Upload to YouTube as unlisted.
 6. **QuickTime**: open `data/videos/AmiDrink.mp4`, mute it, Window → Fill, drag the playhead to 0:15. Leave it in front.
 7. **Mic check.** ⌘⇧5 → Record Entire Screen, Options → Microphone: MacBook Pro Microphone, Show Mouse Clicks off.
    Record 10 s of talking plus one alarm, stop, listen on headphones. Delete it.
-8. Move the mouse to a corner. Do one full dry run without recording, then reset steps 3–6 (Preview page 1,
+8. Move the mouse to a corner. Do one full dry run without recording, then reset steps 3–6 (Preview on p. 3,
    browser tabs at the top, `scripts/demo_take.sh` waiting, QuickTime at 0:15).
 
 ## The take
@@ -43,21 +39,21 @@ About 2:45. Must be under 3:00. Upload to YouTube as unlisted.
 This is Ami, one of our two cats. If she started drinking twice as much water, or using the litter box twice as
 often, would you notice? Changes like these are often the first sign of illness, and cats hide them well.
 
-**Space (pause). ⌘Tab to Preview: "Cat hides illness".**
+**Space (pause). ⌘Tab to Preview: p. 3 "Cat hides illness".**
 
 Most of us are out all day, so we miss them.
 
-**→ "Today's smart devices each watch one spot".**
+**→ → p. 5 "Today's smart devices each watch one spot".**
 
 Smart feeders and litter boxes each watch one spot. Pet cameras see more, but they stream our homes to the cloud,
 for a monthly fee.
 
-**→ "Solution: PawWatch".**
+**→ p. 6 "Solution: PawWatch".**
 
 So we built PawWatch. Cameras watch the food bowl, the water bowl and the litter box. An AI accelerator at home
 recognizes the cat and logs every visit.
 
-**→ "Why run AI at home".**
+**→ p. 7 "Why run AI at home, not in the cloud".**
 
 Video never leaves the house, and there's no monthly fee.
 
@@ -95,29 +91,29 @@ PawWatch suggests watching her, and considering a vet visit. It never diagnoses.
 
 Every evening, a plain-English report like this reaches the owner's phone, ready to show the vet.
 
-**⌘Tab to Preview. → "Architecture".**
+**⌘Tab to Preview. → → p. 9 "Architecture: video in, events out".**
 
 Today, the prototype runs on a laptop.
 
-**→ "Hardware".**
+**→ p. 10 "Hardware: one host, many fixed cameras".**
 
 The target is the ASUS U Gen 300, whose Hailo 10 H chip draws two and a half watts. Our detector matches ASUS's
 own U Gen 300 demos, so moving over means swapping one module.
 
-**→ "Market".**
+**⌥⌘G 18: p. 18 "Market: 266k Taiwan homes with an older cat".**
 
 We start with owners of cats aged seven or older: two hundred sixty-six thousand homes in Taiwan.
 
-**→ "Business model".**
+**→ p. 19 "Business model: buy once, no monthly fee".**
 
 The full kit is fourteen thousand nine hundred N T dollars, paid once, with no subscription: less than half of one
 emergency visit.
 
-**→ "Targeted audience roadmap".**
+**→ p. 20 "Targeted audience roadmap".**
 
 Next, vet clinics recommend it for cats with kidney disease. Later, device makers build PawWatch into their own products.
 
-**→ title slide.**
+**⌥⌘G 1: p. 1, the title slide.**
 
 PawWatch: know your cat's routine, without sending your home to the cloud.
 
@@ -136,4 +132,4 @@ If a take runs over 2:55, read faster through the slides, or drop "Drinking and 
 
 Numbers to keep in step with the slides and data: 8 litter box visits against about 3 (`data/alert.db`), 2.5 W,
 266k homes, NT$14,900, NT$30,000+ for an emergency visit (more than twice the kit). If a slide changes, change the line here,
-and check the page numbers in setup step 3.
+and check the page numbers in the take.
