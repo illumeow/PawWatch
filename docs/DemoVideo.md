@@ -60,7 +60,8 @@ So we built PawWatch. Cameras watch the food, the water and the litter box, and 
 
 **→ p. 7 "Why run AI at home, not in the cloud".**
 
-Video never leaves the house.
+Because the AI runs at home, the video never leaves the house: no cloud, no monthly fee, and it keeps working
+when the internet is down.
 
 **⌘Tab to Terminal. Enter.** The food bowl window opens in a few seconds.
 
