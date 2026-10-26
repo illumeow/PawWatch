@@ -1,7 +1,7 @@
 # Demo video
 
 One take, no editing: record the whole screen with the MacBook mic, read the script, switch apps as it says.
-About 2:45. Must be under 3:00. Upload to YouTube as unlisted.
+About 2:50. Must be under 3:00. Upload to YouTube as unlisted.
 
 **Bold** is what you do. Plain text is what you say. Slow down; pauses are fine.
 
@@ -92,7 +92,12 @@ PawWatch suggests watching her, and considering a vet visit. It never diagnoses.
 
 **Point at the daily report box.**
 
-Every evening, a plain-English report like this reaches the owner's phone, ready to show the vet.
+Every evening, a plain-English report like this one
+
+**⌘Tab to Terminal ("Enter: send the daily report"). Enter.** It prints "sent to Discord"; the banner pops up.
+**⌘Tab to Discord.**
+
+reaches the owner's phone, ready to show the vet. This one is from the simulated day, too.
 
 **⌘Tab to Preview. → → p. 9 "Architecture: video in, events out".**
 

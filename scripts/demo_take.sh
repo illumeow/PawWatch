@@ -22,3 +22,6 @@ read -rp "PawWatch · Enter: bed camera " _
 clear
 clip TangerineJumpOntoBed.mov cam_bed
 clear
+read -rp "PawWatch · Enter: send the daily report " _
+clear
+uv run python scripts/send_report.py --db data/alert.db --day 2026-10-10  # the simulated alert day on tab 2
