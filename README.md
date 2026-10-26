@@ -43,13 +43,13 @@ PawWatch does the watching on a box at home and keeps only a log of visits.
 ## How it works
 
 ```
- cameras, one per spot          detector                   visit logic                    SQLite
- (food, water, litter, ──frame──▶ YOLOv8n, cats only ──box──▶ zone the box overlaps,  ──visit──▶ events
-  no-go)                         (label, score, box)        dwell and dropout rules        recordings
-                                                                   │                         │
-                                                                   │ cat in no-go zone       ├──▶ change alerts
-                                                                   ▼                         ├──▶ daily report
-                                                            alarm: sound, LINE, Discord      └──▶ dashboard
+    cameras, one per spot                      detector                   visit logic                    SQLite
+ (food, water, litter, no-go)  ──frame──▶ YOLOv8n, cats only ──box──▶ zone the box overlaps,  ──visit──▶ events
+                                          (label, score, box)         dwell and dropout rules          recordings
+                                                                        │                                │
+                                                                        │ cat in no-go zone              ├──▶ change alerts
+                                                                        ▼                                ├──▶ daily report
+                                                              alarm: sound, LINE, Discord                └──▶ dashboard
 ```
 
 | Module | Role |
