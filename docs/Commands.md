@@ -76,6 +76,15 @@ uv run python scripts/draw_zones.py data/videos/TangerineJumpOntoBed.mov config/
 
 After changing a zone, rerun `build_demo.py` so the real-day dashboard matches.
 
+## Daily report to LINE or Discord
+
+Set the variables from the README's "Messages to your phone" first; the bed clip's alarm also texts once they're set.
+
+```bash
+DISCORD_WEBHOOK_URL=... uv run python scripts/send_report.py --db data/alert.db --day 2026-10-10
+uv run python scripts/send_report.py --db data/demo.db --dry-run     # print only
+```
+
 ## Tests, lint, format, types
 
 ```bash
