@@ -11,7 +11,7 @@
 #show: slides.with(
   title: "PawWatch",
   subtitle: "Edge-AI Cat Health Monitor",
-  date: [#link("https://github.com/illumeow/PawWatch")[#box(baseline: 0.15em, image("images/github.svg", height: 1em))#h(0.3em)GitHub Repo]],
+  date: [#link("https://github.com/illumeow/PawWatch")[#box(baseline: 0.15em, image("images/github.svg", height: 1em))#h(0.3em)GitHub Repo]#h(1.2em)#link("https://youtu.be/6INgWusto90")[#box(baseline: 0.15em, image("images/youtube.svg", height: 1em))#h(0.3em)Demo Video]],
   authors: ("Jin-Yu Yang", "Zan-Yun Lee", "Wen-Hsiu Lin"),
   institution: [Department of Computer Science and Information Engineering, National Taiwan University],
   layout: "medium",
